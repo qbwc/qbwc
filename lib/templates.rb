@@ -5,7 +5,7 @@ class QBWC::Templates
   end
 
   def self.quickbooks_sync_specific_records
-    parser = Quickbooks::API[:qbpos]
+    parser = Quickbooks::API[QBWC.quickbooks_type]
     [parser, []]
   end
 
