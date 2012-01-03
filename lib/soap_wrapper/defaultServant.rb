@@ -39,7 +39,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def authenticate(parameters)
     #p parameters                               
-    AuthenticateResponse.new(['TRUNKCLUB-PC', ActiveIntegration[:quickbooks].config[:company_name]])
+    AuthenticateResponse.new(['foo', ""])#path to company file
   end
 
   # SYNOPSIS
