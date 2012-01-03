@@ -3,6 +3,14 @@ require "qbwc/version"
 
 module QBWC
   
+  #Todo Move this to Autolaod
+  require 'qbwc/soap_wrapper/default'
+  autoload :DefaultMappingRegistry,   'qbwc/soap_wrapper/defaultMappingRegistry'
+  autoload :QBWebConnectorSvcSoap,        'qbwc/soap_wrapper/QBWebConnectorSvc'
+  autoload :Interface,                  'qbwc/interface'
+  autoload :Templates,                'qbwc/templates'
+  autoload :Session,                   'qbwc/session'
+
   #QBWC login credentials
   mattr_accessor :qbwc_username
   @@qbwc_username = "foo"
@@ -45,11 +53,6 @@ module QBWC
 end
 
 #ROOT_PATH    = File.dirname(__FILE__)
-#LIB_FILES    = %w( soap_wrapper/default
-#                   soap_wrapper/defaultMappingRegistry 
-#                   soap_wrapper/defaultServant 
-#                   soap_wrapper/QBWebConnectorSvc
-#                   generators/install_generator 
-#                   interface templates session )
+
                    
 #LIB_FILES.each { |f| require File.join(ROOT_PATH, f) }
