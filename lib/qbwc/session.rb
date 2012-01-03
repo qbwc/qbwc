@@ -1,5 +1,4 @@
-module QBWC
-class Session
+class QBWC::Session
   include Enumerable
 
   attr_reader :index, :progress, :error
@@ -161,8 +160,6 @@ class << self
     parser, requests = QBWC::Templates[template]
     self.new(template, parser, requests)
   end
-
-end
 
 end
 end

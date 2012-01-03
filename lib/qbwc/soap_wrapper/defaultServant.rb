@@ -1,5 +1,5 @@
-module QBWC
-class QBWebConnectorSvcSoap
+ 
+class QBWC::QBWebConnectorSvcSoap
   include QBWC
   # SYNOPSIS
   #   serverVersion(parameters)
@@ -133,5 +133,4 @@ class QBWebConnectorSvcSoap
     end
   end
 
-end
 end

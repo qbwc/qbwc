@@ -1,16 +1,18 @@
 #TODO: replace with ruby 1.9 external iterator
 require "qbwc/version"
 
+
 module QBWC
   
   #Todo Move this to Autolaod
   require 'qbwc/soap_wrapper/default'
-  autoload :DefaultMappingRegistry,   'qbwc/soap_wrapper/defaultMappingRegistry'
-  autoload :QBWebConnectorSvcSoap,        'qbwc/soap_wrapper/QBWebConnectorSvc'
-  autoload :Interface,                  'qbwc/interface'
-  autoload :Templates,                'qbwc/templates'
-  autoload :Session,                   'qbwc/session'
-
+  require 'qbwc/soap_wrapper/defaultMappingRegistry'
+  require 'qbwc/soap_wrapper/defaultServant'
+  require 'qbwc/soap_wrapper/QBWebConnectorSvc'
+  require 'qbwc/interface'
+  require 'qbwc/templates'
+  require 'qbwc/session'
+  
   #QBWC login credentials
   mattr_accessor :qbwc_username
   @@qbwc_username = "foo"
@@ -51,8 +53,3 @@ module QBWC
   end
   
 end
-
-#ROOT_PATH    = File.dirname(__FILE__)
-
-                   
-#LIB_FILES.each { |f| require File.join(ROOT_PATH, f) }

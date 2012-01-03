@@ -1,5 +1,5 @@
-module QBWC
-class Templates
+
+class QBWC::Templates
 
   def self.[](template)
     self.send(template)
@@ -14,4 +14,4 @@ class Templates
   end
 
 end
-end
+
