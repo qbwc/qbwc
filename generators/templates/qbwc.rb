@@ -4,8 +4,11 @@ QBWC.setup do |config|
   config.qbwc_username = "foo"
   config.qbwc_password = "bar"
   
+  #Path to Company File (blank for open or named path or function etc..)
+  config.quickbooks_company_file_path = ""
+  
   #Minimum Quickbooks Version Required for use in QBXML Requests
-  config.quickbooks_min_version = 3.0
+  config.quickbooks_min_version = 7.0
   
   #Quickbooks Type (either :qb or :qbpos)
   config.quickbooks_type = :qb
