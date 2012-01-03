@@ -1,4 +1,4 @@
-= qbwc
+# Quickbooks Web Connector (QBWC)
 
 Be Warned, this code is still hot out of the oven. 
 
@@ -26,8 +26,7 @@ Things QBWC does for you.
 2. Quick Start Generators to allow you to have functioning soap server in a single command. (rails generate qbwc:install)
 3. Integration of the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing requests pre processed hashes 
   
-
-== Contributing to qbwc
+## Contributing to qbwc
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
