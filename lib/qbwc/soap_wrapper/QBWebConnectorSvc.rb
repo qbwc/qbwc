@@ -1,4 +1,5 @@
-class QBWC::QBWebConnectorSvcSoap
+module QBWC
+class QBWebConnectorSvcSoap
   Methods = [
     [ "http://developer.intuit.com/serverVersion",
       "serverVersion",
@@ -65,4 +66,5 @@ class QBWC::QBWebConnectorSvcSoap
         :faults => {} }
     ]
   ]
+end
 end

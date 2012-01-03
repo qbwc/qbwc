@@ -1,4 +1,5 @@
-class QBWC::Session
+module QBWC
+class Session
   include Enumerable
 
   attr_reader :index, :progress, :error
@@ -163,4 +164,5 @@ class << self
 
 end
 
+end
 end

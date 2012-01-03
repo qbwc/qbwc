@@ -1,4 +1,5 @@
-class QBWC::Templates
+module QBWC
+class Templates
 
   def self.[](template)
     self.send(template)
@@ -12,4 +13,5 @@ class QBWC::Templates
    return QBWC.quickbooks_sync.call
   end
 
+end
 end

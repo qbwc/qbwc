@@ -1,6 +1,6 @@
 require 'soap/rpc/standaloneServer'
-
-class QBWC::Interface
+module QBWC
+class Interface
   include QBWC
   private_class_method :new
 
@@ -32,4 +32,5 @@ class QBWC::Interface
   end
 
   initialize_singleton
+end
 end
