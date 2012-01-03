@@ -126,9 +126,9 @@ class QBWC::QBWebConnectorSvcSoap
   # wraps xml in version header
   def wrap_in_version(xml_rq)
     if QBWC.quickbooks_type == :qbpos
-      %q( <?qbposxml version="3.0"?> ) + xml_rq
+      %q( <?qbposxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
     else
-      %q( <?qbxml version="3.0"?> ) + xml_rq
+      %q( <?qbxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
     end
   end
 
