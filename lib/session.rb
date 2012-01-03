@@ -6,7 +6,7 @@ class QBWC::Session
 
   # a request is a 2-tuple consisting of (xml_request, response_proc)
   #
-  def initialize(name, parser = Quickbooks::API[:qbpos], requests = [])
+  def initialize(name, parser = Quickbooks::API[options[:quickbooks_type]], requests = [])
     @index = 0
     @progress = 0
     
@@ -123,7 +123,13 @@ class QBWC::Session
           request_hash = @parser.qbxml_to_hash(request)
           nested_request = request_hash.detect { |k,v| k != 'xml_attributes' }.last
           nested_request['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
-          self << [@parser.hash_to_qbxml(:qbposxml_msgs_rq => request_hash), response_proc]
+          
+          if QBWC.quickbooks_type == :qbpos
+            self << [@parser.hash_to_qbxml(:qbposxml_msgs_rq => request_hash), response_proc]
+          else
+            self << [@parser.hash_to_qbxml(:qbxml_msgs_rq => request_hash), response_proc]
+          end
+          
         end
       end
     rescue => e

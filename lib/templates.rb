@@ -10,8 +10,7 @@ class QBWC::Templates
   end
 
   def self.quickbooks_sync
-    qb = ActiveIntegration[:quickbooks]
-    parser = Quickbooks::API[:qbpos]
+    parser = Quickbooks::API[QBWC.quickbooks_type]
     import_requests, export_requests, export_objs = [], [], []
 
     import_requests << qb.generate_import_query(Member)
