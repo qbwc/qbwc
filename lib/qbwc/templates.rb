@@ -5,11 +5,11 @@ class QBWC::Templates
   end
 
   def self.quickbooks_sync_specific_records
-    QBWC.quickbooks_sync_specific_records.call 
+   return QBWC.quickbooks_sync_specific_records.call 
   end
 
   def self.quickbooks_sync
-    QBWC.quickbooks_sync.call
+   return QBWC.quickbooks_sync.call
   end
 
 end
