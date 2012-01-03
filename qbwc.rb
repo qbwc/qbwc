@@ -9,8 +9,8 @@ module QBWC
   @@qbwc_password = "bar"
   
   #Path to Company File 
-  #mattr_accessor :quickbooks_company_file_path 
-  #@@quickbooks_company_file_path = /HD/yoda/
+  mattr_accessor :quickbooks_company_file_path 
+  @@quickbooks_company_file_path = "" #blank for open or named path or function etc..
   
   #Minimum Quickbooks Version Required for use in QBXML Requests
   mattr_accessor :quickbooks_min_version
