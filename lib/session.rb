@@ -116,7 +116,7 @@ class QBWC::Session
       end
 
       if status_severity == 'Error' || status_code.to_i > 0 || resp_hash.keys.size <= 1
-        puts "QBPOS ERROR: #{status_code} - #{status_message}"
+        puts "QBWC ERROR: #{status_code} - #{status_message}"
       else
         process_response(resp_hash)
         if iterator_remaining > 0
