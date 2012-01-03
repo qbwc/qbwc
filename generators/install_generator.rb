@@ -8,6 +8,18 @@ module QBWC
         directory 'config'
       end
 
+      def copy_controller
+        directory 'app/controllers'
+      end
+      
+      def setup_routes
+        route("add_routes")
+      end
+      
+      def add_routes
+        return match 'apis/quickbooks/:action', :controller => 'qbwc', :as => 'quickbooks'
+      end
+      
     end
   end
 end
