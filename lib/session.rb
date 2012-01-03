@@ -6,7 +6,7 @@ class QBWC::Session
 
   # a request is a 2-tuple consisting of (xml_request, response_proc)
   #
-  def initialize(name, parser = Quickbooks::API[options[:quickbooks_type]], requests = [])
+  def initialize(name, parser = Quickbooks::API[QBWC.quickbooks_type], requests = [])
     @index = 0
     @progress = 0
     
