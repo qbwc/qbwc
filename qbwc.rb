@@ -2,6 +2,16 @@
 
 module QBWC
   
+  #QBWC login credentials
+  mattr_accessor :qbwc_username
+  @@qbwc_username = "foo"
+  mattr_accessor :qbwc_password
+  @@qbwc_password = "bar"
+  
+  #Path to Company File 
+  #mattr_accessor :quickbooks_company_file_path 
+  #@@quickbooks_company_file_path = /HD/yoda/
+  
   #Minimum Quickbooks Version Required for use in QBXML Requests
   mattr_accessor :quickbooks_min_version
   @@quickbooks_min_version = 3.0
