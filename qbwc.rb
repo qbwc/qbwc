@@ -28,6 +28,12 @@ module QBWC
   mattr_accessor :quickbooks_owner_id
   @@quickbooks_owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
   
+  #Block to run on Full Sync
+  mattr_accessor :quickbooks_sync
+  
+  #Block to Run on Single Sync
+  mattr_accessor :quickbooks_sync_specific_records
+
   
   # Default way to setup Quickbooks Web Connector (QBWC). Run rails generate qbwc:install
   # to create a fresh initializer with all configuration values.

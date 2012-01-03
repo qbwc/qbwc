@@ -18,5 +18,23 @@ QBWC.setup do |config|
   
   #Quickbooks Owner ID provided in QWC File
   config.quickbooks_owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+
+  #Sync Code
+  # This is where you feed requests into the queue.  
+  # a request is a 2-tuple consisting of (xml_request, response_proc)
+  # Do not put all your business logic here.  Place in Models or Another Structure. 
+  
+  config.quickbooks_sync = Proc.new do
+    parser = Quickbooks::API[QBWC.quickbooks_type]
+    requests = []   
+    #IE: requests <<  Gdaget.sync_gadgets
+    [parser, requests]   
+  end
+  
+  #Will sync instead of a full sync above
+  config.quickbooks_sync_specific_records = Proc.new do
+    parser = Quickbooks::API[QBWC.quickbooks_type]    
+    return [parser, []]    
+  end
   
 end
