@@ -6,7 +6,7 @@ class QBWC::Session
 
   # a request is a 2-tuple consisting of (xml_request, response_proc)
   #
-  def initialize(name, parser = Quickbooks::API[:qbpos], requests = [])
+  def initialize(name, parser = Quickbooks::API[QBWC.quickbooks_type], requests = [])
     @index = 0
     @progress = 0
     
@@ -116,14 +116,20 @@ class QBWC::Session
       end
 
       if status_severity == 'Error' || status_code.to_i > 0 || resp_hash.keys.size <= 1
-        puts "QBPOS ERROR: #{status_code} - #{status_message}"
+        puts "QBWC ERROR: #{status_code} - #{status_message}"
       else
         process_response(resp_hash)
         if iterator_remaining > 0
           request_hash = @parser.qbxml_to_hash(request)
           nested_request = request_hash.detect { |k,v| k != 'xml_attributes' }.last
           nested_request['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
-          self << [@parser.hash_to_qbxml(:qbposxml_msgs_rq => request_hash), response_proc]
+          
+          if QBWC.quickbooks_type == :qbpos
+            self << [@parser.hash_to_qbxml(:qbposxml_msgs_rq => request_hash), response_proc]
+          else
+            self << [@parser.hash_to_qbxml(:qbxml_msgs_rq => request_hash), response_proc]
+          end
+          
         end
       end
     rescue => e
@@ -156,5 +162,4 @@ class << self
   end
 
 end
-
 end

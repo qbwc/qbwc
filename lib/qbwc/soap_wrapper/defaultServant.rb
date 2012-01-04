@@ -1,3 +1,4 @@
+ 
 class QBWC::QBWebConnectorSvcSoap
   include QBWC
   # SYNOPSIS
@@ -39,7 +40,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def authenticate(parameters)
     #p parameters                               
-    AuthenticateResponse.new(['TRUNKCLUB-PC', ActiveIntegration[:quickbooks].config[:company_name]])
+    AuthenticateResponse.new(['foo', QBWC.quickbooks_company_file_path]) #path to company file
   end
 
   # SYNOPSIS
@@ -125,7 +126,11 @@ class QBWC::QBWebConnectorSvcSoap
 
   # wraps xml in version header
   def wrap_in_version(xml_rq)
-    %q( <?qbposxml version="3.0"?> ) + xml_rq
+    if QBWC.quickbooks_type == :qbpos
+      %Q( <?qbposxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+    else
+      %Q( <?qbxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+    end
   end
 
 end
