@@ -32,7 +32,7 @@ class QbwcController < ApplicationController
 
     req = request
     puts "========== #{ params["Envelope"]["Body"].keys.first}  =========="
-    res = QBWC::Interface.route_request(req)
+    res = QBWC::SoapWrapper.route_request(req)
     render :xml => res, :content_type => 'text/xml'
   end
 

@@ -53,15 +53,8 @@ class QBWC::QBWebConnectorSvcSoap
   #   parameters      SendRequestXMLResponse - {http://developer.intuit.com/}sendRequestXMLResponse
   #
   def sendRequestXML(parameters)
-    qbwc_session_main = Session.new_or_unfinished(:quickbooks_sync)
-    qbwc_session_specific = Session.new_or_unfinished(:quickbooks_sync_specific_records)
-
-    unless qbwc_session_specific.size == 0
-      qbwc_session_main.merge(qbwc_session_specific)
-    end
-    request = qbwc_session_main.current
-    #Rails.logger.info request
-    SendRequestXMLResponse.new(wrap_in_version(request))
+    qbwc_session = Session.new_or_unfinished
+    SendRequestXMLResponse.new(wrap_in_version(qbwc_session.qbxml_request))
   end
   
   # SYNOPSIS
@@ -74,10 +67,8 @@ class QBWC::QBWebConnectorSvcSoap
   #   parameters      ReceiveResponseXMLResponse - {http://developer.intuit.com/}receiveResponseXMLResponse
   #
   def receiveResponseXML(response)
-    response = response.response
-    #Rails.logger.info response
-    qbwc_session = Session[:quickbooks_sync]
-    qbwc_session.response = response
+    qbwc_session = Session.new_or_unfinished
+    qbwc_session.response = response.response
     qbwc_session.next
     ReceiveResponseXMLResponse.new(qbwc_session.progress)
   end
@@ -121,8 +112,12 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def closeConnection(parameters)
     #p [parameters]
+    qbwc_session = Session.session
+    qbwc_session.process_responses if qbwc_session && qbwc_session.finished?
     CloseConnectionResponse.new('OK')
   end
+
+private
 
   # wraps xml in version header
   def wrap_in_version(xml_rq)

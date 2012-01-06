@@ -1,6 +1,6 @@
 require 'soap/rpc/standaloneServer'
 
-class QBWC::Interface
+class QBWC::SoapWrapper
   include QBWC
   private_class_method :new
 
