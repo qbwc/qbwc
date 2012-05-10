@@ -1,14 +1,14 @@
 class QBWC::Session
+  include QBWC
   include Enumerable
 
-  attr_reader :requests, :index, :progress, :error
-  @@sessions = {}
+  attr_reader :requests, :responses, :index, :progress, :error
 
   def initialize
     @index = 0
     @progress = 0
     
-    @requests = QBWC.enabled_jobs.map { |j| j.requests }.flatten
+    @requests = build_request_queue(QBWC.enabled_jobs)
     @@session = self
   end
 
@@ -113,6 +113,12 @@ private
         self << Request.new(raw_request, response_proc)
       end
     end
+  end
+
+  def build_request_queue(jobs)
+    jobs.map do |j| 
+      j.requests.map { |r| Request.new(r, j.response_proc) }
+    end.flatten 
   end
 
 class << self

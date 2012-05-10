@@ -1,11 +1,12 @@
-require "qbwc/version"
+require 'qbwc/version'
+require 'quickbooks'
 
 module QBWC
   #QBWC login credentials
-  mattr_accessor :qbwc_username
-  @@qbwc_username = "foo"
-  mattr_accessor :qbwc_password
-  @@qbwc_password = "bar"
+  mattr_accessor :username
+  @@username = 'foo'
+  mattr_accessor :password
+  @@password = 'bar'
   
   #Path to Company File 
   mattr_accessor :quickbooks_company_file_path 
@@ -17,7 +18,7 @@ module QBWC
   
   #Quickbooks Support URL provided in QWC File
   mattr_accessor :quickbooks_support_site_url
-  @@quickbooks_support_site_url = "http://qb_support.lumber.com"
+  @@quickbooks_support_site_url = 'http://qb_support.lumber.com'
   
   #Quickbooks Owner ID provided in QWC File
   mattr_accessor :quickbooks_owner_id
@@ -33,36 +34,34 @@ module QBWC
 
   # Do processing after session termination
   # Enabling this option will speed up qbwc session time but will necessarily eat
-  # up more memory since every response must be stored until its processed. 
+  # up more memory since every response must be stored until it is processed. 
   mattr_accessor :delayed_processing
   @@delayed_processing = false
 
   #Quickbooks Type (either :qb or :qbpos)
   mattr_reader :quickbooks_type
   @@quickbooks_type = :qb
-  @@parser = Quickbooks::API[quickbooks_type]
+  @@parser = ::Quickbooks::API[quickbooks_type]
   
 class << self
 
-  # One request, one response proc
-  def add_job(name, request, &block)
-    @@jobs[name] = Job.new(name, request, block)
+  def add_job(name, requests, response_proc)
+    @@jobs[name] = Job.new_static(name, requests, response_proc)
   end
 
-  # Many requests, same response proc
-  def add_batch_job(name, requests, &proc)
-    @@jobs[name] = Job.new(name, requests, block)
+  def add_dynamic_job(name, request_generator, response_proc)
+    @@jobs[name] = Job.new_dynamic(name, request_generator, response_proc)
   end
 
   def quickbooks_type=(qb_type)
-    raise "Quickbooks type must be :qb or :qbpos" unless [:qb, :qbpos].include?(qb_type)
+    raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(qb_type)
     @@quickbooks_type = qb_type
-    @@parser = Quickbooks::API[qb_type]
+    @@parser = ::Quickbooks::API[qb_type]
   end
 
   # Default way to setup Quickbooks Web Connector (QBWC). Run rails generate qbwc:install
   # to create a fresh initializer with all configuration values.
-  def setup
+  def configure
     yield self
   end
 

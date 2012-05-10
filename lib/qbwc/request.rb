@@ -8,7 +8,7 @@ class QBWC::Request
   end
 
   def process_response(raw_response = @raw_response)
-    @response_proc.call(raw_response) if raw_response
+    @response_proc.call(raw_response) if @response_proc && raw_response
   end
 
 end
