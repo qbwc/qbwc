@@ -1,0 +1,34 @@
+PATH
+  remote: .
+  specs:
+    qbwc (0.0.2)
+      quickbooks_api (>= 0.1.6)
+      rubyjedi-soap4r (>= 1.5.8.20100619003610)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activesupport (3.2.3)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
+    buffered_logger (0.1.3)
+      activesupport
+      i18n
+      term-ansicolor
+    httpclient (2.1.5.2)
+    i18n (0.6.0)
+    multi_json (1.3.5)
+    nokogiri (1.5.2)
+    quickbooks_api (0.1.6)
+      activesupport
+      buffered_logger (>= 0.1.3)
+      nokogiri
+    rubyjedi-soap4r (1.5.8.20100619003610)
+      httpclient (~> 2.1.5.2)
+    term-ansicolor (1.0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  qbwc!

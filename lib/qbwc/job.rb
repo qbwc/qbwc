@@ -1,34 +1,47 @@
 class QBWC::Job
-  include QBWC
-  
-  attr_reader :name, :request_proc, :response_proc
-  private_class_method :new 
 
-  def initialize(name, raw_requests = nil, request_proc = nil, response_proc = nil)
+  attr_reader :name, :response_proc, :requests
+
+  def initialize(name, &block)
     @name = name
-    @request_proc = request_proc
-    @response_proc = response_proc
-    @raw_requests = Array(raw_requests)
-  end                       
+    @enabled = true
+    @requests = block
 
-  def raw_requests
-    @raw_requests || (@request_proc && @request_proc.call)
+    reset
   end
 
-  def <<(raw_request)
-    @raw_requests << raw_request
+  def set_response_proc(&block) 
+    @response_proc = block
   end
 
-class << self
-
-  def new_static(name, requests, response_proc)
-    new(name, requests, nil, response_proc)
+  def enable
+    @enabled = true
   end
 
-  def new_dynamic(name, request_generator, response_proc)
-    new(name, nil, request_generator, response_proc)
+  def disable
+    @enabled = false
   end
 
-end
+  def enabled?
+    @enabled
+  end
+
+  def next
+    @request_gen.alive? ? @request_gen.resume : nil
+  end
+
+  def reset
+    @request_gen = new_request_generator
+  end
+
+private
+
+  def new_request_generator
+    Fiber.new { request_queue.each { |r| Fiber.yield r }; nil }
+  end
+
+  def request_queue
+    QBWC::Request.from_array(@requests.call, @response_proc )
+  end
 
 end
