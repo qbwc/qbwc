@@ -60,10 +60,11 @@ The block can contain:
 
   * A single qbxml request
   * An array of qbxml requests
-  * A single qbxml request hash (See quickbooks_api)
-  * An array of qbxml request hashes (See quickbooks_api)
-  * Code that genrates a qbxml request or request hash
-  * Code that generates an array of qbxml requests or request hashes
+  * Code that genrates a qbxml request
+  * Code that generates an array of qbxml requests
+
+Note: All requests should be in ruby hash form, generated using quickbooks_api. Raw
+requests will be supported soon.
 
 The code block is re-evaluated every time a session instance with that job is
 created. Only enabled jobs are added to a new session instance. 
