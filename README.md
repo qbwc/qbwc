@@ -4,11 +4,11 @@ Be Warned, this code is still hot out of the oven.
 
 ## Installation
 
-Install the gem:
+Install the gem
 
   `gem install qbwc`
 
-Add it to your Gemfile:
+Add it to your Gemfile
 
   `gem "qbwc"`
 
@@ -16,30 +16,18 @@ Run the generator:
 
   `rails generate qbwc:install`
 
-## Things QBWC does for you 
+## Features
 
-QBWC was designed to rapidly add quickbooks web support to your Rails 3 application. 
+QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
 
-1. Implementation of the Soap WDSL spec for Intuit Quickbooks ( Point of Sale also supported)
-2. Quick Start Generators to allow you to have functioning soap server in a single command. (rails generate qbwc:install)
-3. Integration of the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
+* Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
+* Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
 
 ## Getting Started
 
 ### Configuration
 
-All configuration occurs in the initializer file for the gem. The following
-configuration options are supported
-
-* Username/Password
-* Company File Path
-* Quickbooks Version
-* Quickbooks API (Quickbooks/Quickbooks POS)
-* Quickbooks Support URL
-* Quickbooks Owner ID
-* Delayed Response Processing
-
-See the initializer for more details regarding these configuration options.
+All configuration takes place in the gem initializer. See the initializer for more details regarding the configuration options.
 
 ### Basics
 
@@ -47,24 +35,23 @@ The QBWC gem provides a persistent work queue for the Web Connector to talk to.
 
 Every time the Web Connector initiates a new conversation with the application a
 Session will be created. The Session is a collection of jobs and the requests
-that comprise those jobs. A new Session will automatically queue up all the work
+that comprise these jobs. A new Session will automatically queue up all the work
 available across all currently enabled jobs for processing by the web connector.
 The session instance will persist across all requests until the work it contains
 has been exhausted. You never have to interact with the Session class directly
 (unless you want to...) since creating a new job will automatically add it's
 work to the next session instance.
 
-A Job is just a named work queue. It consists of a name and a code block.
-
-The block can contain:
+A Job is just a named work queue. It consists of a name and a code block. The
+block can contain:
 
   * A single qbxml request
   * An array of qbxml requests
   * Code that genrates a qbxml request
   * Code that generates an array of qbxml requests
 
-Note: All requests should be in ruby hash form, generated using quickbooks_api. Raw
-requests will be supported soon.
+*Note: All requests should be in ruby hash form, generated using quickbooks_api. Raw
+requests will be supported soon.*
 
 The code block is re-evaluated every time a session instance with that job is
 created. Only enabled jobs are added to a new session instance. 
@@ -74,7 +61,7 @@ all requests are either processed immediately after being received or saved for
 processing after the web connector closes its connection. The delayed processing
 configuration option decides this.
 
-Here is the rough order in which things happen
+Here is the rough order in which things happen:
 
   1. The Web Connector initiates a connection
   2. A new Session is created (with work from all enabled jobs)
@@ -105,7 +92,7 @@ Caveats
   * Using a non unique job name will overwrite the existing job
 
 
-## Managing Jobs
+### Managing Jobs
 
 Jobs can be added, removed, enabled, and disabled. See the above section for
 details on adding new jobs. 
