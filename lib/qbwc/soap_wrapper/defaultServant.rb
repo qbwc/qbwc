@@ -39,7 +39,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def authenticate(parameters)
     #p parameters                               
-    AuthenticateResponse.new(['foo', QBWC.quickbooks_company_file_path]) #path to company file
+    QBWC::AuthenticateResponse.new([QBWC.username, QBWC.company_file_path]) #path to company file
   end
 
   # SYNOPSIS
@@ -53,7 +53,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def sendRequestXML(parameters)
     qbwc_session = QBWC::Session.new_or_unfinished
-    SendRequestXMLResponse.new(wrap_in_version(qbwc_session.next))
+    QBWC::SendRequestXMLResponse.new(wrap_in_version(qbwc_session.next))
   end
   
   # SYNOPSIS
@@ -96,7 +96,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def getLastError(parameters)
     #p [parameters]
-    GetLastErrorResponse.new(nil)
+    QBWC::GetLastErrorResponse.new(nil)
   end
 
   # SYNOPSIS
