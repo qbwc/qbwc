@@ -122,9 +122,9 @@ private
   # wraps xml in version header
   def wrap_in_version(xml_rq)
     if QBWC.api == :qbpos
-      %Q( <?qbposxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+      %Q( <?qbposxml version="#{QBWC.min_version}"?> ) + xml_rq
     else
-      %Q( <?qbxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+      %Q( <?qbxml version="#{QBWC.min_version}"?> ) + xml_rq
     end
   end
 
