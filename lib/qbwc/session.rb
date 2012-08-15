@@ -19,7 +19,7 @@ class QBWC::Session
   end
 
   def reset
-    @progress = 0
+    @progress = QBWC.jobs.blank? ? 100 : 0
     enabled_jobs.map { |j| j.reset } unless enabled_jobs.blank?
     @requests = build_request_generator(enabled_jobs)
   end
