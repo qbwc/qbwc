@@ -101,4 +101,7 @@ class << self
 
 end
 
+	def self.session
+		@@session
+	end
 end
