@@ -56,11 +56,13 @@ private
 
   def build_request_generator(jobs)
     Fiber.new do 
-      jobs.each do |j|
-        @current_job = j
-        while (r = next_request)
-          @current_request = r
-          Fiber.yield r
+      unless jobs.blank?
+        jobs.each do |j|
+          @current_job = j
+          while (r = next_request)
+            @current_request = r
+            Fiber.yield r
+          end
         end
       end
       @progress = 100
