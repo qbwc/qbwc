@@ -114,7 +114,7 @@ class QBWC::QBWebConnectorSvcSoap
     if qbwc_session && qbwc_session.finished?
       qbwc_session.current_request.process_responses unless qbwc_session.current_request.blank?
     end
-    CloseConnectionResponse.new('OK')
+    QBWC::CloseConnectionResponse.new('OK')
   end
 
 private
