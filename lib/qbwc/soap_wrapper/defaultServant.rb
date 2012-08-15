@@ -39,7 +39,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def authenticate(parameters)
     #p parameters                               
-    AuthenticateResponse.new(['foo', QBWC.quickbooks_company_file_path]) #path to company file
+    QBWC::AuthenticateResponse.new([QBWC.username, QBWC.company_file_path]) #path to company file
   end
 
   # SYNOPSIS
