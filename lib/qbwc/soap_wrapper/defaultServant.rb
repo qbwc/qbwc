@@ -53,7 +53,8 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def sendRequestXML(parameters)
     qbwc_session = QBWC::Session.new_or_unfinished
-    QBWC::SendRequestXMLResponse.new(wrap_in_version(qbwc_session.next)) unless qbwc_session.next.blank?
+    next_request = qbwc_session.next
+    QBWC::SendRequestXMLResponse.new(wrap_in_version(next_request.request)) unless next_request.blank?
   end
 
   # SYNOPSIS
