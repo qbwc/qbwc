@@ -11,7 +11,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def serverVersion(parameters)
     #p parameters
-    ServerVersionResponse.new(nil)
+    QBWC::ServerVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -25,7 +25,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def clientVersion(parameters)
     #p parameters
-    ClientVersionResponse.new(nil)
+    QBWC::ClientVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -69,7 +69,7 @@ class QBWC::QBWebConnectorSvcSoap
   def receiveResponseXML(response)
     qbwc_session = QBWC::Session.new_or_unfinished
     qbwc_session.response = response.response
-    ReceiveResponseXMLResponse.new(qbwc_session.progress)
+    QBWC::ReceiveResponseXMLResponse.new(qbwc_session.progress)
   end
 
   # SYNOPSIS
