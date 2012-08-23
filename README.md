@@ -80,6 +80,22 @@ Create a new job
     QBWC.add_job('my job') do
       # work to do
     end
+    
+Sample "Work to do"  
+    {  :qbxml_msgs_rq       => 
+      [
+        {
+          :xml_attributes    =>  { "onError" => "stopOnError"}, 
+          :customer_add_rq    => 
+          [
+            {
+              :xml_attributes => {"requestID" => "1"},
+              :customer_add   => { :name => "GermanGR" }
+            } 
+          ] 
+        }
+      ]
+    }
 
 Add a response proc
 
