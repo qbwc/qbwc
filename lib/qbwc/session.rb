@@ -81,10 +81,10 @@ private
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID') 
 
-    if status_severity == 'Error' || status_code.to_i > 1 || resp_hash.keys.size <= 1
+    if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
       @current_request.error = "QBWC ERROR: #{status_code} - #{status_message}"
     else
-      if iterator_remaining.to_i > 0
+      if iterator_remaining_count.to_i > 0
         @qbwc_iterating = true
         new_request = @current_request.to_hash.detect { |k,v| k != 'xml_attributes' }.last
         new_request['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
