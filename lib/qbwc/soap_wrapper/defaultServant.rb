@@ -11,7 +11,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def serverVersion(parameters)
     #p parameters
-    ServerVersionResponse.new(nil)
+    QBWC::ServerVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -25,7 +25,7 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def clientVersion(parameters)
     #p parameters
-    ClientVersionResponse.new(nil)
+    QBWC::ClientVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -53,9 +53,11 @@ class QBWC::QBWebConnectorSvcSoap
   #
   def sendRequestXML(parameters)
     qbwc_session = QBWC::Session.new_or_unfinished
-    QBWC::SendRequestXMLResponse.new(wrap_in_version(qbwc_session.next))
+    next_request = qbwc_session.next
+    return if next_request.blank?
+    QBWC::SendRequestXMLResponse.new(wrap_in_version(next_request.request)) unless next_request.request.blank?
   end
-  
+
   # SYNOPSIS
   #   receiveResponseXML(parameters)
   #
@@ -68,7 +70,7 @@ class QBWC::QBWebConnectorSvcSoap
   def receiveResponseXML(response)
     qbwc_session = QBWC::Session.new_or_unfinished
     qbwc_session.response = response.response
-    ReceiveResponseXMLResponse.new(qbwc_session.progress)
+    QBWC::ReceiveResponseXMLResponse.new(qbwc_session.progress)
   end
 
   # SYNOPSIS
@@ -112,19 +114,19 @@ class QBWC::QBWebConnectorSvcSoap
     #p [parameters]
     qbwc_session = QBWC::Session.session
     if qbwc_session && qbwc_session.finished?
-      qbwc_session.process_responses 
+      qbwc_session.current_request.process_response unless qbwc_session.current_request.blank?
     end
-    CloseConnectionResponse.new('OK')
+    QBWC::CloseConnectionResponse.new('OK')
   end
 
 private
 
   # wraps xml in version header
   def wrap_in_version(xml_rq)
-    if QBWC.quickbooks_type == :qbpos
-      %Q( <?qbposxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+    if QBWC.api == :qbpos
+      %Q( <?qbposxml version="#{QBWC.min_version}"?> ) + xml_rq
     else
-      %Q( <?qbxml version="#{QBWC.quickbooks_min_version}"?> ) + xml_rq
+      %Q( <?qbxml version="#{QBWC.min_version}"?> ) + xml_rq
     end
   end
 
