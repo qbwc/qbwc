@@ -1,10 +1,10 @@
-class QBWC::Request
+class Qbwc::Request
 
   attr_reader   :request, :response_proc
   attr_accessor :response, :error
 
   def initialize(request, response_proc)
-    @request = QBWC.parser.hash_to_qbxml(request) 
+    @request = Qbwc.parser.hash_to_qbxml(request) 
     @response_proc = response_proc
   end
 
@@ -13,7 +13,7 @@ class QBWC::Request
   end
 
   def to_qbxml
-    QBWC.parser.hash_to_qbxml(request)
+    Qbwc.parser.hash_to_qbxml(request)
   end
 
   def to_hash

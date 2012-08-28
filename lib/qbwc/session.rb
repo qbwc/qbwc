@@ -1,4 +1,4 @@
-class QBWC::Session
+class Qbwc::Session
   include Enumerable
 
   attr_reader :current_job, :current_request, :saved_requests, :progress
@@ -19,7 +19,7 @@ class QBWC::Session
   end
 
   def reset
-    @progress = QBWC.jobs.blank? ? 100 : 0
+    @progress = Qbwc.jobs.blank? ? 100 : 0
     enabled_jobs.map { |j| j.reset } unless enabled_jobs.blank?
     @requests = build_request_generator(enabled_jobs)
   end
@@ -34,10 +34,10 @@ class QBWC::Session
 
   def response=(qbxml_response)
     @current_request.response = \
-      QBWC.parser.qbxml_to_hash(qbxml_response) 
+      Qbwc.parser.qbxml_to_hash(qbxml_response) 
     parse_response_header(@current_request.response)
 
-    if QBWC.delayed_processing
+    if Qbwc.delayed_processing
       @saved_requests << @current_request
     else
       @current_request.process_response
@@ -51,7 +51,7 @@ class QBWC::Session
 private
 
   def enabled_jobs
-    QBWC.jobs.values.select { |j| j.enabled? } unless QBWC.jobs.empty?
+    Qbwc.jobs.values.select { |j| j.enabled? } unless Qbwc.jobs.empty?
   end
 
   def build_request_generator(jobs)
@@ -82,7 +82,7 @@ private
                                                'iteratorRemainingCount', 'iteratorID') 
 
     if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
-      @current_request.error = "QBWC ERROR: #{status_code} - #{status_message}"
+      @current_request.error = "Qbwc ERROR: #{status_code} - #{status_message}"
     else
       if iterator_remaining_count.to_i > 0
         @qbwc_iterating = true

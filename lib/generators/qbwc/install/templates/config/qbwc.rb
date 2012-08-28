@@ -1,4 +1,4 @@
-QBWC.configure do |c|
+Qbwc.configure do |c|
   
   #Currently Only supported for single logins. 
   c.username = "foo"

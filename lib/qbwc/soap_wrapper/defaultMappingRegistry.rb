@@ -1,7 +1,7 @@
 require 'soap/mapping'
 
-module QBWC::DefaultMappingRegistry
-  include QBWC
+module Qbwc::DefaultMappingRegistry
+  include Qbwc
   EncodedRegistry = ::SOAP::Mapping::EncodedRegistry.new
   LiteralRegistry = ::SOAP::Mapping::LiteralRegistry.new
   NsDeveloperIntuitCom = "http://developer.intuit.com/"

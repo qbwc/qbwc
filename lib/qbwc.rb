@@ -2,7 +2,7 @@ $:.unshift File.dirname(File.expand_path(__FILE__))
 require 'qbwc/version'
 require 'quickbooks'
 
-module QBWC
+module Qbwc
 
   # Web connector login credentials
   mattr_accessor :username

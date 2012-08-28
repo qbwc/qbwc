@@ -1,7 +1,7 @@
 require 'soap/rpc/standaloneServer'
 
-class QBWC::SoapWrapper
-  include QBWC
+class Qbwc::SoapWrapper
+  include Qbwc
   private_class_method :new
 
   def self.initialize_singleton

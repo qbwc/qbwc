@@ -1,6 +1,6 @@
 require 'rails/generators'
 
-module QBWC
+module Qbwc
   module Generators
     class InstallGenerator < Rails::Generators::Base
       namespace "qbwc:install"

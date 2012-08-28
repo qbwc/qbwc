@@ -18,7 +18,7 @@ Run the generator:
 
 ## Features
 
-QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
+Qbwc was designed to add quickbooks web connector integration to your Rails 3 application. 
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
 * Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
@@ -31,7 +31,7 @@ All configuration takes place in the gem initializer. See the initializer for mo
 
 ### Basics
 
-The QBWC gem provides a persistent work queue for the Web Connector to talk to.
+The Qbwc gem provides a persistent work queue for the Web Connector to talk to.
 
 Every time the Web Connector initiates a new conversation with the application a
 Session will be created. The Session is a collection of jobs and the requests
@@ -77,13 +77,13 @@ Here is the rough order in which things happen:
 
 Create a new job
 
-    QBWC.add_job('my job') do
+    Qbwc.add_job('my job') do
       # work to do
     end
 
 Add a response proc
 
-    QBWC.jobs['my job'].set_response_proc do |r|
+    Qbwc.jobs['my job'].set_response_proc do |r|
       # response processing work here
     end
 
@@ -99,15 +99,15 @@ details on adding new jobs.
 
 Removing jobs is as easy as deleting them from the jobs hash.                   
 
-    QBWC.jobs.delete('my job')
+    Qbwc.jobs.delete('my job')
 
 Disabling a job
 
-    QBWC.jobs['my job'].disable
+    Qbwc.jobs['my job'].disable
 
 Enabling a job
 
-    QBWC.jobs['my job'].enable
+    Qbwc.jobs['my job'].enable
 
 
 ## Contributing to qbwc
