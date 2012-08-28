@@ -4,13 +4,13 @@ class QbwcController < ApplicationController
   def qwc
     qwc = <<-QWC
     <QBWCXML>
-    <AppName>My App #{Rails.env}</AppName>
+    <AppName>#{Rails.application.class.parent_name} #{Rails.env}</AppName>
     <AppID></AppID>
     <AppURL>#{quickbooks_url(:protocol => 'https://', :action => 'api')}</AppURL>
     <AppDescription>I like to describe my awesome app</AppDescription>
-    <AppSupport>#{QBWC.quickbooks_support_site_url}</AppSupport>
-    <UserName>foo</UserName>
-    <OwnerID>#{QBWC.quickbooks_owner_id}</OwnerID>
+    <AppSupport>#{Qbwc.support_site_url}</AppSupport>
+    <UserName>#{Qbwc.username}</UserName>
+    <OwnerID>#{Qbwc.owner_id}</OwnerID>
     <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
     <QBType>QBFS</QBType>
     <Style>Document</Style>

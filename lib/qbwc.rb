@@ -20,7 +20,7 @@ module Qbwc
   
   # Quickbooks support url provided in qwc file
   mattr_accessor :support_site_url
-  @@support_site_url = 'http://qb_support.lumber.com'
+  @@support_site_url = 'http://google.com'
   
   # Quickbooks owner id provided in qwc file
   mattr_accessor :owner_id
