@@ -1,5 +1,5 @@
  
-class Qbwc::QBWebConnectorSvcSoap
+class QBWC::QBWebConnectorSvcSoap
   # SYNOPSIS
   #   serverVersion(parameters)
   #
@@ -11,7 +11,7 @@ class Qbwc::QBWebConnectorSvcSoap
   #
   def serverVersion(parameters)
     #p parameters
-    Qbwc::ServerVersionResponse.new(nil)
+    QBWC::ServerVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -25,7 +25,7 @@ class Qbwc::QBWebConnectorSvcSoap
   #
   def clientVersion(parameters)
     #p parameters
-    Qbwc::ClientVersionResponse.new(nil)
+    QBWC::ClientVersionResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -39,7 +39,7 @@ class Qbwc::QBWebConnectorSvcSoap
   #
   def authenticate(parameters)
     #p parameters                               
-    Qbwc::AuthenticateResponse.new([Qbwc.username, Qbwc.company_file_path]) #path to company file
+    QBWC::AuthenticateResponse.new([QBWC.username, QBWC.company_file_path]) #path to company file
   end
 
   # SYNOPSIS
@@ -52,10 +52,10 @@ class Qbwc::QBWebConnectorSvcSoap
   #   parameters      SendRequestXMLResponse - {http://developer.intuit.com/}sendRequestXMLResponse
   #
   def sendRequestXML(parameters)
-    qbwc_session = Qbwc::Session.new_or_unfinished
+    qbwc_session = QBWC::Session.new_or_unfinished
     next_request = qbwc_session.next
     return if next_request.blank?
-    Qbwc::SendRequestXMLResponse.new(wrap_in_version(next_request.request)) unless next_request.request.blank?
+    QBWC::SendRequestXMLResponse.new(wrap_in_version(next_request.request)) unless next_request.request.blank?
   end
 
   # SYNOPSIS
@@ -68,9 +68,9 @@ class Qbwc::QBWebConnectorSvcSoap
   #   parameters      ReceiveResponseXMLResponse - {http://developer.intuit.com/}receiveResponseXMLResponse
   #
   def receiveResponseXML(response)
-    qbwc_session = Qbwc::Session.new_or_unfinished
+    qbwc_session = QBWC::Session.new_or_unfinished
     qbwc_session.response = response.response
-    Qbwc::ReceiveResponseXMLResponse.new(qbwc_session.progress)
+    QBWC::ReceiveResponseXMLResponse.new(qbwc_session.progress)
   end
 
   # SYNOPSIS
@@ -98,7 +98,7 @@ class Qbwc::QBWebConnectorSvcSoap
   #
   def getLastError(parameters)
     #p [parameters]
-    Qbwc::GetLastErrorResponse.new(nil)
+    QBWC::GetLastErrorResponse.new(nil)
   end
 
   # SYNOPSIS
@@ -112,21 +112,21 @@ class Qbwc::QBWebConnectorSvcSoap
   #
   def closeConnection(parameters)
     #p [parameters]
-    qbwc_session = Qbwc::Session.session
+    qbwc_session = QBWC::Session.session
     if qbwc_session && qbwc_session.finished?
       qbwc_session.current_request.process_response unless qbwc_session.current_request.blank?
     end
-    Qbwc::CloseConnectionResponse.new('OK')
+    QBWC::CloseConnectionResponse.new('OK')
   end
 
 private
 
   # wraps xml in version header
   def wrap_in_version(xml_rq)
-    if Qbwc.api == :qbpos
-      %Q( <?qbposxml version="#{Qbwc.min_version}"?> ) + xml_rq
+    if QBWC.api == :qbpos
+      %Q( <?qbposxml version="#{QBWC.min_version}"?> ) + xml_rq
     else
-      %Q( <?qbxml version="#{Qbwc.min_version}"?> ) + xml_rq
+      %Q( <?qbxml version="#{QBWC.min_version}"?> ) + xml_rq
     end
   end
 

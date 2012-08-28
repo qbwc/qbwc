@@ -1,5 +1,5 @@
 
-class Qbwc::QBWebConnectorSvcSoap
+class QBWC::QBWebConnectorSvcSoap
   Methods = [
     [ "http://developer.intuit.com/serverVersion",
       "serverVersion",

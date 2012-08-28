@@ -1,4 +1,4 @@
-class Qbwc::Job
+class QBWC::Job
 
   attr_reader :name, :response_proc, :requests
 
@@ -41,7 +41,7 @@ private
   end
 
   def request_queue
-    Qbwc::Request.from_array(@requests.call, @response_proc )
+    QBWC::Request.from_array(@requests.call, @response_proc )
   end
 
 end

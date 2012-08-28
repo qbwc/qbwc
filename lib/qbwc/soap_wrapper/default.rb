@@ -7,7 +7,7 @@ end
 # {http://developer.intuit.com/}authenticate
 #   strUserName - SOAP::SOAPString
 #   strPassword - SOAP::SOAPString
-class Qbwc::Authenticate
+class QBWC::Authenticate
   attr_accessor :strUserName
   attr_accessor :strPassword
 
@@ -19,7 +19,7 @@ end
 
 # {http://developer.intuit.com/}authenticateResponse
 #   authenticateResult - ArrayOfString
-class Qbwc::AuthenticateResponse
+class QBWC::AuthenticateResponse
   attr_accessor :authenticateResult
 
   def initialize(authenticateResult = nil)
@@ -29,7 +29,7 @@ end
 
 # {http://developer.intuit.com/}serverVersion
 #   strVersion - SOAP::SOAPString
-class Qbwc::ServerVersion
+class QBWC::ServerVersion
   attr_accessor :strVersion
 
   def initialize(strVersion = nil)
@@ -39,7 +39,7 @@ end
 
 # {http://developer.intuit.com/}serverVersionResponse
 #   serverVersionResult - SOAP::SOAPString
-class Qbwc::ServerVersionResponse
+class QBWC::ServerVersionResponse
   attr_accessor :serverVersionResult
 
   def initialize(serverVersionResult = nil)
@@ -49,7 +49,7 @@ end
 
 # {http://developer.intuit.com/}clientVersion
 #   strVersion - SOAP::SOAPString
-class Qbwc::ClientVersion
+class QBWC::ClientVersion
   attr_accessor :strVersion
 
   def initialize(strVersion = nil)
@@ -59,7 +59,7 @@ end
 
 # {http://developer.intuit.com/}clientVersionResponse
 #   clientVersionResult - SOAP::SOAPString
-class Qbwc::ClientVersionResponse
+class QBWC::ClientVersionResponse
   attr_accessor :clientVersionResult
 
   def initialize(clientVersionResult = nil)
@@ -74,7 +74,7 @@ end
 #   qbXMLCountry - SOAP::SOAPString
 #   qbXMLMajorVers - SOAP::SOAPInt
 #   qbXMLMinorVers - SOAP::SOAPInt
-class Qbwc::SendRequestXML
+class QBWC::SendRequestXML
   attr_accessor :ticket
   attr_accessor :strHCPResponse
   attr_accessor :strCompanyFileName
@@ -94,7 +94,7 @@ end
 
 # {http://developer.intuit.com/}sendRequestXMLResponse
 #   sendRequestXMLResult - SOAP::SOAPString
-class Qbwc::SendRequestXMLResponse
+class QBWC::SendRequestXMLResponse
   attr_accessor :sendRequestXMLResult
 
   def initialize(sendRequestXMLResult = nil)
@@ -107,7 +107,7 @@ end
 #   response - SOAP::SOAPString
 #   hresult - SOAP::SOAPString
 #   message - SOAP::SOAPString
-class Qbwc::ReceiveResponseXML
+class QBWC::ReceiveResponseXML
   attr_accessor :ticket
   attr_accessor :response
   attr_accessor :hresult
@@ -123,7 +123,7 @@ end
 
 # {http://developer.intuit.com/}receiveResponseXMLResponse
 #   receiveResponseXMLResult - SOAP::SOAPInt
-class Qbwc::ReceiveResponseXMLResponse
+class QBWC::ReceiveResponseXMLResponse
   attr_accessor :receiveResponseXMLResult
 
   def initialize(receiveResponseXMLResult = nil)
@@ -135,7 +135,7 @@ end
 #   ticket - SOAP::SOAPString
 #   hresult - SOAP::SOAPString
 #   message - SOAP::SOAPString
-class Qbwc::ConnectionError
+class QBWC::ConnectionError
   attr_accessor :ticket
   attr_accessor :hresult
   attr_accessor :message
@@ -149,7 +149,7 @@ end
 
 # {http://developer.intuit.com/}connectionErrorResponse
 #   connectionErrorResult - SOAP::SOAPString
-class Qbwc::ConnectionErrorResponse
+class QBWC::ConnectionErrorResponse
   attr_accessor :connectionErrorResult
 
   def initialize(connectionErrorResult = nil)
@@ -159,7 +159,7 @@ end
 
 # {http://developer.intuit.com/}getLastError
 #   ticket - SOAP::SOAPString
-class Qbwc::GetLastError
+class QBWC::GetLastError
   attr_accessor :ticket
 
   def initialize(ticket = nil)
@@ -169,7 +169,7 @@ end
 
 # {http://developer.intuit.com/}getLastErrorResponse
 #   getLastErrorResult - SOAP::SOAPString
-class Qbwc::GetLastErrorResponse
+class QBWC::GetLastErrorResponse
   attr_accessor :getLastErrorResult
 
   def initialize(getLastErrorResult = nil)
@@ -179,7 +179,7 @@ end
 
 # {http://developer.intuit.com/}closeConnection
 #   ticket - SOAP::SOAPString
-class Qbwc::CloseConnection
+class QBWC::CloseConnection
   attr_accessor :ticket
 
   def initialize(ticket = nil)
@@ -189,7 +189,7 @@ end
 
 # {http://developer.intuit.com/}closeConnectionResponse
 #   closeConnectionResult - SOAP::SOAPString
-class Qbwc::CloseConnectionResponse
+class QBWC::CloseConnectionResponse
   attr_accessor :closeConnectionResult
 
   def initialize(closeConnectionResult = nil)

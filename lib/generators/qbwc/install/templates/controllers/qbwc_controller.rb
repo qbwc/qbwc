@@ -1,4 +1,4 @@
-class QbwcController < ApplicationController
+class QBWCController < ApplicationController
   require "Quickbooks"
 
   def qwc
@@ -8,9 +8,9 @@ class QbwcController < ApplicationController
     <AppID></AppID>
     <AppURL>#{quickbooks_url(:protocol => 'https://', :action => 'api')}</AppURL>
     <AppDescription>I like to describe my awesome app</AppDescription>
-    <AppSupport>#{Qbwc.support_site_url}</AppSupport>
-    <UserName>#{Qbwc.username}</UserName>
-    <OwnerID>#{Qbwc.owner_id}</OwnerID>
+    <AppSupport>#{QBWC.support_site_url}</AppSupport>
+    <UserName>#{QBWC.username}</UserName>
+    <OwnerID>#{QBWC.owner_id}</OwnerID>
     <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
     <QBType>QBFS</QBType>
     <Style>Document</Style>
@@ -32,7 +32,7 @@ class QbwcController < ApplicationController
 
     req = request
     puts "========== #{ params["Envelope"]["Body"].keys.first}  =========="
-    res = Qbwc::SoapWrapper.route_request(req)
+    res = QBWC::SoapWrapper.route_request(req)
     render :xml => res, :content_type => 'text/xml'
   end
 

@@ -2,7 +2,7 @@ $:.unshift File.dirname(File.expand_path(__FILE__))
 require 'qbwc/version'
 require 'quickbooks'
 
-module Qbwc
+module QBWC
 
   # Web connector login credentials
   mattr_accessor :username
@@ -56,6 +56,7 @@ class << self
   def configure
     yield self
   end
+
 
 end
   
