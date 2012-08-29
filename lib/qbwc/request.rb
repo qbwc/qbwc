@@ -17,6 +17,10 @@ class QBWC::Request
   end
 
   def to_hash
+    QBWC.parser.qbxml_to_hash @request.to_s
+  end
+
+  def to_s
     @request
   end
 
