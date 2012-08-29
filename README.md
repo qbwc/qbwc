@@ -137,6 +137,7 @@ Get All Vendors (In Chunks of 5)
             }
           ]
         end
+        
 Get All Vendors (Raw QBXML)
 
         QBWC.add_job(:import_vendors) do
