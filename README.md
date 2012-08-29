@@ -50,8 +50,8 @@ block can contain:
   * Code that genrates a qbxml request
   * Code that generates an array of qbxml requests
 
-*Note: All requests should be in ruby hash form, generated using quickbooks_api. Raw
-requests will be supported soon.*
+*Note: All requests may be in ruby hash form, generated using quickbooks_api. 
+Raw requests are supported supported as of 0.0.3 (8/28/2012)*
 
 The code block is re-evaluated every time a session instance with that job is
 created. Only enabled jobs are added to a new session instance. 
@@ -91,6 +91,67 @@ Caveats
   * Jobs are enabled by default
   * Using a non unique job name will overwrite the existing job
 
+###Sample Jobs
+
+Add a Customer (Wrapped)
+
+          {  :qbxml_msgs_rq => 
+            [
+              {
+                :xml_attributes =>  { "onError" => "stopOnError"}, 
+                :customer_add_rq => 
+                [
+                  {
+                    :xml_attributes => {"requestID" => "1"},  ##Optional
+                    :customer_add   => { :name => "GermanGR" }
+                  } 
+                ] 
+              }
+            ]
+          }
+          
+Add a Customer (Unwrapped)
+
+        {
+          :customer_add_rq    => 
+          [
+            {
+              :xml_attributes => {"requestID" => "1"},  ##Optional
+              :customer_add   => { :name => "GermanGR" }
+            } 
+          ] 
+        }
+
+Get All Vendors (In Chunks of 5)
+
+        QBWC.add_job(:import_vendors) do
+          [
+            :vendor_query_rq  =>
+            {
+              :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+      
+              :max_returned => 5,
+              :owner_id => 0,
+              :from_modified_date=> "1984-01-29T22:03:19"
+
+            }
+          ]
+        end
+        
+Get All Vendors (Raw QBXML)
+
+        QBWC.add_job(:import_vendors) do
+          '<QBXML>
+            <QBXMLMsgsRq onError="continueOnError">
+            <VendorQueryRq requestID="6" iterator="Start">
+            <MaxReturned>5</MaxReturned>
+            <FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
+            <OwnerID>0</OwnerID>
+          </VendorQueryRq>
+          </QBXMLMsgsRq>
+          </QBXML>
+          '
+        end
 
 ### Managing Jobs
 

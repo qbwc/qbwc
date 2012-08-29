@@ -19,8 +19,8 @@ class QBWC::Session
   end
 
   def reset
-    @progress = 0
-    enabled_jobs.map { |j| j.reset }
+    @progress = QBWC.jobs.blank? ? 100 : 0
+    enabled_jobs.map { |j| j.reset } unless enabled_jobs.blank?
     @requests = build_request_generator(enabled_jobs)
   end
 
@@ -56,11 +56,13 @@ private
 
   def build_request_generator(jobs)
     Fiber.new do 
-      jobs.each do |j|
-        @current_job = j
-        while (r = next_request)
-          @current_request = r
-          Fiber.yield r
+      unless jobs.blank?
+        jobs.each do |j|
+          @current_job = j
+          while (r = next_request)
+            @current_request = r
+            Fiber.yield r
+          end
         end
       end
       @progress = 100
@@ -78,14 +80,15 @@ private
     status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID') 
-
-    if status_severity == 'Error' || status_code.to_i > 1 || resp_hash.keys.size <= 1
+                                               
+    if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
       @current_request.error = "QBWC ERROR: #{status_code} - #{status_message}"
     else
-      if iterator_remaining.to_i > 0
+      if iterator_remaining_count.to_i > 0
         @qbwc_iterating = true
-        new_request = @current_request.to_hash.detect { |k,v| k != 'xml_attributes' }.last
-        new_request['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
+        new_request = @current_request.to_hash
+        new_request.delete('xml_attributes')
+        new_request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
         @qbwc_iterator_queue << Request.new(new_request, @current_request.response_proc)
       else
         @qbwc_iterating = false
@@ -101,4 +104,7 @@ class << self
 
 end
 
+	def self.session
+		@@session
+	end
 end
