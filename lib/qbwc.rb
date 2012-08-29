@@ -30,6 +30,8 @@ module QBWC
   mattr_reader :jobs
   @@jobs = {}
   
+  mattr_reader :on_error
+  @@on_error = 'stopOnError'
   # Do processing after session termination
   # Enabling this option will speed up qbwc session time but will necessarily eat
   # up more memory since every response must be stored until it is processed. 
@@ -45,7 +47,13 @@ class << self
   def add_job(name, &block)
     @@jobs[name] = Job.new(name, &block)
   end
-
+  
+  def on_error=(reaction)
+    raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
+    @@on_error = "stopOnError" if reaction == :stop
+    @@on_error = "continueOnError" if reaction == :continue
+  end
+  
   def api=(api)
     raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
     @@api = api

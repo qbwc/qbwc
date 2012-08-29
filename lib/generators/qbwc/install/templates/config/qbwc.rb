@@ -25,4 +25,11 @@ QBWC.configure do |c|
   # until it is processed. 
   c.delayed_processing = false
 
+  # In the event of an error in the communcation process do you wish the sync to stop or blase through
+  #
+  # Options: 
+  # :stop
+  # :continue
+  c.on_error = :stop
+  
 end
