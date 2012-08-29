@@ -91,6 +91,52 @@ Caveats
   * Jobs are enabled by default
   * Using a non unique job name will overwrite the existing job
 
+###Sample Jobs
+
+Add a Customer (Wrapped)
+
+          {  :qbxml_msgs_rq => 
+            [
+              {
+                :xml_attributes =>  { "onError" => "stopOnError"}, 
+                :customer_add_rq => 
+                [
+                  {
+                    :xml_attributes => {"requestID" => "1"},  ##Optional
+                    :customer_add   => { :name => "GermanGR" }
+                  } 
+                ] 
+              }
+            ]
+          }
+          
+Add a Customer (Unwrapped)
+
+        {
+          :customer_add_rq    => 
+          [
+            {
+              :xml_attributes => {"requestID" => "1"},  ##Optional
+              :customer_add   => { :name => "GermanGR" }
+            } 
+          ] 
+        }
+
+Get All Vendors (In Chunks of 5)
+
+        QBWC.add_job(:import_vendors) do
+          [
+            :vendor_query_rq  =>
+            {
+              :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+      
+              :max_returned => 5,
+              :owner_id => 0,
+              :from_modified_date=> "1984-01-29T22:03:19"
+
+            }
+          ]
+        end
 
 ### Managing Jobs
 
