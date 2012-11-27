@@ -40,7 +40,7 @@ module QBWC
 
   # Quickbooks Type (either :qb or :qbpos)
   mattr_reader :api, :parser
-  @@api= ::Quickbooks::API[:qb]
+  @@api = :qb #::Quickbooks::API[:qb]
   
 class << self
 
