@@ -42,6 +42,10 @@ module QBWC
   mattr_reader :api, :parser
   @@api = :qb #::Quickbooks::API[:qb]
   
+  # Check Rails Cache for Parser before boot
+  mattr_accessor :warm_boot
+  @@warm_boot = true
+
 class << self
 
   def add_job(name, &block)
@@ -57,7 +61,13 @@ class << self
   def api=(api)
     raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
     @@api = api
-    @@parser = ::Quickbooks::API[api]
+    if @@warm_boot
+      ::Rails.logger.warn "using warm boot"
+      @@parser = ::Rails.cache.read("qb_api_#{api}") || ::Quickbooks::API[api] 
+      ::Rails.cache.write("qb_api_#{api}", @@parser)
+    else
+      @@parser = ::Quickbooks::API[api] 
+    end
   end
 
   # Allow configuration overrides

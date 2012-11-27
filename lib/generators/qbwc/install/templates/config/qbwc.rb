@@ -31,5 +31,8 @@ QBWC.configure do |c|
   # :stop
   # :continue
   c.on_error = :stop
+
+  # Rails Cache Hot Boot  (Check the rails cache for existing API object to speed app boot)
+  c.warm_boot = true
   
 end
