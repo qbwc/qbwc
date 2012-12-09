@@ -44,7 +44,7 @@ module QBWC
   
   # Check Rails Cache for Parser before boot
   mattr_accessor :warm_boot
-  @@warm_boot = true
+  @@warm_boot = false
 
 class << self
 

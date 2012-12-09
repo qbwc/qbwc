@@ -25,14 +25,15 @@ QBWC.configure do |c|
   # until it is processed. 
   c.delayed_processing = false
 
-  # In the event of an error in the communcation process do you wish the sync to stop or blase through
+  # In the event of an error in the communication process do you wish the sync to stop or blaze through
   #
   # Options: 
   # :stop
   # :continue
   c.on_error = :stop
 
-  # Rails Cache Hot Boot  (Check the rails cache for existing API object to speed app boot)
-  c.warm_boot = true
+  # Rails Cache Hot Boot  (Check the rails cache for existing API object to speed app boot) 
+  # This Feature is Unstable and is Extreme Alpha.  IT is known not to work
+  # c.warm_boot = false
   
 end
