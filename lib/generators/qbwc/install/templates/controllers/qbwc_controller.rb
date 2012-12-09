@@ -1,4 +1,4 @@
-class QBWCController < ApplicationController
+class QbwcController < ApplicationController
   require "Quickbooks"
 
   def qwc
