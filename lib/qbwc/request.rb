@@ -35,10 +35,6 @@ class QBWC::Request
     QBWC.parser.qbxml_to_hash @request.to_s
   end
 
-  def to_s
-    @request
-  end
-
   class << self
 
     def from_array(requests, response_proc)
