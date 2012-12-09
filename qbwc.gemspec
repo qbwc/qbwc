@@ -22,7 +22,12 @@ Gem::Specification.new do |s|
     "README.md"
   ]
 
-   s.add_dependency "quickbooks_api", [">= 0.1.6"]
-   s.add_dependency "rubyjedi-soap4r", [">= 1.5.8.20100619003610"]
+  s.add_dependency "quickbooks_api", [">= 0.1.6"]
+  s.add_dependency "rubyjedi-soap4r", [">= 1.5.8.20100619003610"]
+  s.add_development_dependency('guard')
+  s.add_development_dependency('guard-rspec')
+  s.add_development_dependency('rb-fsevent')
+  s.add_development_dependency('webmock')
+  s.add_development_dependency('rspec')
 
 end
