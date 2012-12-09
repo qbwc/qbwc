@@ -94,7 +94,7 @@ class QBWC::Session
         new_request = @current_request.to_hash
         new_request.delete('xml_attributes')
         new_request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
-        @qbwc_iterator_queue << Request.new(new_request, @current_request.response_proc)
+        @qbwc_iterator_queue << QBWC::Request.new(new_request, @current_request.response_proc)
       else
         @qbwc_iterating = false
       end
