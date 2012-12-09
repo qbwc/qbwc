@@ -20,7 +20,7 @@ class QBWC::Session
 
   def reset
     @progress = QBWC.jobs.blank? ? 100 : 0
-    enabled_jobs.map { |j| j.reset } unless enabled_jobs.blank?
+    enabled_jobs.map { |j| j.reset }
     @requests = build_request_generator(enabled_jobs)
   end
 
@@ -33,38 +33,43 @@ class QBWC::Session
   end
 
   def response=(qbxml_response)
-    @current_request.response = \
-      QBWC.parser.qbxml_to_hash(qbxml_response) 
-    parse_response_header(@current_request.response)
+    begin
+      @current_request.response = QBWC.parser.qbxml_to_hash(qbxml_response)
+      parse_response_header(@current_request.response)
 
-    if QBWC.delayed_processing
-      @saved_requests << @current_request
-    else
-      @current_request.process_response
+      if QBWC.delayed_processing
+        @saved_requests << @current_request
+      else
+        @current_request.process_response
+      end
+    rescue => e
+      puts "An error occured in QBWC::Session: #{e}"
+      puts e
+      puts e.backtrace
     end
+
   end
 
   def process_saved_responses
     @saved_requests.each { |r| r.process_response }
   end
 
-private
+  private
 
   def enabled_jobs
-    QBWC.jobs.values.select { |j| j.enabled? } unless QBWC.jobs.empty?
+    QBWC.jobs.values.select { |j| j.enabled? }
   end
 
   def build_request_generator(jobs)
-    Fiber.new do 
-      unless jobs.blank?
-        jobs.each do |j|
-          @current_job = j
-          while (r = next_request)
-            @current_request = r
-            Fiber.yield r
-          end
+    Fiber.new do
+      jobs.each do |j|
+        @current_job = j
+        while (r = next_request)
+          @current_request = r
+          Fiber.yield r
         end
       end
+
       @progress = 100
       nil
     end
