@@ -1,6 +1,9 @@
 # Quickbooks Web Connector (QBWC)
 
-Be Warned, this code is still hot out of the oven. 
+QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
+
+* Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
+* Integration with a qbxml [parser](https://github.com/skryl/qbxml)
 
 ## Installation
 
@@ -16,50 +19,51 @@ Run the generator:
 
   `rails generate qbwc:install`
 
-## Features
+## Configuration
 
-QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
 
-* Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
-* Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
+## Basics
 
-## Getting Started
+The QBWC gem provides a in-memory work queue for the Quickbooks Web Connector to
+interact with. This queue is comprised of a session, which takes care of the
+queueing and persistence across web requests, the job(s), which are groupings of
+similar requests along with a response processor, and the request(s) themselves,
+which can be supplied in either raw XML or hash format.
 
-### Configuration
+### The Session
 
-All configuration takes place in the gem initializer. See the initializer for more details regarding the configuration options.
+Every time the Web Connector initiates a new connection to your application, an
+existing session will be found or a new one will be created. Upon creation, the
+session will automatically round up all requests across currently enabled jobs
+and queue them for processing. The session will persist across web requests until 
+the work it contains has been exhausted.
 
-### Basics
+### The Job
 
-The QBWC gem provides a persistent work queue for the Web Connector to talk to.
+A Job groups similar requests together into a manageable work unit. It is
+comprised of one or more requests and a response processor. The response
+processor will be used to digest responses to all the requests in the job. A job
+can 
 
-Every time the Web Connector initiates a new conversation with the application a
-Session will be created. The Session is a collection of jobs and the requests
-that comprise these jobs. A new Session will automatically queue up all the work
-available across all currently enabled jobs for processing by the web connector.
-The session instance will persist across all requests until the work it contains
-has been exhausted. You never have to interact with the Session class directly
-(unless you want to...) since creating a new job will automatically add it's
-work to the next session instance.
-
-A Job is just a named work queue. It consists of a name and a code block. The
-block can contain:
-
-  * A single qbxml request
-  * An array of qbxml requests
-  * Code that genrates a qbxml request
-  * Code that generates an array of qbxml requests
-
-*Note: All requests may be in ruby hash form, generated using quickbooks_api. 
-Raw requests are supported supported as of 0.0.3 (8/28/2012)*
-
-The code block is re-evaluated every time a session instance with that job is
-created. Only enabled jobs are added to a new session instance. 
+The result of the code block is not cached and is re-evaluated every time a new
+session is initiated. Only requests from enabled jobs are added to a new
+session.
 
 An optional response processor block can also be added to a job. Responses to
 all requests are either processed immediately after being received or saved for
 processing after the web connector closes its connection. The delayed processing
 configuration option decides this.
+
+### The Request
+
+All requests in hash form must be generated or validated by the [qbxml](https://github.com/skryl/qbxml) gem.
+
+  * A single qbxml request (String)
+  * An array of qbxml requests (String)
+  * A single qbxml request (Hash)
+  * An array of qbxml requests (Hash)
+  * Code that genrates a qbxml request
+  * Code that generates an array of qbxml requests
 
 Here is the rough order in which things happen:
 
@@ -72,6 +76,16 @@ Here is the rough order in which things happen:
   6. The response is processed or saved for later processing
   7. If progress == 100 then the web connector closes the connection, otherwise goto 3
   8. Saved responses are processed if any exist
+
+
+## Usage
+
+### QBWC
+Getting a list of enabled jobs from QBWC
+
+```ruby
+QBWC.enabled_jobs
+```
 
 ### Adding Jobs
 
@@ -91,7 +105,24 @@ Caveats
   * Jobs are enabled by default
   * Using a non unique job name will overwrite the existing job
 
-###Sample Jobs
+### Managing Jobs
+
+Jobs can be added, removed, enabled, and disabled. See the above section for
+details on adding new jobs. 
+
+Removing jobs is as easy as deleting them from the jobs hash.                   
+
+    QBWC.jobs.delete('my job')
+
+Disabling a job
+
+    QBWC.jobs['my job'].disable
+
+Enabling a job
+
+    QBWC.jobs['my job'].enable
+
+### Sample Jobs
 
 Add a Customer (Wrapped)
 
@@ -152,24 +183,6 @@ Get All Vendors (Raw QBXML)
           </QBXML>
           '
         end
-
-### Managing Jobs
-
-Jobs can be added, removed, enabled, and disabled. See the above section for
-details on adding new jobs. 
-
-Removing jobs is as easy as deleting them from the jobs hash.                   
-
-    QBWC.jobs.delete('my job')
-
-Disabling a job
-
-    QBWC.jobs['my job'].disable
-
-Enabling a job
-
-    QBWC.jobs['my job'].enable
-
 
 ## Contributing to qbwc
  

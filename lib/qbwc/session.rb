@@ -1,66 +1,77 @@
 class QBWC::Session
-  include Enumerable
 
-  attr_reader :current_job, :current_request, :saved_requests, :progress
-  attr_reader :qbwc_iterator_queue, :qbwc_iterating
+  attr_reader :progress
 
   @@session = nil
 
   def initialize
     @current_job = nil
     @current_request = nil
-    @saved_requests = []
 
-    @qbwc_iterator_queue = []
-    @qbwc_iterating = false
+    @delayed_processing_queue = []
+    @iterator_queue = []
 
+    @iterating = false
     @@session = self
-    reset
+
+    reset!
   end
 
-  def reset
-    @progress = QBWC.jobs.blank? ? 100 : 0
-    enabled_jobs.map { |j| j.reset }
-    @requests = build_request_generator(enabled_jobs)
+  def reset!
+    @progress = QBWC.jobs.empty? ? 100 : 0
+    @enabled_jobs = enabled_jobs.each { |j| j.reset }
+    @request_gen = new_request_generator(@enabled_jobs)
+  end
+
+  def enabled_jobs
+    QBWC.enabled_jobs.values
+  end
+
+  def enabled_jobs?
+    !enabled_jobs.empty?
+  end
+
+  def request_queue
+    enabled_jobs.map { j.requests }.flatten
+  end
+
+  def next
+    @request_gen.alive? ? @request_gen.resume : nil
   end
 
   def finished?
     @progress == 100
   end
 
-  def next
-    @requests.alive? ? @requests.resume : nil
+  def iterating?
+    @iterating
   end
 
-  def response=(qbxml_response)
-    begin
-      @current_request.response = QBWC.parser.qbxml_to_hash(qbxml_response)
-      parse_response_header(@current_request.response)
+  # TODO: refactor
+  #
+  # def response=(qbxml_response)
+  #   @current_request.response = QBWC.parser.from_qbxml(qbxml_response)
+  #   parse_response_header(@current_request.response)
 
-      if QBWC.delayed_processing
-        @saved_requests << @current_request
-      else
-        @current_request.process_response
-      end
-    rescue => e
-      puts "An error occured in QBWC::Session: #{e}"
-      puts e
-      puts e.backtrace
-    end
+  #   if QBWC.delayed_processing
+  #     @delayed_processing_queue << @current_request
+  #   else
+  #     @current_request.process_response
+  #   end
 
-  end
+  # rescue => e
+  #   puts "An error occured in QBWC::Session: #{e}"
+  #   puts e
+  #   puts e.backtrace
+  # end
 
-  def process_saved_responses
-    @saved_requests.each { |r| r.process_response }
-  end
+  # def process_saved_responses
+  #   @delayed_processing_queue.each { |r| r.process_response }
+  # end
 
-  private
+private
 
-  def enabled_jobs
-    QBWC.jobs.values.select { |j| j.enabled? }
-  end
-
-  def build_request_generator(jobs)
+  def new_request_generator(jobs)
     Fiber.new do
       jobs.each do |j|
         @current_job = j
@@ -76,30 +87,31 @@ class QBWC::Session
   end
 
   def next_request
-    (@qbwc_iterating == true && @qbwc_iterator_queue.shift) || @current_job.next
+    (@iterating && @iterator_queue.shift) || @current_job.next
   end
 
-  def parse_response_header(response)
-    return unless response['xml_attributes']
+  # TODO: refactor
+  # def parse_response_header(response)
+  #   return unless response['xml_attributes']
 
-    status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
-      response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
-                                               'iteratorRemainingCount', 'iteratorID') 
+  #   status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
+  #     response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
+  #                                          'iteratorRemainingCount', 'iteratorID') 
                                                
-    if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
-      @current_request.error = "QBWC ERROR: #{status_code} - #{status_message}"
-    else
-      if iterator_remaining_count.to_i > 0
-        @qbwc_iterating = true
-        new_request = @current_request.to_hash
-        new_request.delete('xml_attributes')
-        new_request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
-        @qbwc_iterator_queue << QBWC::Request.new(new_request, @current_request.response_proc)
-      else
-        @qbwc_iterating = false
-      end
-    end
-  end
+  #   if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
+  #     @current_request.error = "QBWC ERROR: #{status_code} - #{status_message}"
+  #   else
+  #     if iterator_remaining_count.to_i > 0
+  #       @iterating = true
+  #       new_request = @current_request.to_hash
+  #       new_request.delete('xml_attributes')
+  #       new_request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
+  #       @iterator_queue << QBWC::Request.new(new_request, @current_request.response_proc)
+  #     else
+  #       @iterating = false
+  #     end
+  #   end
+  # end
 
 class << self
 

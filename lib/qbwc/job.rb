@@ -1,13 +1,18 @@
 class QBWC::Job
 
-  attr_reader :name, :response_proc, :requests
+  attr_reader :name, :requests, :response_proc
 
   def initialize(name, &block)
     @name = name
     @enabled = true
-    @requests = block
+    @request_block = block
 
-    reset
+    reset!
+  end
+
+  def reset!
+    @requests = collect_requests
+    @request_gen = new_request_generator
   end
 
   def set_response_proc(&block) 
@@ -30,18 +35,14 @@ class QBWC::Job
     @request_gen.alive? ? @request_gen.resume : nil
   end
 
-  def reset
-    @request_gen = new_request_generator
-  end
-
 private
 
   def new_request_generator
-    Fiber.new { request_queue.each { |r| Fiber.yield r }; nil }
+    Fiber.new { @requests.each { |r| Fiber.yield r }; nil }
   end
 
-  def request_queue
-    QBWC::Request.from_array(@requests.call, @response_proc )
+  def collect_requests
+    QBWC::Request.from_array(@request_block.call, @response_proc )
   end
 
 end
