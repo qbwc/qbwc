@@ -1,9 +1,12 @@
 # Quickbooks Web Connector (QBWC)
 
-QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
+QBWC adds [Quickbooks Web Connector](http://marketplace.intuit.com/webconnector/) integration to your Rails 3/4 application. 
 
-* Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
-* Integration with a qbxml [parser](https://github.com/skryl/qbxml)
+* Simplified job queueing and response processing
+* No-XML request generation and validation with [qbxml](https://github.com/skryl/qbxml)
+* Support for custom job queue implementations
+* Works with both Quickbooks and Quickbooks Point of Sale
+
 
 ## Installation
 
@@ -19,170 +22,269 @@ Run the generator:
 
   `rails generate qbwc:install`
 
-## Configuration
-
 
 ## Basics
 
-The QBWC gem provides a in-memory work queue for the Quickbooks Web Connector to
-interact with. This queue is comprised of a session, which takes care of the
-queueing and persistence across web requests, the job(s), which are groupings of
-similar requests along with a response processor, and the request(s) themselves,
-which can be supplied in either raw XML or hash format.
-
-### The Session
-
-Every time the Web Connector initiates a new connection to your application, an
-existing session will be found or a new one will be created. Upon creation, the
-session will automatically round up all requests across currently enabled jobs
-and queue them for processing. The session will persist across web requests until 
-the work it contains has been exhausted.
 
 ### The Job
 
-A Job groups similar requests together into a manageable work unit. It is
-comprised of one or more requests and a response processor. The response
-processor will be used to digest responses to all the requests in the job. A job
-can 
 
-The result of the code block is not cached and is re-evaluated every time a new
-session is initiated. Only requests from enabled jobs are added to a new
-session.
+### The Session
 
-An optional response processor block can also be added to a job. Responses to
-all requests are either processed immediately after being received or saved for
-processing after the web connector closes its connection. The delayed processing
-configuration option decides this.
 
 ### The Request
 
-All requests in hash form must be generated or validated by the [qbxml](https://github.com/skryl/qbxml) gem.
+A request is a chunk of XML that the Web Connector can process. Requests can be
+formatted as raw XML or Ruby hashes. Requests can be easily generated and
+validated using the [qbxml](https://github.com/skryl/qbxml) gem.
 
-  * A single qbxml request (String)
-  * An array of qbxml requests (String)
-  * A single qbxml request (Hash)
-  * An array of qbxml requests (Hash)
-  * Code that genrates a qbxml request
-  * Code that generates an array of qbxml requests
 
-Here is the rough order in which things happen:
+### Workflow Overview
 
-  1. The Web Connector initiates a connection
-  2. A new Session is created (with work from all enabled jobs)
-  3. The web connector requests work
-  4. The session responds with the next request in the work queue
-  5. The web connector provides a response
-  6. The session responds with the current progress of the work queue (0 - 100)
-  6. The response is processed or saved for later processing
-  7. If progress == 100 then the web connector closes the connection, otherwise goto 3
-  8. Saved responses are processed if any exist
+This is the rough order in which things happen
+
+1. The Web Connector initiates a connection with the application
+2. An existing QBWC session is retrieved or a new one is created
+3. The web connector requests work from the QBWC session
+4. The session responds with the next request in the work queue
+5. The web connector processes the query and replies with a result set
+6. The session processes the result set and sends back the current progress of
+   the work queue (0 - 100)
+7. If the session is exhausted then the web connector closes the connection,
+   otherwise it restarts from step 3
 
 
 ## Usage
 
-### QBWC
-Getting a list of enabled jobs from QBWC
-
-```ruby
-QBWC.enabled_jobs
-```
-
-### Adding Jobs
-
-Create a new job
-
-    QBWC.add_job('my job') do
-      # work to do
-    end
-
-Add a response proc
-
-    QBWC.jobs['my job'].set_response_proc do |r|
-      # response processing work here
-    end
-
-Caveats
-  * Jobs are enabled by default
-  * Using a non unique job name will overwrite the existing job
 
 ### Managing Jobs
 
-Jobs can be added, removed, enabled, and disabled. See the above section for
-details on adding new jobs. 
 
-Removing jobs is as easy as deleting them from the jobs hash.                   
+#### Listing Jobs
 
-    QBWC.jobs.delete('my job')
+```ruby
+QBWC.jobs
+```
 
-Disabling a job
+Listing all jobs that match a pattern
 
-    QBWC.jobs['my job'].disable
+```ruby
+QBWC.jobs(:name => /customer/)
+```
 
-Enabling a job
+Listing all automatically queued jobs
 
-    QBWC.jobs['my job'].enable
+```ruby
+QBWC.jobs(:auto => true)
+```
+
+Listing all disabled jobs
+
+```ruby
+QBWC.jobs(:enabled => false)
+```
+
+#### Adding Jobs
+
+Adding a manual job
+
+```ruby
+QBWC.add_job :my_manual_job do |a, b|
+  # qbxml request(s) here
+end
+```
+
+Adding an automatic job
+
+```ruby
+QBWC.add_job :my_auto_job, :auto => true do
+  # qbxml request(s) here
+end
+```
+
+Add a response proccessor for a job
+
+```ruby
+QBWC.on_response :my_job do |r|
+  # response processing here
+end
+```
+
+
+#### Modifying an existing job
+
+Changing job properties
+
+```ruby
+QBWC.mod_job :my_job, :auto => false, :enabled => false
+```
+
+Changing the job body
+
+```ruby
+QBWC.mod_job :my_job do |d|
+  # qbxml request(s) here
+end
+```
+
+
+#### Queueing jobs
+
+Automatic jobs are queued every time a new session is created. Manual jobs have
+to be queued when needed.
+
+```ruby
+QBWC.queue(:new_customers, Customer.all)
+```
+
+
+#### Job Configuration DSL
+
+All of the above class methods are accessible in the configuration context of
+the QBWC object, allowing you to keep all of your QBWC specific definitions in a
+single, clean, configuration file.
+
+```ruby
+QBWC.configure do
+  add_job :my_manual_job do
+  end
+
+  on_response :my_manual_job do
+  end
+
+  add_job :my_auto_job, :auto => true do
+  end
+
+  on_response :my_auto_job do
+  end
+end
+```
+
+Caveats
+
+* Jobs are enabled by default
+* Jobs are manual by default
+* Using a non unique job name when creating a job will overwrite the job with
+  the same name
+
 
 ### Sample Jobs
 
-Add a Customer (Wrapped)
+Create new customers
 
-          {  :qbxml_msgs_rq => 
-            [
-              {
-                :xml_attributes =>  { "onError" => "stopOnError"}, 
-                :customer_add_rq => 
-                [
-                  {
-                    :xml_attributes => {"requestID" => "1"},  ##Optional
-                    :customer_add   => { :name => "GermanGR" }
-                  } 
-                ] 
-              }
-            ]
-          }
-          
-Add a Customer (Unwrapped)
+```ruby
+QBWC.add_job :new_customers do |customers|
+  Array(customers).map do |c|
+    { xml_attributes:  { onError: "stopOnError"}, 
+      customer_add_rq: {
+        :xml_attributes: { requestID: "1"}
+        :customer_add:   { name: c.name} } }
+  end
+end
+```
 
-        {
-          :customer_add_rq    => 
-          [
-            {
-              :xml_attributes => {"requestID" => "1"},  ##Optional
-              :customer_add   => { :name => "GermanGR" }
-            } 
-          ] 
-        }
+```ruby
+QBWC.on_response :new_customers do |c|
+  
+end
+```
 
-Get All Vendors (In Chunks of 5)
+Get All Vendors
 
-        QBWC.add_job(:import_vendors) do
-          [
-            :vendor_query_rq  =>
-            {
-              :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-      
-              :max_returned => 5,
-              :owner_id => 0,
-              :from_modified_date=> "1984-01-29T22:03:19"
+```ruby
+QBWC.add_job :import_vendors, :auto => true do
+%q(
+  <QBXML>
+    <QBXMLMsgsRq onError="continueOnError">
+      <VendorQueryRq requestID="6" iterator="Start">
+        <MaxReturned>5</MaxReturned>
+        <FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
+        <OwnerID>0</OwnerID>
+      </VendorQueryRq>
+    </QBXMLMsgsRq>
+  </QBXML>
+)
+end
+```
 
-            }
-          ]
-        end
-        
-Get All Vendors (Raw QBXML)
+```ruby
+QBWC.on_response :new_customer do |v|
+  
+end
+```
 
-        QBWC.add_job(:import_vendors) do
-          '<QBXML>
-            <QBXMLMsgsRq onError="continueOnError">
-            <VendorQueryRq requestID="6" iterator="Start">
-            <MaxReturned>5</MaxReturned>
-            <FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
-            <OwnerID>0</OwnerID>
-          </VendorQueryRq>
-          </QBXMLMsgsRq>
-          </QBXML>
-          '
-        end
+
+## Configuration
+
+All configuration options can be set in the auto-generated initializers/qbwc.rb
+file. The sample values below represent the default settings.
+
+Set web connector authentication credentials
+
+```ruby
+c.username = "foo"
+c.password = "bar"
+```
+
+Set company file path (blank for open or named path or function etc..)
+
+```ruby
+c.company_file_path = ""
+```
+
+Set minimum Quickbooks version
+
+```ruby
+c.min_version = 7.0
+```
+
+Set Quickbooks support URL provided
+
+```ruby
+c.support_site_url = "localhost:3000"
+```
+
+Set Quickbooks owner ID
+
+```ruby
+c.owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+```
+
+In the event of an error in the communication process do you wish the sync to stop or blaze through
+
+```ruby
+Options: 
+:stop
+:continue
+
+c.on_error = :stop
+```
+
+Enable logging of all requests and responses
+
+```ruby
+QBWC.logging = false
+```
+
+Select Quickbooks api to use
+
+```ruby
+# Options
+# :qb
+# :qbpos
+
+c.api = :qb
+```
+
+Perform response processing after session termination. Enabling this option
+will speed up qbwc session time (and potentially fix timeout issues) at the
+expense of  memory since every response must be stored until it is
+processed. 
+
+```ruby
+c.delayed_processing = false
+```
+
 
 ## Contributing to qbwc
  

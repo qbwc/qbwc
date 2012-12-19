@@ -3,6 +3,11 @@ require 'qbxml'
 
 module QBWC
 
+  # Job definitions
+  #
+  mattr_reader :jobs
+  @@jobs = {}
+  
   # Web connector login credentials
   #
   mattr_accessor :username
@@ -31,35 +36,39 @@ module QBWC
   mattr_accessor :owner_id
   @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
   
-  # Job definitions
-  #
-  mattr_reader :jobs
-  @@jobs = {}
-  
   # OnError action
   #
   mattr_reader :on_error
   @@on_error = 'stopOnError'
-
-  # Toggle delayed processing
-  #
-  mattr_accessor :delayed_processing
-  @@delayed_processing = false
 
   # Quickbooks Type (either :qb or :qbpos)
   #
   mattr_reader :api, :parser
   @@api = :qb
   @@parser = Qbxml.new(@@api)
+
+  # Toggle delayed processing
+  #
+  mattr_accessor :delayed_processing
+  @@delayed_processing = false
+
   
 class << self
 
   def add_job(name, &block)
-    @@jobs[name] = Job.new(name, &block)
+    @@jobs[name.to_sym] = Job.new(name, &block)
   end
 
   def remove_job(name)
-    @@jobs.delete(name)
+    @@jobs.delete(name.to_sym)
+  end
+
+  def enable_job(name)
+    @@jobs[name.to_sym].enable if @@jobs[name]
+  end
+
+  def disable_job(name)
+    @@jobs[name.to_sym].disable if @@jobs[name]
   end
 
   def enabled_jobs
