@@ -48,8 +48,8 @@ module QBWC
 
 class << self
 
-  def add_job(name, &block)
-    @@jobs[name] = Job.new(name, &block)
+  def add_job(name,priority=0, &block)
+    @@jobs[name] = Job.new(name,priority, &block)
   end
   
   def on_error=(reaction)
