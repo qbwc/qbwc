@@ -50,7 +50,7 @@ class << self
 
   def add_job(name,priority=0, &block)
     @@jobs[name] = Job.new(name,priority, &block)
-    @@jobs.sort_by{|job, priority| job[3] }
+    @@jobs.sort_by{|job, priority| job[3] }.reverse
   end
   
   def on_error=(reaction)
