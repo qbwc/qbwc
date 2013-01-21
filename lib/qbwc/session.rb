@@ -62,6 +62,7 @@ class QBWC::Session
 
   def build_request_generator(jobs)
     Fiber.new do
+      jobs.sort_by{|job, priority| job[3] }.reverse
       jobs.each do |j|
         @current_job = j
         while (r = next_request)
