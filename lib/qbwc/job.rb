@@ -2,8 +2,9 @@ class QBWC::Job
 
   attr_reader :name, :response_proc, :requests
 
-  def initialize(name, &block)
+  def initialize(name,priority=0, &block)
     @name = name
+    @priority = priority
     @enabled = true
     @requests = block
 
