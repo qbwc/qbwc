@@ -15,6 +15,10 @@ class QBWC::Job
     @response_proc = block
   end
 
+  def priority
+    @priority
+  end
+
   def enable
     @enabled = true
   end

@@ -49,8 +49,8 @@ module QBWC
 class << self
 
   def add_job(name,priority=0, &block)
-    @@jobs[name] = Job.new(name,priority, &block)
-    @@jobs.sort_by{|job, priority| job[3] }.reverse
+    @@jobs[name] = Job.new(name, priority, &block)
+    @@jobs.sort_by{|job, key| key.priority }.reverse
   end
   
   def on_error=(reaction)
