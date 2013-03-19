@@ -1,6 +1,6 @@
 $:.unshift File.dirname(File.expand_path(__FILE__))
 require 'qbwc/version'
-require 'quickbooks'
+require 'qbxml'
 
 module QBWC
 
@@ -40,12 +40,8 @@ module QBWC
 
   # Quickbooks Type (either :qb or :qbpos)
   mattr_reader :api, :parser
-  @@api = :qb #::Quickbooks::API[:qb]
+  @@api = :qb
   
-  # Check Rails Cache for Parser before boot
-  mattr_accessor :warm_boot
-  @@warm_boot = false
-
 class << self
 
   def add_job(name, &block)
@@ -61,20 +57,13 @@ class << self
   def api=(api)
     raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
     @@api = api
-    if @@warm_boot
-      ::Rails.logger.warn "using warm boot"
-      @@parser = ::Rails.cache.read("qb_api_#{api}") || ::Quickbooks::API[api] 
-      ::Rails.cache.write("qb_api_#{api}", @@parser)
-    else
-      @@parser = ::Quickbooks::API[api] 
-    end
+    @@parser = Qbxml.new(api) 
   end
 
   # Allow configuration overrides
   def configure
     yield self
   end
-
 
 end
   

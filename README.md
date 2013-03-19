@@ -21,7 +21,7 @@ Run the generator:
 QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
-* Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
+* Integration with the [qbxml](https://github.com/skryl/qbxml) gem providing qbxml processing
 
 ## Getting Started
 
@@ -50,7 +50,7 @@ block can contain:
   * Code that genrates a qbxml request
   * Code that generates an array of qbxml requests
 
-*Note: All requests may be in ruby hash form, generated using quickbooks_api. 
+*Note: All requests may be in ruby hash form, generated qbxml
 Raw requests are supported supported as of 0.0.3 (8/28/2012)*
 
 The code block is re-evaluated every time a session instance with that job is

@@ -16,7 +16,7 @@ class QBWC::Request
         request = wrapped_request
       end
 
-      @request = QBWC.parser.hash_to_qbxml(request)
+      @request = QBWC.parser.to_qbxml(request)
     when request.is_a?(String)
       @request = request
     end
@@ -28,11 +28,11 @@ class QBWC::Request
   end
 
   def to_qbxml
-    QBWC.parser.hash_to_qbxml(request)
+    QBWC.parser.to_qbxml(request)
   end
 
   def to_hash
-    QBWC.parser.qbxml_to_hash @request.to_s
+    QBWC.parser.from_qbxml(@request.to_s)
   end
 
   class << self

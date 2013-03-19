@@ -34,7 +34,7 @@ class QBWC::Session
 
   def response=(qbxml_response)
     begin
-      @current_request.response = QBWC.parser.qbxml_to_hash(qbxml_response)
+      @current_request.response = QBWC.parser.from_qbxml(qbxml_response)
       parse_response_header(@current_request.response)
 
       if QBWC.delayed_processing
