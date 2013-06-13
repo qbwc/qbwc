@@ -6,8 +6,13 @@ class QBWC::Job
     @name = name
     @enabled = true
     @requests = block
+    @check_pending = lambda { true }
 
     reset
+  end
+
+  def check_pending(&block) 
+    @check_pending = block
   end
 
   def set_response_proc(&block) 
@@ -20,6 +25,10 @@ class QBWC::Job
 
   def disable
     @enabled = false
+  end
+
+  def pending?
+    enabled? && @check_pending.call
   end
 
   def enabled?

@@ -1,8 +1,13 @@
-$:.unshift File.dirname(File.expand_path(__FILE__))
-require 'qbwc/version'
-require 'qbxml'
+require 'qbwc/railtie'
+#require 'qbxml'
 
 module QBWC
+  autoload :ActiveRecord, 'qbwc/active_record'
+  autoload :Controller, 'qbwc/controller'
+  autoload :Version, 'qbwc/version'
+  autoload :Job, 'qbwc/job'
+  autoload :Session, 'qbwc/session'
+  autoload :Request, 'qbwc/request'
 
   # Web connector login credentials
   mattr_accessor :username
@@ -18,13 +23,17 @@ module QBWC
   mattr_accessor :min_version
   @@min_version = 3.0
   
-  # Quickbooks support url provided in qwc file
+  # Quickbooks support url provided in qwc file, defaults to root_url
   mattr_accessor :support_site_url
-  @@support_site_url = 'http://google.com'
+  @@support_site_url = nil
   
   # Quickbooks owner id provided in qwc file
   mattr_accessor :owner_id
   @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+  
+  # How often to run web service (in minutes)
+  mattr_accessor :minutes_to_run
+  @@minutes_to_run = 5
   
   # Job definitions
   mattr_reader :jobs
@@ -41,42 +50,40 @@ module QBWC
   # Quickbooks Type (either :qb or :qbpos)
   mattr_reader :api, :parser
   @@api = :qb
-  
-class << self
 
-  def add_job(name, &block)
-    @@jobs[name] = Job.new(name, &block)
-  end
+  # Storage module
+  mattr_reader :storage
+  @@storage = :active_record
   
-  def on_error=(reaction)
-    raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
-    @@on_error = "stopOnError" if reaction == :stop
-    @@on_error = "continueOnError" if reaction == :continue
-  end
-  
-  def api=(api)
-    raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
-    @@api = api
-    @@parser = Qbxml.new(api) 
-  end
+  class << self
 
-  # Allow configuration overrides
-  def configure
-    yield self
-  end
+    def storage_module
+      const_get storage.to_s.camelize
+    end
 
-end
+    def add_job(name, &block)
+      @@jobs[name] = storage_module::Job.new(name, &block)
+    end
+    
+    def on_error=(reaction)
+      raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
+      @@on_error = "stopOnError" if reaction == :stop
+      @@on_error = "continueOnError" if reaction == :continue
+    end
+    
+    def api=(api)
+      raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
+      @@api = api
+      @@parser = Qbxml.new(api) 
+    end
+
+    # Allow configuration overrides
+    def configure
+      yield self
+    end
+
+  end
   
 end
 
 require 'fiber'
-
-#Todo Move this to Autolaod
-require 'qbwc/soap_wrapper/default'
-require 'qbwc/soap_wrapper/defaultMappingRegistry'
-require 'qbwc/soap_wrapper/defaultServant'
-require 'qbwc/soap_wrapper/QBWebConnectorSvc'
-require 'qbwc/soap_wrapper'
-require 'qbwc/session'
-require 'qbwc/request'
-require 'qbwc/job'

@@ -170,6 +170,18 @@ Enabling a job
 
     QBWC.jobs['my job'].enable
 
+### Supporting multiple users/companies
+
+Override get_user and current_company methods in the generated controller. authenticate_user must authenticate with username and password and return user if it's authenticated, nil in other case. current_company receives authenticated user and must return nil if there are no pending jobs or company where jobs will run. Currently this methods are like this:
+
+    protected
+    def authenticate_user(username, password)
+      username if username == QBWC.username && password == QBWC.password
+    end
+    def current_company(user)
+      QBWC.company_file_path if QBWC.jobs.any?(&:pending?)
+    end
+
 
 ## Contributing to qbwc
  

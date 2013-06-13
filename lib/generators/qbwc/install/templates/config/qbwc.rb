@@ -14,10 +14,13 @@ QBWC.configure do |c|
   c.api = :qb
   
   #Quickbooks Support URL provided in QWC File
-  c.support_site_url = "localhost:3000"
+  c.support_site_url = nil
   
   #Quickbooks Owner ID provided in QWC File
   c.owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+
+  #How often to run web service (in minutes)
+  c.minutes_to_run = 5
 
   # Perform response processing after session termination. Enabling this option
   # will speed up qbwc session time (and potentially fix timeout issues) but

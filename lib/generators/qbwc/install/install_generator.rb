@@ -16,7 +16,9 @@ module QBWC
       end
 
       def setup_routes
-        route("match 'apis/quickbooks/:action', :controller => 'qbwc', :as => 'quickbooks'")
+        route("get 'quickbooks/qwc' => 'quickbooks#qwc'")
+        route("get 'quickbooks/action' => 'quickbooks#_generate_wsdl'")
+        route("wash_out :quickbooks")
       end
       
     end
