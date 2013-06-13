@@ -57,7 +57,7 @@ class QBWC::Session
   private
 
   def enabled_jobs
-    QBWC.jobs.values.select { |j| j.enabled? }
+    QBWC.jobs.select { |_, j| j.enabled? }
   end
 
   def build_request_generator(jobs)

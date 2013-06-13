@@ -60,9 +60,9 @@ module QBWC
     def storage_module
       const_get storage.to_s.camelize
     end
-
+    
     def add_job(name, &block)
-      @@jobs[name] = storage_module::Job.new(name, &block)
+      @@jobs[name.to_sym] = storage_module::Job.new(name, &block)
     end
     
     def on_error=(reaction)

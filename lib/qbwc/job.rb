@@ -2,9 +2,10 @@ class QBWC::Job
 
   attr_reader :name, :response_proc, :requests
 
-  def initialize(name, &block)
+  def initialize(name, company, &block)
     @name = name
     @enabled = true
+    @company = company
     @requests = block
     @check_pending = lambda { true }
 
@@ -20,15 +21,19 @@ class QBWC::Job
   end
 
   def enable
-    @enabled = true
+    self.enabled = true
   end
 
   def disable
-    @enabled = false
+    self.enabled = false
   end
 
   def pending?
     enabled? && @check_pending.call
+  end
+
+  def self.enabled=(value)
+    @enabled = value
   end
 
   def enabled?
