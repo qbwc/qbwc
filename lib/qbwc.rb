@@ -1,5 +1,5 @@
 require 'qbwc/railtie'
-#require 'qbxml'
+require 'qbxml'
 
 module QBWC
   autoload :ActiveRecord, 'qbwc/active_record'
