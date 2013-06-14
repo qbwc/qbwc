@@ -4,6 +4,8 @@ module QBWC
       base.class_eval do
         include WashOut::SOAP
         skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => :qwc
+        before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
+        after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection]
 
         soap_action 'authenticate',
                     :args   => {:strUserName => :string, :strPassword => :string},
@@ -67,30 +69,34 @@ QWC
       user = authenticate_user(params[:strUserName], params[:strPassword])
       if user
         company = current_company(user)
-        ticket = Time.now.to_i.to_s if company
+        ticket = Session.new(user, company).ticket if company
         company ||= 'none'
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company || 'nvu']}}
     end
 
     def send_request
-      render :soap => {'tns:sendRequestXMLResult' => ''}
+      request = @session.current_request
+      render :soap => {'tns:sendRequestXMLResult' => request.try(:request) || ''}
     end
 
     def receive_response
-      render :soap => {'tns:receiveResponseXMLResult' => 0}
+      @session.respose = params[:response]
+      render :soap => {'tns:receiveResponseXMLResult' => @session.error ? -1 : @session.progress}
     end
 
     def close_connection
+      @session.destroy
       render :soap => {'tns:closeConnectionResult' => 'OK'}
     end
 
     def connection_error
+      @session.destroy
       render :soap => {'tns:connectionErrorResult' => 'done'}
     end
 
     def get_last_error
-      render :soap => {'tns:getLastErrorResult' => 'Unknown error'}
+      render :soap => {'tns:getLastErrorResult' => @session.error || ''}
     end
 
     protected
@@ -98,7 +104,11 @@ QWC
       username if username == QBWC.username && password == QBWC.password
     end
     def current_company(user)
-      nil
+      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
+    end
+
+    def get_session
+      @session = QBWC.storage_module::Session.get(params[:ticket])
     end
   end
 end

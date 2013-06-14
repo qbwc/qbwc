@@ -1,9 +1,8 @@
 class QBWC::Request
 
   attr_reader   :request, :response_proc
-  attr_accessor :response, :error
 
-  def initialize(request, response_proc)
+  def initialize(request)
     #Handle Cases for a request passed in as a Hash or String
     #If it's a hash verify that it is properly wrapped with qbxml_msg_rq and xml_attributes for on_error events
     #Allow strings of QBXML to be passed in directly. 
@@ -20,11 +19,6 @@ class QBWC::Request
     when request.is_a?(String)
       @request = request
     end
-    @response_proc = response_proc
-  end
-
-  def process_response
-    @response_proc && @response && @response_proc.call(response) 
   end
 
   def to_qbxml
@@ -33,14 +27,6 @@ class QBWC::Request
 
   def to_hash
     QBWC.parser.from_qbxml(@request.to_s)
-  end
-
-  class << self
-
-    def from_array(requests, response_proc)
-      Array(requests).map { |r| new(r, response_proc) } 
-    end
-
   end
 
 end

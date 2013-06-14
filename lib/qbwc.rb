@@ -61,8 +61,12 @@ module QBWC
       const_get storage.to_s.camelize
     end
     
-    def add_job(name, &block)
-      @@jobs[name.to_sym] = storage_module::Job.new(name, &block)
+    def add_job(name, company = nil, &block)
+      @@jobs[name.to_sym] = storage_module::Job.new(name, company, &block)
+    end
+
+    def pending_jobs(company)
+      @@jobs.values.select {|job| job.company == company && job.pending?}
     end
     
     def on_error=(reaction)
