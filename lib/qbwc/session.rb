@@ -1,7 +1,6 @@
 class QBWC::Session
 
-  attr_reader :user, :company, :current_job
-  attr_accessor :progress, :error, :qbwc_iterating
+  attr_reader :user, :company, :ticket, :progress, :error
 
   @@session = nil
 
@@ -9,7 +8,7 @@ class QBWC::Session
 		@@session
 	end
 
-  def initialize(user = nil, company = nil)
+  def initialize(user = nil, company = nil, ticket = nil)
     @user = user
     @company = company
     @current_job = nil
@@ -17,7 +16,7 @@ class QBWC::Session
     @progress = 0
     @qbwc_iterating = false
 
-    @ticket = Digest::SHA1.hexdigest "#{Rails.application.config.secret_token}#{Time.now.to_i}"
+    @ticket = ticket || Digest::SHA1.hexdigest "#{Rails.application.config.secret_token}#{Time.now.to_i}"
 
     @@session = self
     self.reset
@@ -29,7 +28,7 @@ class QBWC::Session
   end
 
   def finished?
-    @progress == 100
+    progress == 100
   end
 
   def next
@@ -38,16 +37,17 @@ class QBWC::Session
       self.reset or break
     end
     self.progress = 100 if request.nil?
+    request
   end
 
   def current_request
     request = self.next
-    request = QBWC.storage_module::Request.new(request) if request
-    if request && @qbwc_iterating
+    request = Request.new(request) if request
+    if request && self.qbwc_iterating
       request = request.to_hash
       request.delete('xml_attributes')
       request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
-      request = QBWC.storage_module::Request.new(request)
+      request = Request.new(request)
     end 
     request
   end
@@ -56,8 +56,8 @@ class QBWC::Session
     begin
       response = QBWC.parser.from_qbxml(qbxml_response)
       parse_response_header(response)
-      self.current_job.process_response(response, !@qbwc_iterating)
-      self.next unless @qbwc_iterating # search next request
+      self.current_job.process_response(response, !qbwc_iterating) unless self.error
+      self.next unless self.error || self.qbwc_iterating # search next request
     rescue => e
       self.error = e.message
       puts "An error occured in QBWC::Session: #{e}"
@@ -66,17 +66,18 @@ class QBWC::Session
     end
   end
 
+  def save
+  end
+
   def destroy
     self.freeze
     @@session = nil
   end
 
-  protected
-  def self.current_job=(job)
-    @current_job = j
-  end
-
   private
+
+  attr_accessor :qbwc_iterating, :current_job
+  attr_writer :progress, :error
 
   def pending_jobs
     @pending_jobs ||= QBWC.pending_jobs(@company)

@@ -5,7 +5,7 @@ module QBWC
         include WashOut::SOAP
         skip_before_filter :_parse_soap_parameters, :_authenticate_wsse, :_map_soap_parameters, :only => :qwc
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
-        after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection]
+        after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
 
         soap_action 'authenticate',
                     :args   => {:strUserName => :string, :strPassword => :string},
@@ -69,7 +69,7 @@ QWC
       user = authenticate_user(params[:strUserName], params[:strPassword])
       if user
         company = current_company(user)
-        ticket = Session.new(user, company).ticket if company
+        ticket = QBWC.storage_module::Session.new(user, company).ticket if company
         company ||= 'none'
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company || 'nvu']}}
@@ -109,6 +109,10 @@ QWC
 
     def get_session
       @session = QBWC.storage_module::Session.get(params[:ticket])
+    end
+
+    def save_session
+      @session.save if @session
     end
   end
 end
