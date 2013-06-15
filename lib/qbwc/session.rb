@@ -19,22 +19,17 @@ class QBWC::Session
     @ticket = ticket || Digest::SHA1.hexdigest "#{Rails.application.config.secret_token}#{Time.now.to_i}"
 
     @@session = self
-    self.reset
-  end
-
-  def reset
-    self.current_job = pending_jobs.first
-    self.current_job.reset if self.current_job
+    reset
   end
 
   def finished?
-    progress == 100
+    self.progress == 100
   end
 
   def next
     until (request = current_job.next) do
       pending_jobs.unshift
-      self.reset or break
+      reset or break
     end
     self.progress = 100 if request.nil?
     request
@@ -74,10 +69,17 @@ class QBWC::Session
     @@session = nil
   end
 
-  private
+  protected
 
   attr_accessor :qbwc_iterating, :current_job
   attr_writer :progress, :error
+
+  private
+
+  def reset
+    self.current_job = pending_jobs.first
+    self.current_job.reset if self.current_job
+  end
 
   def pending_jobs
     @pending_jobs ||= QBWC.pending_jobs(@company)
@@ -93,7 +95,7 @@ class QBWC::Session
     if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
       self.error = "QBWC ERROR: #{status_code} - #{status_message}"
     else
-      self.qbwc_iterating = if iterator_remaining_count.to_i > 0
+      self.qbwc_iterating = iterator_remaining_count.to_i > 0
     end
   end
 end
