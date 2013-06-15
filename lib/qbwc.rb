@@ -41,11 +41,6 @@ module QBWC
   
   mattr_reader :on_error
   @@on_error = 'stopOnError'
-  # Do processing after session termination
-  # Enabling this option will speed up qbwc session time but will necessarily eat
-  # up more memory since every response must be stored until it is processed. 
-  mattr_accessor :delayed_processing
-  @@delayed_processing = false
 
   # Quickbooks Type (either :qb or :qbpos)
   mattr_reader :api, :parser

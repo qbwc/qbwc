@@ -12,6 +12,9 @@ QBWC.configure do |c|
   
   #Quickbooks Type (either :qb or :qbpos)
   c.api = :qb
+
+  # Storage module
+  c.storage = :active_record
   
   #Quickbooks Support URL provided in QWC File
   c.support_site_url = nil
@@ -21,12 +24,6 @@ QBWC.configure do |c|
 
   #How often to run web service (in minutes)
   c.minutes_to_run = 5
-
-  # Perform response processing after session termination. Enabling this option
-  # will speed up qbwc session time (and potentially fix timeout issues) but
-  # will necessarily eat up more memory since every response must be stored
-  # until it is processed. 
-  c.delayed_processing = false
 
   # In the event of an error in the communication process do you wish the sync to stop or blaze through
   #
