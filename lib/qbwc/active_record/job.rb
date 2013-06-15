@@ -5,7 +5,10 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def initialize(name, company, &block)
     super
-    find_job.first_or_create {|job| job.enabled = @enabled}
+    find_job.first_or_create do |job|
+      job.company = @company
+      job.enabled = @enabled
+    end
   end
 
   def find_job
