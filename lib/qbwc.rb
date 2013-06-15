@@ -47,7 +47,7 @@ module QBWC
   @@api = :qb
 
   # Storage module
-  mattr_reader :storage
+  mattr_accessor :storage
   @@storage = :active_record
   
   class << self
