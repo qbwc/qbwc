@@ -1,6 +1,7 @@
 class QBWC::Session
 
-  attr_reader :user, :company, :ticket, :progress, :error
+  attr_reader :user, :company, :ticket, :progress
+  attr_accessor :error
 
   @@session = nil
 
@@ -54,9 +55,8 @@ class QBWC::Session
       self.next unless self.error || self.qbwc_iterating # search next request
     rescue => e
       self.error = e.message
-      puts "An error occured in QBWC::Session: #{e}"
-      puts e
-      puts e.backtrace
+      Rails.logger.warn "An error occured in QBWC::Session: #{e.message}"
+      Rails.logger.warn e.backtrace.join("\n")
     end
   end
 
@@ -71,7 +71,7 @@ class QBWC::Session
   protected
 
   attr_accessor :qbwc_iterating, :current_job
-  attr_writer :progress, :error
+  attr_writer :progress
 
   private
 

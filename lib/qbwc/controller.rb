@@ -81,7 +81,12 @@ QWC
     end
 
     def receive_response
-      @session.response = params[:response]
+      if params[:hresult]
+        logger.warn "#{params[:hresult]}: #{params[:message]}"
+        @session.error = params[:message]
+      else
+        @session.response = params[:response]
+      end
       render :soap => {'tns:receiveResponseXMLResult' => @session.error ? -1 : @session.progress}
     end
 

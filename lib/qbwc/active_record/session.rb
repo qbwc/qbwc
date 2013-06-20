@@ -44,6 +44,6 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @session.send("#{method}=", value)
     end
   end
-  protected :error=, :progress=, :qbwc_iterating=, :qbwc_iterating
+  protected :progress=, :qbwc_iterating=, :qbwc_iterating
 
 end
