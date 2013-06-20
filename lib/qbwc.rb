@@ -56,8 +56,8 @@ module QBWC
       const_get storage.to_s.camelize
     end
     
-    def add_job(name, company = nil, &block)
-      @@jobs[name.to_sym] = storage_module::Job.new(name, company, &block)
+    def add_job(name, company = nil, *requests, &block)
+      @@jobs[name.to_sym] = storage_module::Job.new(name, company, *requests, &block)
     end
 
     def pending_jobs(company)

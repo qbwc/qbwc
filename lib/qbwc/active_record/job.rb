@@ -3,7 +3,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     validates :name, :uniqueness => true, :presence => true
   end
 
-  def initialize(name, company, &block)
+  def initialize(name, company, *requests, &block)
     super
     find_job.first_or_create do |job|
       job.company = @company
@@ -21,5 +21,13 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def enabled?
     find_job.where(:enabled => true).exists?
+  end
+
+  def next_request
+    find_job.pluck(:next_request).first
+  end
+
+  def next_request=(value)
+    find_job.update_all(:next_request => value)
   end
 end

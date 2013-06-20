@@ -23,7 +23,7 @@ class QBWC::Job
   end
 
   def process_response(response, advance)
-    @next_request += 1 if @requests.present? && advance
+    self.next_request += 1 if @requests.present? && advance
     @response_proc && @response_proc.call(response) 
   end
 
@@ -49,21 +49,16 @@ class QBWC::Job
 
   def next
     request = @request_gen.call
-    QBWC.storage_module::Request.new(request) if request
+    QBWC::Request.new(request) if request
   end
 
   def reset
     if @requests.present?
-      @request_gen = lambda { @requests[@next_request] }
+      self.next_request = 0
+      @request_gen = lambda { @requests[next_request] }
     else
       @request_gen = @block
     end
-  end
-
-  private
-
-  def request_queue
-    QBWC::Request.from_array(@requests.call, @response_proc )
   end
 
 end

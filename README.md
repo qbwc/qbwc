@@ -122,8 +122,8 @@ Add a Customer (Unwrapped)
 
 Get All Vendors (In Chunks of 5)
 
-        QBWC.add_job(:import_vendors) do
-          [
+        QBWC.add_job(:import_vendors, nil
+          {
             :vendor_query_rq  =>
             {
               :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
@@ -133,12 +133,12 @@ Get All Vendors (In Chunks of 5)
               :from_modified_date=> "1984-01-29T22:03:19"
 
             }
-          ]
-        end
+          }
+        )
         
 Get All Vendors (Raw QBXML)
 
-        QBWC.add_job(:import_vendors) do
+        QBWC.add_job(:import_vendors, nil
           '<QBXML>
             <QBXMLMsgsRq onError="continueOnError">
             <VendorQueryRq requestID="6" iterator="Start">
@@ -149,7 +149,7 @@ Get All Vendors (Raw QBXML)
           </QBXMLMsgsRq>
           </QBXML>
           '
-        end
+        )
 
 ### Managing Jobs
 

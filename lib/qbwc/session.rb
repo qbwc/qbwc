@@ -16,10 +16,10 @@ class QBWC::Session
     @progress = 0
     @qbwc_iterating = false
 
-    @ticket = ticket || Digest::SHA1.hexdigest "#{Rails.application.config.secret_token}#{Time.now.to_i}"
+    @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
 
     @@session = self
-    reset
+    reset(ticket.nil?)
   end
 
   def finished?
@@ -29,7 +29,7 @@ class QBWC::Session
   def next
     until (request = current_job.next) do
       pending_jobs.unshift
-      reset or break
+      reset(true) or break
     end
     self.progress = 100 if request.nil?
     request
@@ -76,9 +76,9 @@ class QBWC::Session
 
   private
 
-  def reset
+  def reset(reset_job = false)
     self.current_job = pending_jobs.first
-    self.current_job.reset if self.current_job
+    self.current_job.reset if reset_job && self.current_job
   end
 
   def pending_jobs
