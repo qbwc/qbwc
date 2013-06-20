@@ -92,6 +92,7 @@ QWC
 
     def connection_error
       @session.destroy
+      logger.warn "#{params[:hresult]}: #{params[:messge]}"
       render :soap => {'tns:connectionErrorResult' => 'done'}
     end
 
