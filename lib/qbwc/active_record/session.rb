@@ -18,13 +18,15 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @pending_jobs = @session.pending_jobs.split(',').map { |job| QBWC.jobs[job.to_sym] }
     else
       super
-      @session = QbwcSession.create(:user => self.user, :company => self.company, :ticket => self.ticket)
+      @session = QbwcSession.new(:user => self.user, :company => self.company, :ticket => self.ticket)
+      self.save
+      @session
     end
   end
 
   def save
     @session.pending_jobs = pending_jobs.map(&:name).join(',')
-    @session.current_job current_job.try(:name)
+    @session.current_job = current_job.try(:name)
     @session.save
     super
   end
