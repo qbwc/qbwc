@@ -37,7 +37,6 @@ class QBWC::Session
 
   def current_request
     request = self.next
-    request = QBWC::Request.new(request) if request
     if request && self.qbwc_iterating
       request = request.to_hash
       request.delete('xml_attributes')
