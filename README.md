@@ -139,7 +139,9 @@ Get All Vendors (In Chunks of 5)
 Get All Vendors (Raw QBXML)
 
         QBWC.add_job(:import_vendors, nil
-          '<QBXML>
+          '<?xml version="1.0"?>
+          <?qbxml version="7.0"?>
+          <QBXML>
             <QBXMLMsgsRq onError="continueOnError">
             <VendorQueryRq requestID="6" iterator="Start">
             <MaxReturned>5</MaxReturned>

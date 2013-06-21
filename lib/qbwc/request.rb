@@ -15,7 +15,7 @@ class QBWC::Request
         request = wrapped_request
       end
 
-      @request = QBWC.parser.to_qbxml(request)
+      @request = "<?xml version=\"1.0\"?>#{QBWC.parser.to_qbxml(request)}"
     when request.is_a?(String)
       @request = request
     end
