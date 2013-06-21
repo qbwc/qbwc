@@ -18,7 +18,7 @@ module QBWC
                     :response_tag => 'tns:sendRequestXMLResponse'
 
         soap_action 'receiveResponseXML', :to => :receive_response,
-                    :args   => {:ticket => :string, :respone => :string, :hresult => :string, :message => :string},
+                    :args   => {:ticket => :string, :response => :string, :hresult => :string, :message => :string},
                     :return => {'tns:receiveResponseXMLResult' => :integer},
                     :response_tag => 'tns:receiveResponseXMLResponse'
 
