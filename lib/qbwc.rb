@@ -61,6 +61,7 @@ module QBWC
     end
 
     def pending_jobs(company)
+      @@jobs.each { |_,job| job.reset }
       @@jobs.values.select {|job| job.company == company && job.pending?}
     end
     

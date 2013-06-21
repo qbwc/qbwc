@@ -8,6 +8,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     @job = find_job.first_or_create do |job|
       job.company = @company
       job.enabled = @enabled
+      job.next_request = @next_request
     end
   end
 

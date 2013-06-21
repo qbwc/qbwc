@@ -10,7 +10,12 @@ class QBWC::Job
     @code_block = block
     @check_pending = lambda { self.next }
 
-    self.reset
+    if @requests.present?
+      @next_request = 0
+      @request_gen = lambda { @requests[next_request] }
+    else
+      @request_gen = @block
+    end
   end
 
   def set_checking_proc(&block) 
@@ -56,12 +61,7 @@ class QBWC::Job
   end
 
   def reset
-    if @requests.present?
-      @next_request = 0
-      @request_gen = lambda { @requests[next_request] }
-    else
-      @request_gen = @block
-    end
+    @next_request = 0
   end
 
 end
