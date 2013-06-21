@@ -1,7 +1,6 @@
 class QBWC::Job
 
-  attr_reader :name, :company, :response_proc
-  attr_accessor :next_request
+  attr_reader :name, :company, :response_proc, :next_request
 
   def initialize(name, company, *requests, &block)
     @name = name
@@ -23,8 +22,12 @@ class QBWC::Job
   end
 
   def process_response(response, advance)
-    self.next_request += 1 if @requests.present? && advance
+    advance_next_request if @requests.present? && advance
     @response_proc && @response_proc.call(response) 
+  end
+
+  def advance_next_request
+    @next_request += 1
   end
 
   def enable
@@ -54,7 +57,7 @@ class QBWC::Job
 
   def reset
     if @requests.present?
-      self.next_request = 0
+      @next_request = 0
       @request_gen = lambda { @requests[next_request] }
     else
       @request_gen = @block
