@@ -85,5 +85,3 @@ module QBWC
   end
   
 end
-
-require 'fiber'

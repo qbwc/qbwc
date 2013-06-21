@@ -11,11 +11,11 @@ class QBWC::ActiveRecord::Session < QBWC::Session
   def initialize(session_or_user = nil, company = nil, ticket = nil)
     if session_or_user.is_a? QbwcSession
       @session = session_or_user
-      super(@session.user, @session.company, @session.ticket)
       # Restore current job from saved one on QbwcSession
       @current_job = QBWC.jobs[@session.current_job.to_sym] if @session.current_job
       # Restore pending jobs from saved list on QbwcSession
       @pending_jobs = @session.pending_jobs.split(',').map { |job| QBWC.jobs[job.to_sym] }
+      super(@session.user, @session.company, @session.ticket)
     else
       super
       @session = QbwcSession.new(:user => self.user, :company => self.company, :ticket => self.ticket)
