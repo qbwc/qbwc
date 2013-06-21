@@ -29,7 +29,7 @@ class QBWC::Session
 
   def next
     until (request = current_job.next) do
-      pending_jobs.unshift
+      pending_jobs.shift
       reset(true) or break
     end
     self.progress = 100 if request.nil?
