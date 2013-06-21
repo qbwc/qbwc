@@ -36,7 +36,7 @@ class QBWC::ActiveRecord::Session < QBWC::Session
     super
   end
 
-  [:error, :progress, :qbwc_iterating].each do |method|
+  [:error, :progress, :iterator_id].each do |method|
     define_method method do
       @session.send(method)
     end
@@ -44,6 +44,6 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @session.send("#{method}=", value)
     end
   end
-  protected :progress=, :qbwc_iterating=, :qbwc_iterating
+  protected :progress=, :iterator_id=, :iterator_id
 
 end

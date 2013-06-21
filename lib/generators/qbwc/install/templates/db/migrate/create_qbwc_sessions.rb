@@ -6,7 +6,7 @@ class CreateQbwcSessions < ActiveRecord::Migration
       t.string :company, :limit => 1000
       t.integer :progress, :null => false, :default => 0
       t.string :current_job
-      t.boolean :qbwc_iterating, :null => false, :default => false
+      t.string :iterator_id
       t.string :error, :limit => 1000
       t.string :pending_jobs, :limit => 1000, :null => false, :default => ''
 

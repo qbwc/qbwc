@@ -15,7 +15,7 @@ class QBWC::Session
     @current_job = nil
     @error = nil
     @progress = 0
-    @qbwc_iterating = false
+    @iterator_id = nil
 
     @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
 
@@ -38,10 +38,10 @@ class QBWC::Session
 
   def current_request
     request = self.next
-    if request && self.qbwc_iterating
+    if request && self.iterator_id.present?
       request = request.to_hash
       request.delete('xml_attributes')
-      request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => iterator_id}
+      request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => self.iterator_id}
       request = QBWC::Request.new(request)
     end 
     request
@@ -49,10 +49,11 @@ class QBWC::Session
 
   def response=(qbxml_response)
     begin
-      response = QBWC.parser.from_qbxml(qbxml_response)
+      response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
+      response = response[response.keys.first]
       parse_response_header(response)
-      self.current_job.process_response(response, !qbwc_iterating) unless self.error
-      self.next unless self.error || self.qbwc_iterating # search next request
+      self.current_job.process_response(response, iterator_id.blank?) unless self.error
+      self.next unless self.error || self.iterator_id.present? # search next request
     rescue => e
       self.error = e.message
       Rails.logger.warn "An error occured in QBWC::Session: #{e.message}"
@@ -70,7 +71,7 @@ class QBWC::Session
 
   protected
 
-  attr_accessor :qbwc_iterating, :current_job
+  attr_accessor :current_job, :iterator_id
   attr_writer :progress
 
   private
@@ -85,16 +86,16 @@ class QBWC::Session
   end
 
   def parse_response_header(response)
+    self.iterator_id = nil
     return unless response['xml_attributes']
 
     status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID') 
-                                               
     if status_severity == 'Error' || status_code.to_i > 1 || response.keys.size <= 1
       self.error = "QBWC ERROR: #{status_code} - #{status_message}"
     else
-      self.qbwc_iterating = iterator_remaining_count.to_i > 0
+      self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0
     end
   end
 end

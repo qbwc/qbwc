@@ -26,7 +26,8 @@ class QBWC::Request
   end
 
   def to_hash
-    QBWC.parser.from_qbxml(@request.to_s)
+    hash = QBWC.parser.from_qbxml(@request.to_s)["qbxml"]["qbxml_msgs_rq"]
+    hash.except('xml_attributes')
   end
 
 end
