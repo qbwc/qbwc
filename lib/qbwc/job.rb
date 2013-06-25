@@ -26,9 +26,15 @@ class QBWC::Job
     @response_proc = block
   end
 
-  def process_response(response, advance)
+  def process_response(response, session, advance)
     advance_next_request if @requests.present? && advance
-    @response_proc && @response_proc.call(response) 
+    if @response_proc
+      if @response_proc.arity == 1
+        @response_proc.call(response)
+      else
+        @response_proc.call(response, session)
+      end
+    end
   end
 
   def advance_next_request
