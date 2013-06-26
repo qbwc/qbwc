@@ -30,13 +30,7 @@ class QBWC::Job
 
   def process_response(response, session, advance)
     advance_next_request if @requests.present? && advance
-    if @response_proc
-      if @response_proc.arity == 1
-        @response_proc.call(response)
-      else
-        @response_proc.call(response, session)
-      end
-    end
+    @response_proc.call(response, session) if @response_proc
   end
 
   def advance_next_request
