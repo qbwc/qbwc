@@ -9,9 +9,9 @@ class QBWC::Job
     @requests = requests
     @code_block = block
     @check_pending = lambda { self.next }
+    @next_request = 0
 
     if @requests.present?
-      @next_request = 0
       @request_gen = lambda { @requests[next_request] }
     else
       @request_gen = @block
