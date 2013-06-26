@@ -52,7 +52,7 @@ class QBWC::Job
   end
 
   def pending?
-    enabled? && @check_pending.call
+    enabled? && instance_eval(&@check_pending)
   end
 
   def self.enabled=(value)
