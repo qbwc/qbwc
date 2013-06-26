@@ -58,7 +58,7 @@ class QBWC::Job
   end
 
   def next
-    request = @request_gen.call
+    request = instance_eval(&@request_gen)
     QBWC::Request.new(request) if request
   end
 
