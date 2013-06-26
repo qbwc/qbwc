@@ -20,10 +20,12 @@ class QBWC::Job
 
   def set_checking_proc(&block) 
     @check_pending = block
+    self
   end
 
   def set_response_proc(&block) 
     @response_proc = block
+    self
   end
 
   def process_response(response, session, advance)

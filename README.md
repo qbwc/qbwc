@@ -75,7 +75,7 @@ Create a new job
 
 Add a checking proc
 
-    QBWC.jobs['my job'].set_checking_proc do |r|
+    QBWC.jobs['my job'].set_checking_proc do
       # pending requests checking here
     end
 
