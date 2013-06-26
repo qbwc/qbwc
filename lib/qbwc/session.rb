@@ -87,7 +87,7 @@ class QBWC::Session
 
   def parse_response_header(response)
     self.iterator_id = nil
-    return unless response['xml_attributes']
+    return unless response.is_a?(Hash) && response['xml_attributes']
 
     status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
