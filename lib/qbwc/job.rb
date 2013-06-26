@@ -7,11 +7,11 @@ class QBWC::Job
     @enabled = true
     @company = company || QBWC.company_file_path
     @requests = requests
-    @check_pending = lambda { self.next }
+    @check_pending = proc { self.next }
     @next_request = 0
 
     if @requests.present?
-      @request_gen = lambda { @requests[next_request] }
+      @request_gen = proc { @requests[next_request] }
     else
       @request_gen = block
     end
