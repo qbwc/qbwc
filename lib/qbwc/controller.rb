@@ -7,6 +7,15 @@ module QBWC
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
         after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
 
+        soap_action 'serverVersion', :to => :server_version,
+                    :return => {'tns:serverVersionResult' => :string},
+                    :response_tag => 'tns:serverVersionResponse'
+
+        soap_action 'clientVersion', :to => :client_version,
+                    :args   => {:strVersion => :string},
+                    :return => {'tns:clientVersionResult' => :string},
+                    :response_tag => 'tns:clientVersionResponse'
+
         soap_action 'authenticate',
                     :args   => {:strUserName => :string, :strPassword => :string},
                     :return => {'tns:authenticateResult' => StringArray},
@@ -65,6 +74,14 @@ QWC
       map "tns:string" => [:string]
     end
 
+    def server_version
+      render :soap => {"tns:serverVersionResult" => server_version_response}
+    end
+
+    def client_version
+      render :soap => {"tns:clientVersionResult" => check_client_version}
+    end
+
     def authenticate
       user = authenticate_user(params[:strUserName], params[:strPassword])
       if user
@@ -119,6 +136,12 @@ QWC
 
     def save_session
       @session.save if @session
+    end
+
+    def server_version_response
+    end
+
+    def check_client_version
     end
   end
 end
