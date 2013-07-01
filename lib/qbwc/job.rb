@@ -28,7 +28,7 @@ class QBWC::Job
   end
 
   def process_response(response, session, advance)
-    advance_next_request if @requests.present? && advance
+    advance_next_request if advance
     @response_proc.call(response, session) if @response_proc
   end
 
