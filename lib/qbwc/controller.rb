@@ -51,13 +51,13 @@ module QBWC
     def qwc
       qwc = <<QWC
 <QBWCXML>
-   <AppName>#{Rails.application.class.parent_name} #{Rails.env}</AppName>
+   <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
    <AppID></AppID>
    <AppURL>#{url_for(:controller => self.controller_path, :action => 'action', :protocol => 'https://')}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>qbint</UserName>
-   <UserName>#{QBWC.username}</UserName>
+   <UserName>#{@username || QBWC.username}</UserName>
    <OwnerID>#{QBWC.owner_id}</OwnerID>
    <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
    <QBType>QBFS</QBType>
