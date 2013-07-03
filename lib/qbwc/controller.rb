@@ -66,7 +66,7 @@ module QBWC
    </Scheduler>
 </QBWCXML>
 QWC
-      send_data qwc, :filename => 'servpac.qwc', :content_type => 'application/x-qwc'
+      send_data qwc, :filename => "#{@filename || Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
     end
 
     class StringArray < WashOut::Type
