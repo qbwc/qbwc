@@ -87,13 +87,14 @@ class QBWC::Session
 
   def parse_response_header(response)
     self.iterator_id = nil
+    response = response.first if response.is_a? Array
     return unless response.is_a?(Hash) && response['xml_attributes']
 
     @status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID') 
     if status_severity == 'Error' || @status_code.to_i > 1
-      self.error = "QBWC ERROR: #{status_code} - #{status_message}"
+      self.error = "QBWC ERROR: #{@status_code} - #{status_message}"
     else
       self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0
     end
