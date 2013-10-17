@@ -1,6 +1,6 @@
 class QBWC::ActiveRecord::Session < QBWC::Session
   class QbwcSession < ActiveRecord::Base
-    attr_accessible :company, :ticket, :user
+    attr_accessible :company, :ticket, :user unless Rails::VERSION::MAJOR >= 4
   end
 
 	def self.get(ticket)
