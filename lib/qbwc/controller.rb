@@ -53,7 +53,7 @@ module QBWC
 <QBWCXML>
    <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
    <AppID></AppID>
-   <AppURL>#{url_for(:controller => self.controller_path, :action => 'action', :protocol => 'https://')}</AppURL>
+   <AppURL>#{url_for(:controller => self.controller_path, :action => '_generate_wsdl', :protocol => 'https://')}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>#{@username || QBWC.username}</UserName>
