@@ -1,6 +1,10 @@
+# ATTENTION
+
+I recommend using the [qbxml](https://github.com/skryl/qbwc/tree/qbxml) branch. It has Rails 4 updates and uses a much faster QBXML parser.
+
 # Quickbooks Web Connector (QBWC)
 
-Be Warned, this code is still hot out of the oven. 
+Be Warned, this code is still hot out of the oven.
 
 ## Installation
 
@@ -18,7 +22,7 @@ Run the generator:
 
 ## Features
 
-QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
+QBWC was designed to add quickbooks web connector integration to your Rails 3 application.
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
 * Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
@@ -50,11 +54,11 @@ block can contain:
   * Code that genrates a qbxml request
   * Code that generates an array of qbxml requests
 
-*Note: All requests may be in ruby hash form, generated using quickbooks_api. 
+*Note: All requests may be in ruby hash form, generated using quickbooks_api.
 Raw requests are supported supported as of 0.0.3 (8/28/2012)*
 
 The code block is re-evaluated every time a session instance with that job is
-created. Only enabled jobs are added to a new session instance. 
+created. Only enabled jobs are added to a new session instance.
 
 An optional response processor block can also be added to a job. Responses to
 all requests are either processed immediately after being received or saved for
@@ -95,31 +99,31 @@ Caveats
 
 Add a Customer (Wrapped)
 
-          {  :qbxml_msgs_rq => 
+          {  :qbxml_msgs_rq =>
             [
               {
-                :xml_attributes =>  { "onError" => "stopOnError"}, 
-                :customer_add_rq => 
+                :xml_attributes =>  { "onError" => "stopOnError"},
+                :customer_add_rq =>
                 [
                   {
                     :xml_attributes => {"requestID" => "1"},  ##Optional
                     :customer_add   => { :name => "GermanGR" }
-                  } 
-                ] 
+                  }
+                ]
               }
             ]
           }
-          
+
 Add a Customer (Unwrapped)
 
         {
-          :customer_add_rq    => 
+          :customer_add_rq    =>
           [
             {
               :xml_attributes => {"requestID" => "1"},  ##Optional
               :customer_add   => { :name => "GermanGR" }
-            } 
-          ] 
+            }
+          ]
         }
 
 Get All Vendors (In Chunks of 5)
@@ -129,7 +133,7 @@ Get All Vendors (In Chunks of 5)
             :vendor_query_rq  =>
             {
               :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-      
+
               :max_returned => 5,
               :owner_id => 0,
               :from_modified_date=> "1984-01-29T22:03:19"
@@ -137,7 +141,7 @@ Get All Vendors (In Chunks of 5)
             }
           ]
         end
-        
+
 Get All Vendors (Raw QBXML)
 
         QBWC.add_job(:import_vendors) do
@@ -156,9 +160,9 @@ Get All Vendors (Raw QBXML)
 ### Managing Jobs
 
 Jobs can be added, removed, enabled, and disabled. See the above section for
-details on adding new jobs. 
+details on adding new jobs.
 
-Removing jobs is as easy as deleting them from the jobs hash.                   
+Removing jobs is as easy as deleting them from the jobs hash.
 
     QBWC.jobs.delete('my job')
 
@@ -172,7 +176,7 @@ Enabling a job
 
 
 ## Contributing to qbwc
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
