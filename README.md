@@ -26,6 +26,7 @@ QBWC was designed to add quickbooks web connector integration to your Rails 3 ap
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
 * Integration with the [quickbooks_api](https://github.com/skryl/quickbooks_api) gem providing qbxml processing
+* Priority system
 
 ## Getting Started
 
@@ -79,9 +80,15 @@ Here is the rough order in which things happen:
 
 ### Adding Jobs
 
-Create a new job
+Create a new job, if you do not specify a priority it will default to 0. 
 
     QBWC.add_job('my job') do
+      # work to do
+    end
+
+Create a job with a priority
+
+    QBWC.add_job('my job', 5) do
       # work to do
     end
 
