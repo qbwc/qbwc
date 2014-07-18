@@ -21,11 +21,15 @@ module QBWC
       end
 
       def active_record
-        migration_template 'db/migrate/create_qbwc_jobs.rb'
-        migration_template 'db/migrate/create_qbwc_sessions.rb'
+        migration_template 'db/migrate/create_qbwc_jobs.rb',     'db/migrate/create_qbwc_jobs.rb'
+        migration_template 'db/migrate/create_qbwc_sessions.rb', 'db/migrate/create_qbwc_sessions.rb'
       end
 
-      def setup_routes
+      def self.next_migration_number(dirname)
+        ::ActiveRecord::Generators::Base.next_migration_number(dirname)
+      end
+
+     def setup_routes
         route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
         route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
         route("wash_out :#{controller_name}")
