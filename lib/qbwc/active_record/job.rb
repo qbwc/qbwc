@@ -35,5 +35,6 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def advance_next_request
     QbwcJob.increment_counter :next_request, @job.id
+    super
   end
 end
