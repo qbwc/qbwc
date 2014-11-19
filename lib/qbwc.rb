@@ -82,6 +82,10 @@ module QBWC
       yield self
     end
 
+    def clear_jobs
+      @@jobs = {}
+    end
+
   end
   
 end
