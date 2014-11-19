@@ -6,19 +6,19 @@ Be Warned, this code is still hot out of the oven.
 
 Install the gem
 
-  `gem install qbwc`
+`gem install qbwc`
 
 Add it to your Gemfile
 
-  `gem "qbwc"`
+`gem "qbwc"`
 
 Run the generator:
 
-  `rails generate qbwc:install`
+`rails generate qbwc:install`
 
 ## Features
 
-QBWC was designed to add quickbooks web connector integration to your Rails 3 application. 
+QBWC was designed to add quickbooks web connector integration to your Rails 4 application. 
 
 * Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
 * Integration with the [qbxml](https://github.com/skryl/qbxml) gem providing qbxml processing
@@ -56,102 +56,102 @@ all requests are processed immediately after being received.
 
 Here is the rough order in which things happen:
 
-  1. The Web Connector initiates a connection
-  2. A new Session is created (with work from all enabled jobs with pending requests)
-  3. The web connector requests work
-  4. The session responds with the next request in the work queue
-  5. The web connector provides a response
-  6. The session responds with the current progress of the work queue (0 - 100)
-  6. The response is processed
-  7. If progress == 100 then the web connector closes the connection, otherwise goto 3
+1. The Web Connector initiates a connection
+2. A new Session is created (with work from all enabled jobs with pending requests)
+3. The web connector requests work
+4. The session responds with the next request in the work queue
+5. The web connector provides a response
+6. The session responds with the current progress of the work queue (0 - 100)
+6. The response is processed
+7. If progress == 100 then the web connector closes the connection, otherwise goto 3
 
 ### Adding Jobs
 
 Create a new job
 
-    QBWC.add_job('my job') do
-      # work to do
-    end
+QBWC.add_job('my job') do
+# work to do
+end
 
 Add a checking proc
 
-    QBWC.jobs['my job'].set_checking_proc do
-      # pending requests checking here
-    end
+QBWC.jobs['my job'].set_checking_proc do
+# pending requests checking here
+end
 
 Add a response proc
 
-    QBWC.jobs['my job'].set_response_proc do |r|
-      # response processing work here
-    end
+QBWC.jobs['my job'].set_response_proc do |r|
+# response processing work here
+end
 
 Caveats
-  * Jobs are enabled by default
-  * Using a non unique job name will overwrite the existing job
+* Jobs are enabled by default
+* Using a non unique job name will overwrite the existing job
 
 ###Sample Jobs
 
 Add a Customer (Wrapped)
 
-          {  :qbxml_msgs_rq => 
-            [
-              {
-                :xml_attributes =>  { "onError" => "stopOnError"}, 
-                :customer_add_rq => 
-                [
-                  {
-                    :xml_attributes => {"requestID" => "1"},  ##Optional
-                    :customer_add   => { :name => "GermanGR" }
-                  } 
-                ] 
-              }
-            ]
-          }
-          
+{  :qbxml_msgs_rq => 
+[
+{
+:xml_attributes =>  { "onError" => "stopOnError"}, 
+:customer_add_rq => 
+[
+{
+:xml_attributes => {"requestID" => "1"},  ##Optional
+:customer_add   => { :name => "GermanGR" }
+} 
+] 
+}
+]
+}
+
 Add a Customer (Unwrapped)
 
-        {
-          :customer_add_rq    => 
-          [
-            {
-              :xml_attributes => {"requestID" => "1"},  ##Optional
-              :customer_add   => { :name => "GermanGR" }
-            } 
-          ] 
-        }
+{
+:customer_add_rq    => 
+[
+{
+:xml_attributes => {"requestID" => "1"},  ##Optional
+:customer_add   => { :name => "GermanGR" }
+} 
+] 
+}
 
 Get All Vendors (In Chunks of 5)
 
-        QBWC.add_job(:import_vendors, nil
-          {
-            :vendor_query_rq  =>
-            {
-              :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-      
-              :max_returned => 5,
-              :owner_id => 0,
-              :from_modified_date=> "1984-01-29T22:03:19"
+QBWC.add_job(:import_vendors, nil
+{
+:vendor_query_rq  =>
+{
+:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
 
-            }
-          }
-        )
-        
+:max_returned => 5,
+:owner_id => 0,
+:from_modified_date=> "1984-01-29T22:03:19"
+
+}
+}
+)
+
 Get All Vendors (Raw QBXML)
 
-        QBWC.add_job(:import_vendors, nil
-          '<?xml version="1.0"?>
-          <?qbxml version="7.0"?>
-          <QBXML>
-            <QBXMLMsgsRq onError="continueOnError">
-            <VendorQueryRq requestID="6" iterator="Start">
-            <MaxReturned>5</MaxReturned>
-            <FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
-            <OwnerID>0</OwnerID>
-          </VendorQueryRq>
-          </QBXMLMsgsRq>
-          </QBXML>
-          '
-        )
+QBWC.add_job(:import_vendors, nil
+'<?xml version="1.0"?>
+<?qbxml version="7.0"?>
+<QBXML>
+<QBXMLMsgsRq onError="continueOnError">
+<VendorQueryRq requestID="6" iterator="Start">
+<MaxReturned>5</MaxReturned>
+<FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
+<OwnerID>0</OwnerID>
+</VendorQueryRq>
+</QBXMLMsgsRq>
+</QBXML>
+'
+)
 
 ### Managing Jobs
 
@@ -160,28 +160,28 @@ details on adding new jobs.
 
 Removing jobs is as easy as deleting them from the jobs hash.                   
 
-    QBWC.jobs.delete('my job')
+QBWC.jobs.delete('my job')
 
 Disabling a job
 
-    QBWC.jobs['my job'].disable
+QBWC.jobs['my job'].disable
 
 Enabling a job
 
-    QBWC.jobs['my job'].enable
+QBWC.jobs['my job'].enable
 
 ### Supporting multiple users/companies
 
 Override get_user and current_company methods in the generated controller. authenticate_user must authenticate with username and password and return user if it's authenticated, nil in other case. current_company receives authenticated user and must return nil if there are no pending jobs or company where jobs will run. Currently this methods are like this:
 
-    protected
-    def authenticate_user(username, password)
-      username if username == QBWC.username && password == QBWC.password
-    end
-    def current_company(user)
-      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).presen
+protected
+def authenticate_user(username, password)
+username if username == QBWC.username && password == QBWC.password
+end
+def current_company(user)
+QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).presen
 t?
-    end
+end
 
 
 ### Check versions ###
@@ -189,7 +189,7 @@ t?
 If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.
 
 ## Contributing to qbwc
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
