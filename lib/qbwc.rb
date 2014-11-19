@@ -62,7 +62,7 @@ module QBWC
 
     def pending_jobs(company)
       @@jobs.each { |_,job| job.reset }
-      @@jobs.values.select {|job| job.company == company && job.pending?}
+      storage_module::Job.sort_in_time_order(@@jobs.values.select {|job| job.company == company && job.pending?})
     end
     
     def on_error=(reaction)

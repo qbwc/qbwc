@@ -37,4 +37,9 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     QbwcJob.increment_counter :next_request, @job.id
     super
   end
+
+  attr_reader :job
+  def self.sort_in_time_order(ary)
+    ary.sort {|a,b| a.job.created_at <=> b.job.created_at}
+  end
 end
