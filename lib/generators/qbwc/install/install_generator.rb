@@ -26,9 +26,9 @@ module QBWC
       end
 
       def setup_routes
-        route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
-        route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
         route("wash_out :#{controller_name}")
+        route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
+        route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
       end
       
     end
