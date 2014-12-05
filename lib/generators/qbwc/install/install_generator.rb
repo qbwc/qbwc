@@ -5,7 +5,7 @@ module QBWC
   module Generators
     class InstallGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
-      extend ::ActiveRecord::Generators::Migration
+      extend Rails::Generators::Migration
 
       namespace "qbwc:install"
       desc "Copy Quickbooks Web Connector default files"
