@@ -26,6 +26,16 @@ Then the migrations:
 
 Open config/initializers/qbwc.rb and check the settings there. The defaults are reasonable, but make a new GUID for owner_id.
 
+(Re-)start your app.
+
+Quickbooks *requires* HTTPS connections when connecting to remote machines. [ngrok](https://ngrok.com/) may be useful to fulfill this requirement.
+
+## QuickBooks Configuration
+
+Install [QuickBooks Web Connector](http://marketplace.intuit.com/webconnector/) on the machine that has QuickBooks installed.
+
+On the QuickBooks machine, visit the path /qbwc/qwc on your domain over an HTTPS connection. Download the file it provides. In QuickBooks Web Connector, click "Add an application", and pick the file. Give Quickbooks the password you specified in config/initializers/qbwc.rb.
+
 ## Features
 
 QBWC was designed to add quickbooks web connector integration to your Rails 4 application. 
