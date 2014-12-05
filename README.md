@@ -4,17 +4,27 @@ Be Warned, this code is still hot out of the oven.
 
 ## Installation
 
-Install the gem
-
 `gem install qbwc`
 
-Add it to your Gemfile
+Or add it to your Gemfile
 
 `gem "qbwc"`
+
+and run
+
+`bundle install`
+
+## Configuration
 
 Run the generator:
 
 `rails generate qbwc:install`
+
+Then the migrations:
+
+`rake db:migrate`
+
+Open config/initializers/qbwc.rb and check the settings there. The defaults are reasonable, but make a new GUID for owner_id.
 
 ## Features
 
@@ -24,10 +34,6 @@ QBWC was designed to add quickbooks web connector integration to your Rails 4 ap
 * Integration with the [qbxml](https://github.com/skryl/qbxml) gem providing qbxml processing
 
 ## Getting Started
-
-### Configuration
-
-All configuration takes place in the gem initializer. See the initializer for more details regarding the configuration options.
 
 ### Basics
 
@@ -69,21 +75,27 @@ Here is the rough order in which things happen:
 
 Create a new job
 
+```
 QBWC.add_job('my job') do
 # work to do
 end
+```
 
 Add a checking proc
 
+```
 QBWC.jobs['my job'].set_checking_proc do
 # pending requests checking here
 end
+```
 
 Add a response proc
 
+```
 QBWC.jobs['my job'].set_response_proc do |r|
 # response processing work here
 end
+```
 
 Caveats
 * Jobs are enabled by default
@@ -91,6 +103,7 @@ Caveats
 
 ###Sample Jobs
 
+```
 Add a Customer (Wrapped)
 
 {  :qbxml_msgs_rq => 
@@ -107,9 +120,11 @@ Add a Customer (Wrapped)
 }
 ]
 }
+```
 
 Add a Customer (Unwrapped)
 
+```
 {
 :customer_add_rq    => 
 [
@@ -119,9 +134,11 @@ Add a Customer (Unwrapped)
 } 
 ] 
 }
+```
 
 Get All Vendors (In Chunks of 5)
 
+```
 QBWC.add_job(:import_vendors, nil
 {
 :vendor_query_rq  =>
@@ -135,9 +152,11 @@ QBWC.add_job(:import_vendors, nil
 }
 }
 )
+```
 
 Get All Vendors (Raw QBXML)
 
+```
 QBWC.add_job(:import_vendors, nil
 '<?xml version="1.0"?>
 <?qbxml version="7.0"?>
@@ -152,6 +171,7 @@ QBWC.add_job(:import_vendors, nil
 </QBXML>
 '
 )
+```
 
 ### Managing Jobs
 
@@ -160,20 +180,21 @@ details on adding new jobs.
 
 Removing jobs is as easy as deleting them from the jobs hash.                   
 
-QBWC.jobs.delete('my job')
+`QBWC.jobs.delete('my job')`
 
 Disabling a job
 
-QBWC.jobs['my job'].disable
+`QBWC.jobs['my job'].disable`
 
 Enabling a job
 
-QBWC.jobs['my job'].enable
+`QBWC.jobs['my job'].enable`
 
 ### Supporting multiple users/companies
 
 Override get_user and current_company methods in the generated controller. authenticate_user must authenticate with username and password and return user if it's authenticated, nil in other case. current_company receives authenticated user and must return nil if there are no pending jobs or company where jobs will run. Currently this methods are like this:
 
+```
 protected
 def authenticate_user(username, password)
 username if username == QBWC.username && password == QBWC.password
@@ -182,7 +203,7 @@ def current_company(user)
 QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).presen
 t?
 end
-
+```
 
 ### Check versions ###
 
