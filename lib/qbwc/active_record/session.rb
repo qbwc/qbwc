@@ -18,7 +18,10 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       super(@session.user, @session.company, @session.ticket)
     else
       super
-      @session = QbwcSession.new(:user => self.user, :company => self.company, :ticket => self.ticket)
+      @session = QbwcSession.new
+      @session.user = self.user
+      @session.company = self.company
+      @session.ticket = self.ticket
       self.save
       @session
     end
