@@ -12,8 +12,10 @@ class QBWC::Job
 
     if @requests.present?
       @request_gen = proc { @requests[next_request] }
+      @request_gen_is_array = true
     else
       @request_gen = block
+      @request_gen_is_array = false
     end
   end
 
@@ -33,7 +35,7 @@ class QBWC::Job
   end
 
   def advance_next_request
-    @next_request += 1
+    @request_gen_is_array ? @next_request += 1 : @request_gen = nil
   end
 
   def enable
@@ -57,7 +59,7 @@ class QBWC::Job
   end
 
   def next
-    request = instance_eval(&@request_gen)
+    request = instance_eval(&@request_gen) unless @request_gen.nil?
     QBWC::Request.new(request) if request
   end
 
