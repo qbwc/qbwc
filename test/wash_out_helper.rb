@@ -1,0 +1,3 @@
+module WashOutHelper
+end
+
