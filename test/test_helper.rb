@@ -40,16 +40,16 @@ end
 
 QbwcTestApplication::Application.routes.draw do
 
-  # Add these routes:
-  # qbwc_wsdl   GET        /qbwc/wsdl              qbwc#_generate_wsdl
-  # qbwc_action GET|POST   /qbwc/action            #<WashOut::Router:0x00000005cf46d0 @controller_name="QbwcController">
-  wash_out :qbwc
-
   # Manually stub these generated routes:
   #          GET        /qbwc/action(.:format)  qbwc#_generate_wsdl
   # qbwc_qwc GET        /qbwc/qwc(.:format)     qbwc#qwc
   get 'qbwc/action' => 'qbwc#_generate_wsdl'
   get 'qbwc/qwc'    => 'qbwc#qwc',            :as => :qbwc_qwc
+
+  # Add these routes:
+  # qbwc_wsdl   GET        /qbwc/wsdl              qbwc#_generate_wsdl
+  # qbwc_action GET|POST   /qbwc/action            #<WashOut::Router:0x00000005cf46d0 @controller_name="QbwcController">
+  wash_out :qbwc
 
   # Route needed for test_qwc 
   get 'qbwc/action' => 'qbwc#action'
