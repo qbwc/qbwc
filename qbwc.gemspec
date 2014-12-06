@@ -30,4 +30,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
 
+  s.add_development_dependency('activerecord')
+  s.add_development_dependency('actionpack')
+  s.add_development_dependency('rails')
+  s.add_development_dependency('sqlite3')
+  s.add_development_dependency('minitest')
 end

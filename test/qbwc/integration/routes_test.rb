@@ -20,7 +20,7 @@ class RoutesTest < ActionDispatch::IntegrationTest
     assert_match /UserName.*foo.*UserName/,                                 @response.body
   end
 
-  test "action" do
+  test "qbwc/action without soap returns successfully" do
     #_inspect_routes
     get 'qbwc/action'
     assert_response :success

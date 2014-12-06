@@ -1,3 +1,7 @@
+# http://stackoverflow.com/a/4402193
+require 'bundler/setup'
+Bundler.setup
+
 require 'minitest/autorun'
 
 require 'active_support'
