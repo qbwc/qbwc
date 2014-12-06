@@ -5,7 +5,7 @@ module QBWC
   module Generators
     class InstallGenerator < Rails::Generators::Base
       include Rails::Generators::Migration
-      extend ::ActiveRecord::Generators::Migration
+      extend Rails::Generators::Migration
 
       namespace "qbwc:install"
       desc "Copy Quickbooks Web Connector default files"
@@ -30,9 +30,9 @@ module QBWC
       end
 
      def setup_routes
+        route("wash_out :#{controller_name}")
         route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
         route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
-        route("wash_out :#{controller_name}")
       end
       
     end

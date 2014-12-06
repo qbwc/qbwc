@@ -31,6 +31,7 @@ class QBWC::Job
 
   def process_response(response, session, advance)
     advance_next_request if advance
+    QBWC.logger.info "Job '#{name}' received response: '#{response}'."
     @response_proc.call(response, session) if @response_proc
   end
 
@@ -47,6 +48,7 @@ class QBWC::Job
   end
 
   def pending?
+    QBWC.logger.info "Job '#{name}' enabled: #{enabled?}, check_pending: #{instance_eval(&@check_pending)}."
     enabled? && instance_eval(&@check_pending)
   end
 
