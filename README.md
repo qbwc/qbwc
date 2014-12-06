@@ -58,7 +58,7 @@ j.set_response_proc do |r|
 	r['customer_ret'].each do |qb_cus|
 		qb_id = qb_cus['list_id']
 		qb_name = qb_cus['name']
-		Rails.logger.info "#{qb_id} - {qb_name}"
+		Rails.logger.info "#{qb_id} - #{qb_name}"
 	end
 	# When r['xml_attributes']['iteratorRemainingCount'] == '0' then we've received all customers.
 end
