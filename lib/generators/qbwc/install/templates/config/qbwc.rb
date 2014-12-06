@@ -35,5 +35,7 @@ QBWC.configure do |c|
   # Rails Cache Hot Boot  (Check the rails cache for existing API object to speed app boot) 
   # This Feature is Unstable and is Extreme Alpha.  IT is known not to work
   # c.warm_boot = false
-  
+
+  # Logger to use
+  c.logger = Rails.logger
 end

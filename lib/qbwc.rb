@@ -49,6 +49,9 @@ module QBWC
   # Storage module
   mattr_accessor :storage
   @@storage = :active_record
+
+  mattr_accessor :logger
+  @@logger = Rails.logger
   
   class << self
 
@@ -61,6 +64,7 @@ module QBWC
     end
 
     def pending_jobs(company)
+      QBWC.logger.info "#{@@jobs.length} jobs exist, checking for pending jobs for company '#{company}'."
       @@jobs.each { |_,job| job.reset }
       storage_module::Job.sort_in_time_order(@@jobs.values.select {|job| job.company == company && job.pending?})
     end

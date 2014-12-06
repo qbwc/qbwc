@@ -82,17 +82,23 @@ QWC
     end
 
     def authenticate
+      QBWC.logger.info "Authenticating user '#{params[:strUserName]}'."
       user = authenticate_user(params[:strUserName], params[:strPassword])
       if user
+        QBWC.logger.info "User '#{params[:strUserName]}' authenticated."
         company = current_company(user)
         ticket = QBWC.storage_module::Session.new(user, company).ticket if company
         company ||= 'none'
+        QBWC.logger.info "Company is '#{company}', ticket is '#{ticket}'."
+      else
+        QBWC.logger.info "Authentication of user '#{params[:strUserName]}' failed."
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company || 'nvu']}}
     end
 
     def send_request
       request = @session.current_request
+      QBWC.logger.info(render_to_string(:soap => {'tns:sendRequestXMLResult' => request.try(:request) || ''}))
       render :soap => {'tns:sendRequestXMLResult' => request.try(:request) || ''}
     end
 
@@ -122,11 +128,15 @@ QWC
     end
 
     protected
+
     def authenticate_user(username, password)
       username if username == QBWC.username && password == QBWC.password
     end
+
     def current_company(user)
-      QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).present?
+      pj = QBWC.pending_jobs(QBWC.company_file_path)
+      QBWC.logger.info "#{pj.length} pending jobs found for company '#{QBWC.company_file_path}'."
+      QBWC.company_file_path if pj.present?
     end
 
     def get_session
