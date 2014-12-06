@@ -1,6 +1,4 @@
-# Quickbooks Web Connector (QBWC)
-
-Be Warned, this code is still hot out of the oven. 
+QBWC lets your Rails 4 application talk to QuickBooks.
 
 ## Installation
 
@@ -36,16 +34,41 @@ Install [QuickBooks Web Connector](http://marketplace.intuit.com/webconnector/) 
 
 On the QuickBooks machine, visit the path /qbwc/qwc on your domain over an HTTPS connection. Download the file it provides. In QuickBooks Web Connector, click "Add an application", and pick the file. Give Quickbooks the password you specified in config/initializers/qbwc.rb.
 
-## Features
+At this point, QuickBooks Web Connector should be able to send requests to your app, but will have nothing to do, and say "No data exchange required".
 
-QBWC was designed to add quickbooks web connector integration to your Rails 4 application. 
+## Creating Jobs
 
-* Implementation of the Soap WDSL spec for Intuit Quickbooks and Point of Sale
-* Integration with the [qbxml](https://github.com/skryl/qbxml) gem providing qbxml processing
+QuickBooks Web Connector (the app you installed above) acts as the HTTP client, and your app acts as the HTTP server. To have QuickBooks perform tasks, you must add a qbwc job to your app, then get QuickBooks Web Connector to check your app for work to do.
 
-## Getting Started
+**qbwc currently has a limitation where the process where you add the job must be the same process that QuickBooks Web Connector ends up talking to, or the job won't work. This means having a multi-process server, or even restarting your app, will mean your jobs won't work. This sucks and will hopefully be fixed soon. Because of this limitation, you will need to add the job from your server process (e.g. in a controller) for job to work.**
 
-### Basics
+A sample job to get a list of customers from QuickBooks:
+
+```ruby
+j = QBWC.add_job(:list_customers, '', {
+	:customer_query_rq => {
+		:xml_attributes => { "requestID" => "1", 'iterator' => "Start" },
+		# This will limit results to 100 per response, so our response proc will get called 
+		# multiple times.
+		:max_returned => 100
+	}
+})
+j.set_response_proc do |r|
+  # Iterate through the customers in this response
+	r['customer_ret'].each do |qb_cus|
+		qb_id = qb_cus['list_id']
+		qb_name = qb_cus['name']
+		Rails.logger.info "#{qb_id} - {qb_name}"
+	end
+	# When r['xml_attributes']['iteratorRemainingCount'] == '0' then we've received all customers.
+end
+```
+
+After adding a job, it will remain active and will run again every time QuickBooks Web Connector runs an update.
+
+Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
+
+## The Details
 
 The QBWC gem provides a persistent work queue for the Web Connector to talk to.
 
