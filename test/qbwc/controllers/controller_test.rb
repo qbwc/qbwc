@@ -17,7 +17,7 @@ class QBWCControllerTest < ActionController::TestCase
 
     assert_match /QBWCXML/,                                                 @response.body
     assert_match /AppName.*QbwcTestApplication development.*AppName/,       @response.body
-    assert_match /AppURL.*https:\/\/test.host\/qbwc\/action.*AppURL/,       @response.body
+    assert_match /AppURL.*http:\/\/test.host\/qbwc\/action.*AppURL/,        @response.body
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body
     assert_match /UserName.*foo.*UserName/,                                 @response.body
