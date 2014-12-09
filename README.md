@@ -1,4 +1,4 @@
-QBWC lets your Rails 4 application talk to QuickBooks.
+QBWC lets your Rails 4 application talk to QuickBooks Desktop.
 
 ## Installation
 
@@ -40,203 +40,52 @@ At this point, QuickBooks Web Connector should be able to send requests to your 
 
 QuickBooks Web Connector (the app you installed above) acts as the HTTP client, and your app acts as the HTTP server. To have QuickBooks perform tasks, you must add a qbwc job to your app, then get QuickBooks Web Connector to check your app for work to do.
 
-**qbwc currently has a limitation where the process where you add the job must be the same process that QuickBooks Web Connector ends up talking to, or the job won't work. This means having a multi-process server, or even restarting your app, will mean your jobs won't work. This sucks and will hopefully be fixed soon. Because of this limitation, you will need to add the job from your server process (e.g. in a controller) for job to work.**
+A job is associated to a worker, which is an object descending from `QBWC::Worker` that can define three methods:
 
-A sample job to get a list of customers from QuickBooks:
+-`requests` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
+-`should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
+-`handle_response(response)` - defines what to do with the response from Quickbooks.
+
+A sample worker to get a list of customers from QuickBooks:
 
 ```ruby
-j = QBWC.add_job(:list_customers, '', {
-	:customer_query_rq => {
-		:xml_attributes => { "requestID" => "1", 'iterator' => "Start" },
-		# This will limit results to 100 per response, so our response proc will get called 
-		# multiple times.
-		:max_returned => 100
-	}
-})
-j.set_response_proc do |r|
-  # Iterate through the customers in this response
-	r['customer_ret'].each do |qb_cus|
-		qb_id = qb_cus['list_id']
-		qb_name = qb_cus['name']
-		Rails.logger.info "#{qb_id} - #{qb_name}"
+require 'qbwc'
+
+class CustomerTestWorker < QBWC::Worker
+
+	def requests
+		{
+			:customer_query_rq => {
+				:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+				:max_returned => 100
+			}
+		}
 	end
-	# When r['xml_attributes']['iteratorRemainingCount'] == '0' then we've received all customers.
+
+	def handle_response(r)
+		# handle_response will get customers in groups of 100. When this is 0, we're done.
+		complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
+
+		r['customer_ret'].each do |qb_cus|
+			qb_id = qb_cus['list_id']
+			qb_name = qb_cus['name']
+			Rails.logger.info("#{qb_id} #{qb_name}")
+		end
+	end
+
 end
 ```
 
-After adding a job, it will remain active and will run again every time QuickBooks Web Connector runs an update.
+And to create the job (e.g. from `rails console` or wherever):
+
+```
+require 'qbwc'
+QBWC.add_job(:list_customers, '', CustomerTestWorker)
+```
+
+After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. 
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
-
-## The Details
-
-The QBWC gem provides a persistent work queue for the Web Connector to talk to.
-
-Every time the Web Connector initiates a new conversation with the application a
-Session will be created. The Session is a collection of jobs and the requests
-that comprise these jobs. A new Session will automatically queue up all the work
-available across all currently enabled jobs for processing by the web connector.
-The session instance will persist across all requests until the work it contains
-has been exhausted. You never have to interact with the Session class directly
-(unless you want to...) since creating a new job will automatically add it's
-work to the next session instance.
-
-A Job is just a named work queue. It consists of a name, a company (defaults to QBWC.company_file_path), and some qbxml requests. If requests are not provided, a code block that generates next qbxml request can be provided.
-
-*Note: All requests may be in ruby hash form, generated qbxml
-Raw requests are supported supported as of 0.0.3 (8/28/2012)*
-
-The code block is called every time a session must send a request. If block return nil, no request will be send and next pending job will be checked.
-
-Only enabled jobs with pending requests are added to a new session instance. Pending requests is checked calling code block, but an optional pending requests checking block can also be added to a job, so request creation can be avoided.
-
-An optional response processor block can also be added to a job. Responses to
-all requests are processed immediately after being received.
-
-Here is the rough order in which things happen:
-
-1. The Web Connector initiates a connection
-2. A new Session is created (with work from all enabled jobs with pending requests)
-3. The web connector requests work
-4. The session responds with the next request in the work queue
-5. The web connector provides a response
-6. The session responds with the current progress of the work queue (0 - 100)
-6. The response is processed
-7. If progress == 100 then the web connector closes the connection, otherwise goto 3
-
-### Adding Jobs
-
-Create a new job
-
-```
-QBWC.add_job('my job') do
-# work to do
-end
-```
-
-Add a checking proc
-
-```
-QBWC.jobs['my job'].set_checking_proc do
-# pending requests checking here
-end
-```
-
-Add a response proc
-
-```
-QBWC.jobs['my job'].set_response_proc do |r|
-# response processing work here
-end
-```
-
-Caveats
-* Jobs are enabled by default
-* Using a non unique job name will overwrite the existing job
-
-###Sample Jobs
-
-```
-Add a Customer (Wrapped)
-
-{  :qbxml_msgs_rq => 
-[
-{
-:xml_attributes =>  { "onError" => "stopOnError"}, 
-:customer_add_rq => 
-[
-{
-:xml_attributes => {"requestID" => "1"},  ##Optional
-:customer_add   => { :name => "GermanGR" }
-} 
-] 
-}
-]
-}
-```
-
-Add a Customer (Unwrapped)
-
-```
-{
-:customer_add_rq    => 
-[
-{
-:xml_attributes => {"requestID" => "1"},  ##Optional
-:customer_add   => { :name => "GermanGR" }
-} 
-] 
-}
-```
-
-Get All Vendors (In Chunks of 5)
-
-```
-QBWC.add_job(:import_vendors, nil
-{
-:vendor_query_rq  =>
-{
-:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-
-:max_returned => 5,
-:owner_id => 0,
-:from_modified_date=> "1984-01-29T22:03:19"
-
-}
-}
-)
-```
-
-Get All Vendors (Raw QBXML)
-
-```
-QBWC.add_job(:import_vendors, nil
-'<?xml version="1.0"?>
-<?qbxml version="7.0"?>
-<QBXML>
-<QBXMLMsgsRq onError="continueOnError">
-<VendorQueryRq requestID="6" iterator="Start">
-<MaxReturned>5</MaxReturned>
-<FromModifiedDate>1984-01-29T22:03:19-05:00</FromModifiedDate>
-<OwnerID>0</OwnerID>
-</VendorQueryRq>
-</QBXMLMsgsRq>
-</QBXML>
-'
-)
-```
-
-### Managing Jobs
-
-Jobs can be added, removed, enabled, and disabled. See the above section for
-details on adding new jobs. 
-
-Removing jobs is as easy as deleting them from the jobs hash.                   
-
-`QBWC.jobs.delete('my job')`
-
-Disabling a job
-
-`QBWC.jobs['my job'].disable`
-
-Enabling a job
-
-`QBWC.jobs['my job'].enable`
-
-### Supporting multiple users/companies
-
-Override get_user and current_company methods in the generated controller. authenticate_user must authenticate with username and password and return user if it's authenticated, nil in other case. current_company receives authenticated user and must return nil if there are no pending jobs or company where jobs will run. Currently this methods are like this:
-
-```
-protected
-def authenticate_user(username, password)
-username if username == QBWC.username && password == QBWC.password
-end
-def current_company(user)
-QBWC.company_file_path if QBWC.pending_jobs(QBWC.company_file_path).presen
-t?
-end
-```
 
 ### Check versions ###
 
