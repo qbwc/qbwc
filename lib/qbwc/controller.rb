@@ -104,13 +104,14 @@ QWC
 
     def send_request
       request = @session.current_request
-      QBWC.logger.info(render_to_string(:soap => {'tns:sendRequestXMLResult' => request.try(:request) || ''}))
-      render :soap => {'tns:sendRequestXMLResult' => request.try(:request) || ''}
+      request = request.try(:request) || ''
+      QBWC.logger.info("Current request is #{request}")
+      render :soap => {'tns:sendRequestXMLResult' => request}
     end
 
     def receive_response
       if params[:hresult]
-        logger.warn "#{params[:hresult]}: #{params[:message]}"
+        QBWC.logger.warn "#{params[:hresult]}: #{params[:message]}"
         @session.error = params[:message]
       else
         @session.response = params[:response]

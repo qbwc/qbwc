@@ -1,45 +1,81 @@
 class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => true, :presence => true
-  end
+    serialize :requests, Array
 
-  def initialize(name, company, *requests, &block)
-    super
-    @job = find_job.first_or_create do |job|
-      job.company = @company
-      job.enabled = @enabled
-      job.next_request = @next_request
+    def to_qbwc_job
+      QBWC::ActiveRecord::Job.new(name, company, worker_class, requests)
     end
+
   end
 
-  def find_job
+  # Creates and persists a job.
+  def self.add_job(name, company, worker_class)
+    worker_class = worker_class.to_s
+    ar_job = find_ar_job_with_name(name).first_or_initialize
+    ar_job.company = company
+    ar_job.enabled = true
+    ar_job.request_index = 0
+    ar_job.worker_class = worker_class
+    ar_job.save!
+    self.new(name, company, worker_class)
+  end
+
+  def self.find_job_with_name(name)
+    j = find_ar_job_with_name(name).first
+    j = j.to_qbwc_job unless j.nil?
+    return j
+  end
+
+  def self.find_ar_job_with_name(name)
     QbwcJob.where(:name => name)
   end
 
+  def find_ar_job
+    self.class.find_ar_job_with_name(name)
+  end
+
   def enabled=(value)
-    find_job.update_all(:enabled => value)
+    find_ar_job.update_all(:enabled => value)
   end
 
   def enabled?
-    find_job.where(:enabled => true).exists?
+    find_ar_job.where(:enabled => true).exists?
   end
 
-  def next_request
-    find_job.pluck(:next_request).first
-  end
-
-  def reset
-    find_job.update_all(:next_request => 0)
+  def requests
+    find_ar_job.pluck(:requests).first
     super
+  end
+
+  def requests=(r)
+    find_ar_job.update_all(:requests => r.to_yaml)
+    super
+  end
+
+  def request_index
+    find_ar_job.pluck(:request_index).first
+  end
+
+  def request_index=(nr)
+    find_ar_job.update_all(:request_index => nr)
   end
 
   def advance_next_request
-    QbwcJob.increment_counter :next_request, @job.id
-    super
+    nr = request_index
+    self.request_index = nr + 1
   end
 
-  attr_reader :job
-  def self.sort_in_time_order(ary)
-    ary.sort {|a,b| a.job.created_at <=> b.job.created_at}
+  def self.list_jobs
+    QbwcJob.all.map {|ar_job| ar_job.to_qbwc_job}
   end
+
+  def self.clear_jobs
+    QbwcJob.delete_all
+  end
+
+  def self.sort_in_time_order(ary)
+    ary.sort {|a,b| a.find_ar_job.first.created_at <=> b.find_ar_job.first.created_at}
+  end
+
 end
