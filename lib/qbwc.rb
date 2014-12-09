@@ -8,6 +8,7 @@ module QBWC
   autoload :Job, 'qbwc/job'
   autoload :Session, 'qbwc/session'
   autoload :Request, 'qbwc/request'
+  autoload :Worker, 'qbwc/worker'
 
   # Web connector login credentials
   mattr_accessor :username
@@ -35,10 +36,6 @@ module QBWC
   mattr_accessor :minutes_to_run
   @@minutes_to_run = 5
   
-  # Job definitions
-  mattr_reader :jobs
-  @@jobs = {}
-  
   mattr_reader :on_error
   @@on_error = 'stopOnError'
 
@@ -58,15 +55,24 @@ module QBWC
     def storage_module
       const_get storage.to_s.camelize
     end
-    
-    def add_job(name, company = nil, *requests, &block)
-      @@jobs[name.to_sym] = storage_module::Job.new(name, company, *requests, &block)
+
+    def jobs
+      storage_module::Job.list_jobs
+    end
+
+    def add_job(name, company, klass)
+      storage_module::Job.add_job(name, company, klass)
+    end
+
+    def get_job(name)
+      storage_module::Job.find_job_with_name(name)
     end
 
     def pending_jobs(company)
-      QBWC.logger.info "#{@@jobs.length} jobs exist, checking for pending jobs for company '#{company}'."
-      @@jobs.each { |_,job| job.reset }
-      storage_module::Job.sort_in_time_order(@@jobs.values.select {|job| job.company == company && job.pending?})
+      js = jobs
+      QBWC.logger.info "#{js.length} jobs exist, checking for pending jobs for company '#{company}'."
+      js.each { |job| job.reset }
+      storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?})
     end
     
     def on_error=(reaction)
@@ -87,7 +93,7 @@ module QBWC
     end
 
     def clear_jobs
-      @@jobs = {}
+      storage_module::Job.clear_jobs
     end
 
   end

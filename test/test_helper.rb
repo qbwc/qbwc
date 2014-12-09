@@ -34,6 +34,12 @@ module QbwcTestApplication
     Rails.application.configure do
       config.secret_key_base = "stub"
     end
+    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_sessions'
+    ActiveRecord::Migration.run(CreateQbwcJobs)
+    ActiveRecord::Migration.run(CreateQbwcSessions)
+    QBWC.logger = Logger.new('/dev/null') # or STDOUT
   end
 
 end

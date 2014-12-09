@@ -28,6 +28,7 @@ class QBWC::Session
   end
 
   def next
+    return nil if current_job.nil?
     until (request = current_job.next) do
       pending_jobs.shift
       reset(true) or break
@@ -56,8 +57,8 @@ class QBWC::Session
       self.next unless self.error || self.iterator_id.present? # search next request
     rescue => e
       self.error = e.message
-      Rails.logger.warn "An error occured in QBWC::Session: #{e.message}"
-      Rails.logger.warn e.backtrace.join("\n")
+      QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
+      QBWC.logger.warn e.backtrace.join("\n")
     end
   end
 

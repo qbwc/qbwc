@@ -1,42 +1,30 @@
 class QBWC::Job
 
-  attr_reader :name, :company, :response_proc, :next_request
+  attr_reader :name, :company, :worker_class
 
-  def initialize(name, company, *requests, &block)
+  def initialize(name, company, worker_class, requests = [])
     @name = name
     @enabled = true
     @company = company || QBWC.company_file_path
+    @worker_class = worker_class
     @requests = requests
-    @check_pending = proc { self.next }
-    @next_request = 0
-
-    if @requests.present?
-      @request_gen = proc { @requests[next_request] }
-      @request_gen_is_array = true
-    else
-      @request_gen = block
-      @request_gen_is_array = false
-    end
+    @request_index = 0
   end
 
-  def set_checking_proc(&block) 
-    @check_pending = block
-    self
-  end
-
-  def set_response_proc(&block) 
-    @response_proc = block
-    self
+  def worker
+    worker_class.constantize.new
   end
 
   def process_response(response, session, advance)
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    @response_proc.call(response, session) if @response_proc
+    worker.handle_response(response)
   end
 
   def advance_next_request
-    @request_gen_is_array ? @next_request += 1 : @request_gen = nil
+    new_index = request_index + 1
+    QBWC.logger.info "Job '#{name}' advancing to request #'#{new_index}'."
+    self.request_index = new_index
   end
 
   def enable
@@ -48,25 +36,54 @@ class QBWC::Job
   end
 
   def pending?
-    QBWC.logger.info "Job '#{name}' enabled: #{enabled?}, check_pending: #{instance_eval(&@check_pending)}."
-    enabled? && instance_eval(&@check_pending)
-  end
-
-  def self.enabled=(value)
-    @enabled = value
+    if !enabled?
+      QBWC.logger.info "Job '#{name}' not enabled."
+      return false
+    end
+    sr = worker.should_run?
+    QBWC.logger.info "Job '#{name}' should_run?: #{sr}."
+    return sr
   end
 
   def enabled?
     @enabled
   end
 
+  def requests
+    @requests
+  end
+
+  def requests=(r)
+    @requests = r
+  end
+
+  def request_index
+    @request_index
+  end
+
+  def request_index=(ri)
+    @request_index = ri
+  end
+
   def next
-    request = instance_eval(&@request_gen) unless @request_gen.nil?
-    QBWC::Request.new(request) if request
+    # Generate and save the requests to run when starting the job.
+    if requests.nil? || requests.empty?
+      r = worker.requests
+      r = [r] if r.is_a?(Hash)
+      self.requests = r
+    end
+    QBWC.logger.info("Requests available are '#{requests}'.")
+    ri = request_index
+    QBWC.logger.info("Request index is '#{ri}'.")
+    return nil if requests.nil? || ri >= requests.length
+    nr = requests[ri]
+    QBWC.logger.info("Next request is '#{nr}'.")
+    return QBWC::Request.new(nr)
   end
 
   def reset
-    @next_request = 0
+    self.request_index = 0
+    self.requests = []
   end
 
 end
