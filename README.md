@@ -42,9 +42,9 @@ QuickBooks Web Connector (the app you installed above) acts as the HTTP client, 
 
 A job is associated to a worker, which is an object descending from `QBWC::Worker` that can define three methods:
 
--`requests` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
--`should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
--`handle_response(response)` - defines what to do with the response from Quickbooks.
+- `requests` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
+- `should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
+- `handle_response(response)` - defines what to do with the response from Quickbooks.
 
 A sample worker to get a list of customers from QuickBooks:
 
@@ -78,7 +78,7 @@ end
 
 And to create the job (e.g. from `rails console` or wherever):
 
-```
+```ruby
 require 'qbwc'
 QBWC.add_job(:list_customers, '', CustomerTestWorker)
 ```
