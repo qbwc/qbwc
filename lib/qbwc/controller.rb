@@ -7,44 +7,50 @@ module QBWC
         before_filter :get_session, :except => [:qwc, :authenticate, :_generate_wsdl]
         after_filter :save_session, :except => [:qwc, :authenticate, :_generate_wsdl, :close_connection, :connection_error]
 
+        # wash_out changed the format of app/views/wash_with_soap/rpc/response.builder in commit
+        # https://github.com/inossidabile/wash_out/commit/24a77f4a3d874562732c6e8c3a30e8defafea7cb
+        require 'wash_out/version'
+        include WashOut
+        tns_prefix = (Gem::Version.new(WashOut::VERSION) < Gem::Version.new('0.9.1') ? 'tns:' : '')
+
         soap_action 'serverVersion', :to => :server_version,
                     :return => {'tns:serverVersionResult' => :string},
-                    :response_tag => 'tns:serverVersionResponse'
+                    :response_tag => "#{tns_prefix}serverVersionResponse"
 
         soap_action 'clientVersion', :to => :client_version,
                     :args   => {:strVersion => :string},
                     :return => {'tns:clientVersionResult' => :string},
-                    :response_tag => 'tns:clientVersionResponse'
+                    :response_tag => "#{tns_prefix}clientVersionResponse"
 
         soap_action 'authenticate',
                     :args   => {:strUserName => :string, :strPassword => :string},
                     :return => {'tns:authenticateResult' => StringArray},
-                    :response_tag => 'tns:authenticateResponse'
+                    :response_tag => "#{tns_prefix}authenticateResponse"
 
         soap_action 'sendRequestXML', :to => :send_request,
                     :args   => {:ticket => :string, :strHCPResponse => :string, :strCompanyFilename => :string, :qbXMLCountry => :string, :qbXMLMajorVers => :string, :qbXMLMinorVers => :string},
                     :return => {'tns:sendRequestXMLResult' => :string},
-                    :response_tag => 'tns:sendRequestXMLResponse'
+                    :response_tag => "#{tns_prefix}sendRequestXMLResponse"
 
         soap_action 'receiveResponseXML', :to => :receive_response,
                     :args   => {:ticket => :string, :response => :string, :hresult => :string, :message => :string},
                     :return => {'tns:receiveResponseXMLResult' => :integer},
-                    :response_tag => 'tns:receiveResponseXMLResponse'
+                    :response_tag => "#{tns_prefix}receiveResponseXMLResponse"
 
         soap_action 'closeConnection', :to => :close_connection,
                     :args   => {:ticket => :string},
                     :return => {'tns:closeConnectionResult' => :string},
-                    :response_tag => 'tns:closeConnectionResponse'
+                    :response_tag => "#{tns_prefix}closeConnectionResponse"
 
         soap_action 'connectionError', :to => :connection_error,
                     :args   => {:ticket => :string, :hresult => :string, :message => :string},
                     :return => {'tns:connectionErrorResult' => :string},
-                    :response_tag => 'tns:connectionErrorResponse'
+                    :response_tag => "#{tns_prefix}connectionErrorResponse"
 
         soap_action 'getLastError', :to => :get_last_error,
                     :args   => {:ticket => :string},
                     :return => {'tns:getLastErrorResult' => :string},
-                    :response_tag => 'tns:getLastErrorResponse'
+                    :response_tag => "#{tns_prefix}getLastErrorResponse"
       end
     end
 
