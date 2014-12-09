@@ -46,5 +46,19 @@ class QBWCControllerTest < ActionController::TestCase
     assert_equal 1, QBWC.pending_jobs(COMPANY).count
   end
 
+  test "send_request" do
+    _authenticate_with_queued_job
+
+    ticket = QBWC::ActiveRecord::Session::QbwcSession.first.ticket
+    send_request_wash_out_soap_data = { :Envelope => { :Body => { SEND_REQUEST_SOAP_ACTION => SEND_REQUEST_PARAMS.update(:ticket => ticket) }}}
+
+    # send_request
+    @request.env["wash_out.soap_action"]  = SEND_REQUEST_SOAP_ACTION.to_s
+    @request.env["wash_out.soap_data"]    = send_request_wash_out_soap_data
+    @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+
+    post 'send_request', use_route: :qbwc_action
+  end
+
 end
 
