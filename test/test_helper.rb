@@ -69,4 +69,53 @@ class QbwcController < ActionController::Base
   include QBWC::Controller
 end
 
+QBWC_USERNAME = 'myUserName'
+QBWC_PASSWORD = 'myPassword'
 
+QBWC_CUSTOMER_ADD_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
+    <?qbxml version=\"7.0\"?>\r
+    <QBXML>\r
+      <QBXMLMsgsRq onError = \"stopOnError\">\r
+        <CustomerAddRq>\r
+          <CustomerAdd>\r
+            <Name>#{QBWC_USERNAME}</Name>\r
+          </CustomerAdd>\r
+        </CustomerAddRq>\r
+      </QBXMLMsgsRq>\r
+    </QBXML>\r"
+
+AUTHENTICATE_PARAMS = {
+  :strUserName => QBWC_USERNAME,
+  :strPassword => QBWC_PASSWORD,
+  :@xmlns      => "http://developer.intuit.com/"
+}
+
+AUTHENTICATE_SOAP_ACTION = :authenticate
+AUTHENTICATE_WASH_OUT_SOAP_DATA = {
+  :Envelope => {
+    :Body => { AUTHENTICATE_SOAP_ACTION => AUTHENTICATE_PARAMS },
+    :"@xmlns:soap" => "http://schemas.xmlsoap.org/soap/envelope/",
+    :"@xmlns:xsi"  => "http://www.w3.org/2001/XMLSchema-instance",
+    :"@xmlns:xsd"  => "http://www.w3.org/2001/XMLSchema"
+  }
+}
+
+#-------------------------------------------
+def _authenticate
+  # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
+  @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
+  @request.env["wash_out.soap_data"]    = AUTHENTICATE_WASH_OUT_SOAP_DATA
+  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+
+  post 'authenticate', use_route: :qbwc_action
+end
+
+#-------------------------------------------
+def _authenticate_with_queued_job
+  # Queue a job
+  QBWC.add_job(:customer_add_rq_job, COMPANY, QBWC::Worker) do
+    QBWC_CUSTOMER_ADD_RQ
+  end
+
+  _authenticate
+end

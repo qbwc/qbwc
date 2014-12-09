@@ -9,6 +9,19 @@ class QBWCControllerTest < ActionController::TestCase
   def setup
     @routes = Rails.application.routes  # https://github.com/blowmage/minitest-rails/issues/133#issuecomment-36401436
     @controller = QbwcController.new    # http://stackoverflow.com/a/7743176
+    Rails.logger = Logger.new('/dev/null')  # or STDOUT
+
+    @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
+    #p @controller.view_paths
+
+    QBWC.configure do |c|
+      c.username = QBWC_USERNAME
+      c.password = QBWC_PASSWORD
+      c.company_file_path = COMPANY
+      c.logger = Rails.logger
+    end
+
+    QBWC.clear_jobs
   end
 
   test "qwc" do
@@ -20,7 +33,18 @@ class QBWCControllerTest < ActionController::TestCase
     assert_match /AppURL.*http:\/\/test.host\/qbwc\/action.*AppURL/,        @response.body
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body
-    assert_match /UserName.*foo.*UserName/,                                 @response.body
+    assert_match /UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body
+  end
+
+  test "authenticate" do
+    _authenticate
+    assert_equal 0, QBWC.pending_jobs(COMPANY).count
+  end
+
+  test "authenticate with queued job" do
+    _authenticate_with_queued_job
+    assert_equal 1, QBWC.pending_jobs(COMPANY).count
   end
 
 end
+

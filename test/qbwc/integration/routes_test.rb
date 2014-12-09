@@ -17,7 +17,7 @@ class RoutesTest < ActionDispatch::IntegrationTest
     assert_match /AppURL.*http:\/\/www.example.com\/qbwc\/action.*AppURL/,  @response.body
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/www.example.com\/.*AppSupport/,     @response.body
-    assert_match /UserName.*foo.*UserName/,                                 @response.body
+    assert_match /UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body
   end
 
   test "qbwc/action without soap returns successfully" do
