@@ -8,13 +8,7 @@ class QBWC::Request
     #Allow strings of QBXML to be passed in directly. 
     case
     when request.is_a?(Hash)
-
-      unless request.keys.include?(:qbxml_msgs_rq)
-        wrapped_request = { :qbxml_msgs_rq => {:xml_attributes => {"onError"=> QBWC::on_error } } } 
-        wrapped_request[:qbxml_msgs_rq] = wrapped_request[:qbxml_msgs_rq].merge(request)
-        request = wrapped_request
-      end
-
+      request = self.class.wrap_request(request)
       @request = "<?xml version=\"1.0\"?>#{QBWC.parser.to_qbxml(request)}"
     when request.is_a?(String)
       @request = request
@@ -30,6 +24,14 @@ class QBWC::Request
   def to_hash
     hash = QBWC.parser.from_qbxml(@request.to_s)["qbxml"]["qbxml_msgs_rq"]
     hash.except('xml_attributes')
+  end
+
+  # Wrap a Hash request with qbxml_msgs_rq, if it's not already.
+  def self.wrap_request(request)
+    return request if request.keys.include?(:qbxml_msgs_rq)
+    wrapped_request = { :qbxml_msgs_rq => {:xml_attributes => {"onError"=> QBWC::on_error } } }
+    wrapped_request[:qbxml_msgs_rq] = wrapped_request[:qbxml_msgs_rq].merge(request)
+    return wrapped_request
   end
 
 end
