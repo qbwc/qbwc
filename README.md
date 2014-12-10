@@ -80,7 +80,7 @@ And to create the job (e.g. from `rails console` or wherever):
 
 ```ruby
 require 'qbwc'
-QBWC.add_job(:list_customers, '', CustomerTestWorker)
+QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 ```
 
 After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. 
