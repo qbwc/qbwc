@@ -15,6 +15,8 @@ require 'qbwc/controller'
 require 'qbwc/active_record'
 
 COMPANY = ''
+QBWC_USERNAME = 'myUserName'
+QBWC_PASSWORD = 'myPassword'
 QBWC.api = :qb
 
 #-------------------------------------------
@@ -39,7 +41,12 @@ module QbwcTestApplication
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_sessions'
     ActiveRecord::Migration.run(CreateQbwcJobs)
     ActiveRecord::Migration.run(CreateQbwcSessions)
-    QBWC.logger = Logger.new('/dev/null') # or STDOUT
+    QBWC.configure do |c|
+      c.username = QBWC_USERNAME
+      c.password = QBWC_PASSWORD
+      c.company_file_path = COMPANY
+      c.logger = Logger.new('/dev/null') # or STDOUT
+    end
   end
 
 end
@@ -68,9 +75,6 @@ class QbwcController < ActionController::Base
   include Rails.application.routes.url_helpers
   include QBWC::Controller
 end
-
-QBWC_USERNAME = 'myUserName'
-QBWC_PASSWORD = 'myPassword'
 
 QBWC_CUSTOMER_ADD_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
     <?qbxml version=\"7.0\"?>\r

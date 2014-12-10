@@ -14,13 +14,6 @@ class QBWCControllerTest < ActionController::TestCase
     @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
     #p @controller.view_paths
 
-    QBWC.configure do |c|
-      c.username = QBWC_USERNAME
-      c.password = QBWC_PASSWORD
-      c.company_file_path = COMPANY
-      c.logger = Rails.logger
-    end
-
     QBWC.clear_jobs
   end
 
