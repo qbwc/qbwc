@@ -127,7 +127,7 @@ end
 #-------------------------------------------
 def _authenticate_with_queued_job
   # Queue a job
-  QBWC.add_job(:customer_add_rq_job, COMPANY, QBWC::Worker) do
+  QBWC.add_job(:customer_add_rq_job, true, COMPANY, QBWC::Worker) do
     QBWC_CUSTOMER_ADD_RQ
   end
 

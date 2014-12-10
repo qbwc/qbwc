@@ -60,8 +60,8 @@ module QBWC
       storage_module::Job.list_jobs
     end
 
-    def add_job(name, company, klass)
-      storage_module::Job.add_job(name, company, klass)
+    def add_job(name, enabled, company, klass)
+      storage_module::Job.add_job(name, enabled, company, klass)
     end
 
     def get_job(name)

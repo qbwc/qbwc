@@ -19,7 +19,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "worker with nothing" do
-    QBWC.add_job(:integration_test, '', QBWC::Worker)
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker)
     session = QBWC::Session.new('foo', '')
     assert_nil session.next
   end
@@ -31,7 +31,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "simple request worker" do
-    QBWC.add_job(:integration_test, '', SingleRequestWorker)
+    QBWC.add_job(:integration_test, true, '', SingleRequestWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next
     simulate_response(session)
@@ -48,7 +48,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "multiple request worker" do
-    QBWC.add_job(:integration_test, '', MultipleRequestWorker)
+    QBWC.add_job(:integration_test, true, '', MultipleRequestWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next
     simulate_response(session)
@@ -58,8 +58,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test 'multiple jobs' do
-    QBWC.add_job(:integration_test_1, '', SingleRequestWorker)
-    QBWC.add_job(:integration_test_2, '', MultipleRequestWorker)
+    QBWC.add_job(:integration_test_1, true, '', SingleRequestWorker)
+    QBWC.add_job(:integration_test_2, true, '', MultipleRequestWorker)
     assert_equal 2, QBWC.jobs.length
     session = QBWC::Session.new('foo', '')
     # one from SingleRequestWorker
@@ -87,7 +87,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "shouldnt run worker" do
-    QBWC.add_job(:integration_test, '', ShouldntRunWorker)
+    QBWC.add_job(:integration_test, true, '', ShouldntRunWorker)
     session = QBWC::Session.new('foo', '')
     assert_nil session.next
   end
@@ -104,7 +104,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "variable request worker" do
-    QBWC.add_job(:integration_test, '', VariableRequestWorker)
+    QBWC.add_job(:integration_test, true, '', VariableRequestWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next
     simulate_response(session)

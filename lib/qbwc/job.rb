@@ -2,9 +2,9 @@ class QBWC::Job
 
   attr_reader :name, :company, :worker_class
 
-  def initialize(name, company, worker_class, requests = [])
+  def initialize(name, enabled, company, worker_class, requests = [])
     @name = name
-    @enabled = true
+    @enabled = enabled
     @company = company || QBWC.company_file_path
     @worker_class = worker_class
     @requests = requests
