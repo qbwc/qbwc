@@ -117,7 +117,7 @@ QWC
       else
         @session.response = params[:response]
       end
-      render :soap => {'tns:receiveResponseXMLResult' => @session.error ? -1 : @session.progress}
+      render :soap => {'tns:receiveResponseXMLResult' => (QBWC::on_error == 'continueOnError' || @session.error.nil?) ? @session.progress : -1}
     end
 
     def close_connection

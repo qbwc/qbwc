@@ -53,7 +53,7 @@ class QBWC::Session
       response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
       response = response[response.keys.first]
       parse_response_header(response)
-      self.current_job.process_response(response, self, iterator_id.blank? && !self.error)
+      self.current_job.process_response(response, self, iterator_id.blank? && (!self.error || QBWC::on_error == 'continueOnError'))
       self.next unless self.error || self.iterator_id.present? # search next request
     rescue => e
       self.error = e.message
@@ -95,10 +95,14 @@ class QBWC::Session
 
     @status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
-                                               'iteratorRemainingCount', 'iteratorID') 
-    if status_severity == 'Error' || @status_code.to_i > 1
+                                               'iteratorRemainingCount', 'iteratorID')
+    QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
+
+    if status_severity == 'Error'
+      QBWC.logger.error "Received error from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'"
       self.error = "QBWC ERROR: #{@status_code} - #{status_message}"
     else
+      QBWC.logger.warn "Received warning from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'" if status_severity == 'Warn'
       self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0
     end
   end

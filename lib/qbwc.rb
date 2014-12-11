@@ -76,7 +76,7 @@ module QBWC
     end
     
     def on_error=(reaction)
-      raise 'Quickbooks type must be :qb or :qbpos' unless [:stop, :continue].include?(reaction)
+      raise 'Quickbooks on_error must be :stop or :continue' unless [:stop, :continue].include?(reaction)
       @@on_error = "stopOnError" if reaction == :stop
       @@on_error = "continueOnError" if reaction == :continue
     end
