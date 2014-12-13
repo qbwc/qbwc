@@ -11,6 +11,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   # Creates and persists a job.
   def self.add_job(name, enabled, company, worker_class)
+
     worker_class = worker_class.to_s
     ar_job = find_ar_job_with_name(name).first_or_initialize
     ar_job.company = company
@@ -18,7 +19,15 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     ar_job.request_index = 0
     ar_job.worker_class = worker_class
     ar_job.save!
-    self.new(name, enabled, company, worker_class)
+
+    jb = self.new(name, enabled, company, worker_class)
+
+    if block_given?
+      rqs = yield
+      jb.requests = rqs.is_a?(Array) ? rqs : [rqs]
+    end
+
+    jb
   end
 
   def self.find_job_with_name(name)

@@ -87,10 +87,16 @@ After adding a job, it will remain active and will run every time QuickBooks Web
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
 
+### Requests via code block ###
+
+In order to access local variables for a request, you can optionally provide a code block to QBWC.add_job. If provided, this code block can return a single qbxml request, or an array of qbxml requests. The code block is evaluated only when the job is added.
+
+If the requests method returns a non-nil value, then this value will be used to create the request and the value returned from the code block will be ignored.
+
 ### Check versions ###
 
 If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.
-
+s
 ## Contributing to qbwc
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet

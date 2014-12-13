@@ -24,6 +24,20 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_nil session.next
   end
 
+  class NilRequestWorker < QBWC::Worker
+    def requests
+      nil
+    end
+  end
+
+  test "worker with nil" do
+    QBWC.add_job(:integration_test, true, '', NilRequestWorker)
+    session = QBWC::Session.new('foo', '')
+    assert_nil session.next
+    simulate_response(session)
+    assert_nil session.next
+  end
+
   class SingleRequestWorker < QBWC::Worker
     def requests
       {:foo => 'bar'}
@@ -112,6 +126,100 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     $VARIABLE_REQUEST_COUNT = 5
     assert_not_nil session.next
     simulate_response(session)
+    assert_nil session.next
+  end
+
+  class CodeBlockIgnoredByRequestWorker < QBWC::Worker
+    def requests
+      {:foo => 'bar'}
+    end
+  end
+
+  test "code block ignored by request worker when requests is non-nil" do
+    QBWC.add_job(:integration_test, true, '', CodeBlockIgnoredByRequestWorker) do
+      QBWC_CUSTOMER_ADD_RQ
+    end
+    session = QBWC::Session.new('foo', '')
+    request = session.next
+    assert_not_nil request
+    assert_match /Foo.bar.\/Foo/, request.request
+    simulate_response(session)
+    assert_nil session.next
+  end
+
+  class CodeBlockOverridesRequestWorker < QBWC::Worker
+    def requests
+      nil
+    end
+  end
+
+  test "code block overrides request worker when requests is nil" do
+    QBWC.add_job(:integration_test, true, '', CodeBlockOverridesRequestWorker) do
+      QBWC_CUSTOMER_ADD_RQ
+    end
+    session = QBWC::Session.new('foo', '')
+    request = session.next
+    assert_not_nil request
+    assert_match /Name.#{QBWC_USERNAME}.\/Name/, request.request
+    simulate_response(session)
+    assert_nil session.next
+  end
+
+  class SimulatedUserModel
+    attr_accessor :name
+  end
+
+  class CodeBlockEstablishesRequestEarlyWorker < QBWC::Worker
+    def requests
+      nil
+    end
+  end
+
+  test "code block establishes request early" do
+    usr = SimulatedUserModel.new
+    usr.name = QBWC_USERNAME
+
+    QBWC.add_job(:integration_test, true, '', CodeBlockEstablishesRequestEarlyWorker) do
+      {:name => usr.name}
+    end
+    usr.name = 'bleech'
+
+    session = QBWC::Session.new('foo', '')
+    request = session.next
+    assert_match /Name.#{QBWC_USERNAME}.\/Name/, request.request
+  end
+
+  class CodeBlockReturnsMultipleRequestsWorker < QBWC::Worker
+    def requests
+      nil
+    end
+  end
+
+  test "code block returns multiple requests" do
+    usr1 = SimulatedUserModel.new
+    usr1.name = QBWC_USERNAME
+
+    usr2 = SimulatedUserModel.new
+    usr2.name = 'usr2 name'
+
+    QBWC.add_job(:integration_test, true, '', CodeBlockEstablishesRequestEarlyWorker) do
+      [
+        {:name => usr1.name},
+        {:name => usr2.name}
+      ]
+    end
+    usr1.name = 'bleech'
+    usr2.name = 'bleech'
+
+    session = QBWC::Session.new('foo', '')
+    request1 = session.next
+    assert_match /Name.#{QBWC_USERNAME}.\/Name/, request1.request
+    simulate_response(session)
+
+    request2 = session.next
+    assert_match /Name.usr2 name.\/Name/, request2.request
+    simulate_response(session)
+
     assert_nil session.next
   end
 
