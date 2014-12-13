@@ -96,7 +96,7 @@ If the requests method returns a non-nil value, then this value will be used to 
 ### Check versions ###
 
 If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.
-s
+
 ## Contributing to qbwc
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
