@@ -145,6 +145,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_match /Foo.bar.\/Foo/, request.request
     simulate_response(session)
     assert_nil session.next
+
+    assert_equal [{:foo => 'bar'}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
   end
 
   class CodeBlockOverridesRequestWorker < QBWC::Worker
@@ -163,6 +165,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_match /Name.#{QBWC_USERNAME}.\/Name/, request.request
     simulate_response(session)
     assert_nil session.next
+
+    assert_equal [QBWC_CUSTOMER_ADD_RQ], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
   end
 
   class SimulatedUserModel
@@ -187,6 +191,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
     request = session.next
     assert_match /Name.#{QBWC_USERNAME}.\/Name/, request.request
+
+    assert_equal [{:name => QBWC_USERNAME}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
   end
 
   class CodeBlockReturnsMultipleRequestsWorker < QBWC::Worker
@@ -221,6 +227,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     simulate_response(session)
 
     assert_nil session.next
+
+    assert_equal [{:name => QBWC_USERNAME}, {:name => 'usr2 name'}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
   end
 
 end
