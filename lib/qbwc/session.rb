@@ -50,9 +50,12 @@ class QBWC::Session
 
   def response=(qbxml_response)
     begin
+      QBWC.logger.info 'Parsing response.'
       response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
       response = response[response.keys.first]
+      QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
+      QBWC.logger.info "Processing response."
       self.current_job.process_response(response, self, iterator_id.blank? && (!self.error || QBWC::on_error == 'continueOnError'))
       self.next unless self.error || self.iterator_id.present? # search next request
     rescue => e
