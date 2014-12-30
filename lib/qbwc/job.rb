@@ -67,11 +67,15 @@ class QBWC::Job
 
   def next
     # Generate and save the requests to run when starting the job.
-    if requests.nil? || requests.empty?
+    unless @worker_requests_called
       r = worker.requests
-      r = [r] if r.is_a?(Hash)
-      self.requests = r
+      @worker_requests_called = true
+      unless r.nil?
+        r = [r] if r.is_a?(Hash)
+        self.requests = r
+      end
     end
+
     QBWC.logger.info("Requests available are '#{requests}'.")
     ri = request_index
     QBWC.logger.info("Request index is '#{ri}'.")
@@ -83,7 +87,7 @@ class QBWC::Job
 
   def reset
     self.request_index = 0
-    self.requests = []
+    #self.requests = []
   end
 
 end

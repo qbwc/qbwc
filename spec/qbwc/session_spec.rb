@@ -52,34 +52,20 @@ describe QBWC::Session do
       :database => ':memory:'
     )
 
-    ActiveRecord::Schema.define do
-      self.verbose = false
-
-      create_table "qbwc_jobs", force: true do |t|
-        t.string   "name"
-        t.string   "company",      limit: 1000
-        t.boolean  "enabled",      		default: false, null: false
-        t.integer  "next_request", 		default: 0,     null: false
-        t.datetime "created_at"
-        t.datetime "updated_at"
-      end
-
-      create_table "qbwc_sessions", force: true do |t|
-        t.string   "ticket"
-        t.string   "user"
-        t.string   "company",      limit: 1000
-        t.integer  "progress",                  default: 0,  null: false
-        t.string   "current_job"
-        t.string   "iterator_id"
-        t.string   "error",        limit: 1000
-        t.string   "pending_jobs", limit: 1000, default: "", null: false
-        t.datetime "created_at"
-        t.datetime "updated_at"
-      end
-    end
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_sessions'
+    ActiveRecord::Migration.run(CreateQbwcJobs)
+    ActiveRecord::Migration.run(CreateQbwcSessions)
 
     # The gem uses Rails.logger
-    Rails.logger = Logger.new(STDOUT)
+    Rails.logger = Logger.new('/dev/null')
+    QBWC.logger = Rails.logger
+  end
+
+  class SessionSpecRequestWorker < QBWC::Worker
+    def requests
+      {:name => 'bleech'}
+    end
   end
 
   it "sends request only once when providing a code block to add_job" do
@@ -89,12 +75,12 @@ describe QBWC::Session do
     QBWC.api = :qb
 
     # Add a job using only a code block
-    QBWC::add_job(JOBNAME) do
+    QBWC.add_job(JOBNAME, true, COMPANY, SessionSpecRequestWorker) do
       CUSTOMER_ADD_REQUEST
     end
 
-    QBWC.jobs.count.should == 1
-    QBWC.pending_jobs(COMPANY).count.should == 1
+    expect(QBWC.jobs.count).to eq(1)
+    expect(QBWC.pending_jobs(COMPANY).count).to eq(1)
 
     # Omit these controller calls that normally occur during a QuickBooks Web Connector session:
     # - server_version
@@ -106,7 +92,7 @@ describe QBWC::Session do
     session = QBWC::Session.new(nil, COMPANY)
     session.response = CUSTOMER_ADD_RESPONSE
 
-    session.progress.should == 100
+    expect(session.progress).to eq(100)
   end
 
 end
