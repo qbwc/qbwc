@@ -91,7 +91,7 @@ Use the [Onscreen Reference for Intuit Software Development Kits](https://develo
 
 You can optionally provide requests directly to QBWC.add_job. If provided, these requests can return a single qbxml request, or an array of qbxml requests.
 
-Any non-nil worker requests override those passed to add_job; if the worker requests method returns a non-nil value, then this value will be used to create the request (and the requests passed to add_job will be ignored).
+The worker requests method overrides requests passed to add_job; if the worker requests method returns a non-nil value, then this value will be used to create the request (and the requests passed to add_job will be ignored).
 
 ### Check versions ###
 
