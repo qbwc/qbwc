@@ -131,3 +131,13 @@ def _authenticate_with_queued_job
 
   _authenticate
 end
+
+def simulate_response(session)
+  session.response = <<-EOF
+  <?xml version="1.0"?><?qbxml version="7.0"?>
+<QBXML>
+  <QBXMLMsgsRs onError="stopOnError">
+  </QBXMLMsgsRs>
+</QBXML>
+  EOF
+end

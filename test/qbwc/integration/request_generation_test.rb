@@ -9,16 +9,6 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.clear_jobs
   end
 
-  def simulate_response(session)
-    session.response = <<-EOF
-    <?xml version="1.0"?><?qbxml version="7.0"?>
-<QBXML>
-  <QBXMLMsgsRs onError="stopOnError">
-  </QBXMLMsgsRs>
-</QBXML>
-    EOF
-  end
-
   test "worker with nothing" do
     QBWC.add_job(:integration_test, true, '', QBWC::Worker)
     session = QBWC::Session.new('foo', '')
@@ -51,6 +41,25 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_not_nil session.next
     simulate_response(session)
     assert_nil session.next
+  end
+
+  class HandleResponseOmitsJobWorker < QBWC::Worker
+    def requests
+      {:foo => 'bar'}
+    end
+    def handle_response(*response)
+      $HANDLE_RESPONSE_EXECUTED = true
+    end
+  end
+
+  test "handle_response must use splat operator when omitting job argument" do
+    $HANDLE_RESPONSE_EXECUTED = false
+    QBWC.add_job(:integration_test, true, '', HandleResponseOmitsJobWorker)
+    session = QBWC::Session.new('foo', '')
+    assert_not_nil session.next
+    simulate_response(session)
+    assert_nil session.next
+    assert $HANDLE_RESPONSE_EXECUTED
   end
 
   class MultipleRequestWorker < QBWC::Worker
