@@ -54,7 +54,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
       {:foo => 'bar'}
     end
 
-    def handle_response(resp, job)
+    def handle_response(resp, job, data)
       QBWC.delete_job(job.name)
     end
   end

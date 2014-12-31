@@ -44,7 +44,7 @@ A job is associated to a worker, which is an object descending from `QBWC::Worke
 
 - `requests` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
 - `should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
-- `handle_response(response, job)` - defines what to do with the response from Quickbooks.
+- `handle_response(response, job, data)` - defines what to do with the response from Quickbooks.
 
 A sample worker to get a list of customers from QuickBooks:
 
@@ -62,7 +62,7 @@ class CustomerTestWorker < QBWC::Worker
 		}
 	end
 
-	def handle_response(r, job)
+	def handle_response(r, job, data)
 		# handle_response will get customers in groups of 100. When this is 0, we're done.
 		complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
 
@@ -86,7 +86,7 @@ QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. For example:
 
 ```ruby
-	def handle_response(r, job)
+	def handle_response(r, job, data)
 		QBWC.delete_job(job.name)
 	end
 
@@ -100,6 +100,10 @@ Use the [Onscreen Reference for Intuit Software Development Kits](https://develo
 You can optionally provide requests directly to QBWC.add_job. If provided, these requests can return a single qbxml request, or an array of qbxml requests.
 
 The worker requests method overrides requests passed to add_job; if the worker requests method returns a non-nil value, then this value will be used to create the request (and the requests passed to add_job will be ignored).
+
+### Data passed to add_job ###
+
+You can optionally provide arbitrary data directly to QBWC.add_job. If provided, this data will be passed to handle_response.
 
 ### Check versions ###
 

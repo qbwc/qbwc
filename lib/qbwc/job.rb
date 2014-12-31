@@ -2,12 +2,13 @@ class QBWC::Job
 
   attr_reader :name, :company, :worker_class
 
-  def initialize(name, enabled, company, worker_class, requests = [])
+  def initialize(name, enabled, company, worker_class, requests = [], data = nil)
     @name = name
     @enabled = enabled
     @company = company || QBWC.company_file_path
     @worker_class = worker_class
     @requests = requests
+    @data = data
     @request_index = 0
   end
 
@@ -18,7 +19,7 @@ class QBWC::Job
   def process_response(response, session, advance)
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    worker.handle_response(response, self)
+    worker.handle_response(response, self, data)
   end
 
   def advance_next_request
@@ -55,6 +56,14 @@ class QBWC::Job
 
   def requests=(r)
     @requests = r
+  end
+
+  def data
+    @data
+  end
+
+  def data=(d)
+    @data = d
   end
 
   def request_index
