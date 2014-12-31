@@ -7,6 +7,9 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     RequestGenerationTest.app = Rails.application
     Rails.logger = Logger.new('/dev/null')  # or STDOUT
     QBWC.clear_jobs
+
+    $HANDLE_RESPONSE_DATA = nil
+    $HANDLE_RESPONSE_IS_PASSED_DATA = false
   end
 
   test "worker with nothing" do
@@ -62,6 +65,26 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     simulate_response(session)
     assert_nil session.next
     assert $HANDLE_RESPONSE_EXECUTED
+  end
+
+  class HandleResponseWithDataWorker < QBWC::Worker
+    def requests
+      {:foo => 'bar'}
+    end
+    def handle_response(response, job, data)
+      $HANDLE_RESPONSE_IS_PASSED_DATA = (data == $HANDLE_RESPONSE_DATA)
+    end
+  end
+
+  test "handle_response is passed data" do
+    $HANDLE_RESPONSE_DATA = {:first => {:second => 2, :third => '3'} }
+    $HANDLE_RESPONSE_IS_PASSED_DATA = false
+    QBWC.add_job(:integration_test, true, '', HandleResponseWithDataWorker, nil, $HANDLE_RESPONSE_DATA)
+    session = QBWC::Session.new('foo', '')
+    assert_not_nil session.next
+    simulate_response(session)
+    assert_nil session.next
+    assert $HANDLE_RESPONSE_IS_PASSED_DATA
   end
 
   class MultipleRequestWorker < QBWC::Worker
