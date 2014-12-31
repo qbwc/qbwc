@@ -19,7 +19,7 @@ class QBWC::Job
   def process_response(response, session, advance)
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    worker.handle_response(response)
+    worker.handle_response(response, self)
   end
 
   def advance_next_request
@@ -85,7 +85,7 @@ class QBWC::Job
     QBWC.logger.info("Requests available are '#{requests}'.")
     ri = request_index
     QBWC.logger.info("Request index is '#{ri}'.")
-    return nil if requests.nil? || ri >= requests.length
+    return nil if ri.nil? || requests.nil? || ri >= requests.length
     nr = requests[ri]
     QBWC.logger.info("Next request is '#{nr}'.")
     return QBWC::Request.new(nr)

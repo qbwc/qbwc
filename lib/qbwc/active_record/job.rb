@@ -42,6 +42,11 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     self.class.find_ar_job_with_name(name)
   end
 
+  def self.delete_job_with_name(name)
+    j = find_ar_job_with_name(name).first
+    j.destroy unless j.nil?
+  end
+
   def get_persistent_value(attribute_name)
     find_ar_job.pluck(attribute_name).first
   end
