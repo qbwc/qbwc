@@ -105,6 +105,17 @@ The worker requests method overrides requests passed to add_job; if the worker r
 
 You can optionally provide arbitrary data directly to QBWC.add_job. If provided, this data will be passed to handle_response.
 
+### Sessions ###
+
+You may optionally specify an initialization block that will be called when each QuickBooks Web Connector session is established:
+
+```ruby
+	QBWC.set_session_initializer() do
+          puts "New QuickBooks Web Connector session has been established"
+        end
+
+```
+
 ### Check versions ###
 
 If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.

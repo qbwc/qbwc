@@ -36,6 +36,9 @@ module QBWC
   mattr_accessor :minutes_to_run
   @@minutes_to_run = 5
   
+  mattr_reader :session_initializer
+  @@session_initializer = nil
+
   mattr_reader :on_error
   @@on_error = 'stopOnError'
 
@@ -79,6 +82,11 @@ module QBWC
       storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?})
     end
     
+    def set_session_initializer(&block)
+      @@session_initializer = block
+      self
+    end
+
     def on_error=(reaction)
       raise 'Quickbooks on_error must be :stop or :continue' unless [:stop, :continue].include?(reaction)
       @@on_error = "stopOnError" if reaction == :stop
