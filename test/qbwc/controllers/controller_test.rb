@@ -39,6 +39,16 @@ class QBWCControllerTest < ActionController::TestCase
     assert_equal 1, QBWC.pending_jobs(COMPANY).count
   end
 
+  test "authenticate with initialization block" do
+     initializer_called = false
+     QBWC.set_session_initializer() do
+        initializer_called = true
+     end
+
+    _authenticate
+    assert initializer_called
+  end
+
   test "send_request" do
     _authenticate_with_queued_job
 

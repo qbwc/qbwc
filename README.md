@@ -107,6 +107,17 @@ If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method wil
 
 Similarly, a `QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, String, Array, or Hash) to `QBWC.add_job`. This data will immediately be persisted by `QBWC.add_job`, then later passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
 
+### Sessions ###
+
+You may optionally specify an initialization block that will be called when each QuickBooks Web Connector session is established:
+
+```ruby
+	QBWC.set_session_initializer() do
+          puts "New QuickBooks Web Connector session has been established"
+        end
+
+```
+
 ### Check versions ###
 
 If you want to return server version or check client version you can override server_version_response or check_client_version methods in your controller. Check QB web connector guide for allowed responses.
