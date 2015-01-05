@@ -46,6 +46,8 @@ A job is associated to a worker, which is an object descending from `QBWC::Worke
 - `should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
 - `handle_response(response, job, data)` - defines what to do with the response from Quickbooks.
 
+All three methods are not invoked until a QuickBooks Web Connector session has been established with your web service.
+
 A sample worker to get a list of customers from QuickBooks:
 
 ```ruby
@@ -95,24 +97,29 @@ After adding a job, it will remain active and will run every time QuickBooks Web
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
 
-### Requests passed to add_job ###
+### Referencing memory values when constructing requests ###
 
-You can optionally provide requests directly to QBWC.add_job. If provided, these requests can return a single qbxml request, or an array of qbxml requests.
+A QBWC::Worker#requests method cannot access values that are in-memory (local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using QBWC::Worker#requests, you can optionally construct and pass requests directly to QBWC.add_job (scalar request or array of requests). These requests will be immediately persisted by QBWC.add_job (in contrast to requests constructed by QBWC::Worker#requests, which are persisted during a QuickBooks Web Connector session).
 
-The worker requests method overrides requests passed to add_job; if the worker requests method returns a non-nil value, then this value will be used to create the request (and the requests passed to add_job will be ignored).
+A QBWC::Worker#requests method overrides any requests passed to QBWC.add_job; if QBWC::Worker#requests returns a non-nil value, then this value will be sent to QuickBooks Web Connector (and any requests passed directly to QBWC.add_job will be ignored).
 
-### Data passed to add_job ###
+### Referencing memory values when handling responses ###
 
-You can optionally provide arbitrary data directly to QBWC.add_job. If provided, this data will be passed to handle_response.
+Similarly, a QBWC::Worker#handle_response method cannot access values that are in-memory at the time that QBWC.add_job is called; however, you can optionally pass arbitrary (serializable) data values to QBWC.add_job. This data will immediately be serialized and persisted by QBWC.add_job, then later deserialized and passed to QBWC::Worker#handle_response during a QuickBooks Web Connector session.
 
 ### Sessions ###
 
-You may optionally specify an initialization block that will be called when each QuickBooks Web Connector session is established:
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session (a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update). For this purpose, you may optionally provide an initialization block that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
+
+You assign this initialization block prior to any QuickBooks Web Connector session being established, outside of any QBWC::Worker classes. For example:
 
 ```ruby
+        require 'qbwc'
 	QBWC.set_session_initializer() do
           puts "New QuickBooks Web Connector session has been established"
+          @information_from_jobs = {}
         end
+        QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 
 ```
 
