@@ -74,7 +74,7 @@ class QBWC::Job
     @request_index = ri
   end
 
-  def next
+  def next_request
     # Generate and save the requests to run when starting the job.
     unless @worker_requests_called
       r = worker.requests
@@ -93,6 +93,7 @@ class QBWC::Job
     QBWC.logger.info("Next request is '#{nr}'.")
     return QBWC::Request.new(nr)
   end
+  alias :next :next_request  # Deprecated method name 'next'
 
   def reset
     self.request_index = 0
