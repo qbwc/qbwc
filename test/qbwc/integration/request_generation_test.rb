@@ -34,6 +34,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class SingleRequestWorker < QBWC::Worker
     def requests
+      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       {:foo => 'bar'}
     end
   end
@@ -87,6 +88,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class MultipleRequestWorker < QBWC::Worker
     def requests
+      $MULTIPLE_REQUESTS_INVOKED_COUNT += 1 if $MULTIPLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       [
         {:foo => 'bar'},
         {:bar => 'foo'}
@@ -95,6 +97,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   test "multiple request worker" do
+    $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
+
     QBWC.add_job(:integration_test, true, '', MultipleRequestWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next
@@ -102,22 +106,32 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_not_nil session.next
     simulate_response(session)
     assert_nil session.next
+
+    assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
 
   test 'multiple jobs' do
+    $SINGLE_REQUESTS_INVOKED_COUNT   = 0
+    $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
+
     QBWC.add_job(:integration_test_1, true, '', SingleRequestWorker)
     QBWC.add_job(:integration_test_2, true, '', MultipleRequestWorker)
     assert_equal 2, QBWC.jobs.length
     session = QBWC::Session.new('foo', '')
-    # one from SingleRequestWorker
+
+    # one request from SingleRequestWorker
     assert_not_nil session.next
     simulate_response(session)
-    # two from MultipleRequestWorker
+
+    # two requests from MultipleRequestWorker
     assert_not_nil session.next
     simulate_response(session)
     assert_not_nil session.next
     simulate_response(session)
     assert_nil session.next
+
+    assert_equal 1, $SINGLE_REQUESTS_INVOKED_COUNT
+    assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end  
 
   class ShouldntRunWorker < QBWC::Worker
