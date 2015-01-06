@@ -78,7 +78,6 @@ module QBWC
     def pending_jobs(company)
       js = jobs
       QBWC.logger.info "#{js.length} jobs exist, checking for pending jobs for company '#{company}'."
-      js.each { |job| job.reset }
       storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?})
     end
     
