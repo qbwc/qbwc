@@ -15,7 +15,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   test "worker with nothing" do
     QBWC.add_job(:integration_test, true, '', QBWC::Worker)
     session = QBWC::Session.new('foo', '')
-    assert_nil session.next
+    assert_nil session.next_request
   end
 
   class NilRequestWorker < QBWC::Worker
@@ -27,9 +27,9 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   test "worker with nil" do
     QBWC.add_job(:integration_test, true, '', NilRequestWorker)
     session = QBWC::Session.new('foo', '')
-    assert_nil session.next
+    assert_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
   end
 
   class SingleRequestWorker < QBWC::Worker
@@ -43,9 +43,9 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:integration_test, true, '', SingleRequestWorker)
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == false}
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
   end
 
   class HandleResponseOmitsJobWorker < QBWC::Worker
@@ -61,9 +61,9 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     $HANDLE_RESPONSE_EXECUTED = false
     QBWC.add_job(:integration_test, true, '', HandleResponseOmitsJobWorker)
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
     assert $HANDLE_RESPONSE_EXECUTED
   end
 
@@ -81,9 +81,9 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     $HANDLE_RESPONSE_IS_PASSED_DATA = false
     QBWC.add_job(:integration_test, true, '', HandleResponseWithDataWorker, nil, $HANDLE_RESPONSE_DATA)
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
     assert $HANDLE_RESPONSE_IS_PASSED_DATA
   end
 
@@ -106,15 +106,15 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     QBWC.add_job(:integration_test, true, '', MultipleRequestWorker)
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
     assert_equal ({:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}), $REQUESTS_FOUND_IN_RESPONSE
 
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
     assert_equal ({:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}), $REQUESTS_FOUND_IN_RESPONSE
 
-    assert_nil session.next
+    assert_nil session.next_request
 
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
 
@@ -139,15 +139,15 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
 
     # one request from SingleRequestWorker
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
 
     # two requests from MultipleRequestWorker
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
 
     assert_equal 1, $SINGLE_REQUESTS_INVOKED_COUNT
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
@@ -190,7 +190,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   test "shouldnt run worker" do
     QBWC.add_job(:integration_test, true, '', ShouldntRunWorker)
     session = QBWC::Session.new('foo', '')
-    assert_nil session.next
+    assert_nil session.next_request
   end
 
   $VARIABLE_REQUEST_COUNT = 2
@@ -207,13 +207,13 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   test "variable request worker" do
     QBWC.add_job(:integration_test, true, '', VariableRequestWorker)
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
     # The number of requests should be fixed after the job starts.
     $VARIABLE_REQUEST_COUNT = 5
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
   end
 
   class RequestsArgumentSuppressesRequestWorker < QBWC::Worker
@@ -226,11 +226,11 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:integration_test, true, '', RequestsArgumentSuppressesRequestWorker, QBWC_CUSTOMER_ADD_RQ)
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
     session = QBWC::Session.new('foo', '')
-    request = session.next
+    request = session.next_request
     assert_not_nil request
     assert_match /CustomerAddRq.*\/CustomerAddRq/m, request.request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
 
     assert_match /CustomerAddRq.*\/CustomerAddRq/m, QBWC::ActiveRecord::Job::QbwcJob.first[:requests][0]
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
@@ -261,7 +261,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     usr.name = 'bleech'
 
     session = QBWC::Session.new('foo', '')
-    request = session.next
+    request = session.next_request
     assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request.request
 
     assert_equal [{:customer_query_rq => {:full_name => QBWC_USERNAME}}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
@@ -291,15 +291,15 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     usr2.name = 'bleech'
 
     session = QBWC::Session.new('foo', '')
-    request1 = session.next
+    request1 = session.next_request
     assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request1.request
     simulate_response(session)
 
-    request2 = session.next
+    request2 = session.next_request
     assert_match /FullName.usr2 name.\/FullName/, request2.request
     simulate_response(session)
 
-    assert_nil session.next
+    assert_nil session.next_request
 
     assert_equal multiple_requests[0], QBWC::ActiveRecord::Job::QbwcJob.first[:requests][0]
     assert_equal multiple_requests[1], QBWC::ActiveRecord::Job::QbwcJob.first[:requests][1]
