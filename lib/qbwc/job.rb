@@ -7,6 +7,7 @@ class QBWC::Job
     @enabled = enabled
     @company = company || QBWC.company_file_path
     @worker_class = worker_class
+    @worker_requests_called = false
     @requests = requests
     @data = data
     @request_index = 0
