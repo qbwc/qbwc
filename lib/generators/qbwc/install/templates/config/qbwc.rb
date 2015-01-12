@@ -8,7 +8,7 @@ QBWC.configure do |c|
   c.company_file_path = ""
   
   #Minimum Quickbooks Version Required for use in QBXML Requests
-  c.min_version = 7.0
+  c.min_version = "7.0"
   
   #Quickbooks Type (either :qb or :qbpos)
   c.api = :qb
