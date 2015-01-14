@@ -110,6 +110,46 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
 
+  class RequestsFromDbWorker < QBWC::Worker
+    $REQUESTS_FROM_DB = [
+        {:request1 => 'value1'},
+        {:request2 => 'value2'},
+        {:request3 => 'value3'},
+    ]
+
+    def requests
+      $REQUESTS_FROM_DB
+    end
+
+    def handle_response(response, job, data)
+      $REQUESTS_FROM_DB.shift  # Simulate marking first request as completed
+      job.reset                # Must reset request index to zero
+    end
+  end
+
+  test 'multiple requests from db' do
+    QBWC.add_job(:integration_test_multiple_requests_from_db, true, '', RequestsFromDbWorker)
+    assert_equal 1, QBWC.jobs.length
+    session = QBWC::Session.new('foo', '')
+
+    req1 = session.next_request
+    assert_not_nil req1
+    assert_match /xml.*Request1.*value1.*Request1/m, req1.request
+    simulate_response(session)
+
+    req2 = session.next_request
+    assert_not_nil req2
+    assert_match /xml.*Request2.*value2.*Request2/m, req2.request
+    simulate_response(session)
+
+    req3 = session.next_request
+    assert_not_nil req3
+    assert_match /xml.*Request3.*value3.*Request3/m, req3.request
+    simulate_response(session)
+
+    assert_nil session.next_request
+  end
+
   test 'multiple jobs' do
     $SINGLE_REQUESTS_INVOKED_COUNT   = 0
     $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
