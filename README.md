@@ -44,7 +44,9 @@ A job is associated to a worker, which is an object descending from `QBWC::Worke
 
 - `requests` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
 - `should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
-- `handle_response(response)` - defines what to do with the response from Quickbooks.
+- `handle_response(response, job, data)` - defines what to do with the response from Quickbooks.
+
+All three methods are not invoked until a QuickBooks Web Connector session has been established with your web service.
 
 A sample worker to get a list of customers from QuickBooks:
 
@@ -62,7 +64,7 @@ class CustomerTestWorker < QBWC::Worker
 		}
 	end
 
-	def handle_response(r)
+	def handle_response(r, job, data)
 		# handle_response will get customers in groups of 100. When this is 0, we're done.
 		complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
 
@@ -83,9 +85,43 @@ require 'qbwc'
 QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 ```
 
-After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. 
+After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. For example:
+
+```ruby
+	def handle_response(r, job, data)
+		QBWC.delete_job(job.name)
+	end
+
+```
+
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
+
+### Referencing memory values when constructing requests ###
+
+A QBWC::Worker#requests method cannot access values that are in-memory (local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using QBWC::Worker#requests, you can optionally construct and pass requests directly to QBWC.add_job (scalar request or array of requests). These requests will be immediately persisted by QBWC.add_job (in contrast to requests constructed by QBWC::Worker#requests, which are persisted during a QuickBooks Web Connector session).
+
+A QBWC::Worker#requests method overrides any requests passed to QBWC.add_job; if QBWC::Worker#requests returns a non-nil value, then this value will be sent to QuickBooks Web Connector (and any requests passed directly to QBWC.add_job will be ignored).
+
+### Referencing memory values when handling responses ###
+
+Similarly, a QBWC::Worker#handle_response method cannot access values that are in-memory at the time that QBWC.add_job is called; however, you can optionally pass arbitrary (serializable) data values to QBWC.add_job. This data will immediately be serialized and persisted by QBWC.add_job, then later deserialized and passed to QBWC::Worker#handle_response during a QuickBooks Web Connector session.
+
+### Sessions ###
+
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session (a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update). For this purpose, you may optionally provide an initialization block that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
+
+You assign this initialization block prior to any QuickBooks Web Connector session being established, outside of any QBWC::Worker classes. For example:
+
+```ruby
+        require 'qbwc'
+	QBWC.set_session_initializer() do
+          puts "New QuickBooks Web Connector session has been established"
+          @information_from_jobs = {}
+        end
+        QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
+
+```
 
 ### Check versions ###
 

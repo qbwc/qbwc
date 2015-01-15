@@ -2,23 +2,32 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => true, :presence => true
     serialize :requests, Array
+    serialize :data
+    serialize :worker_requests_called
 
     def to_qbwc_job
-      QBWC::ActiveRecord::Job.new(name, enabled, company, worker_class, requests)
+      QBWC::ActiveRecord::Job.new(name, enabled, company, worker_class, requests, data)
     end
 
   end
 
   # Creates and persists a job.
-  def self.add_job(name, enabled, company, worker_class)
+  def self.add_job(name, enabled, company, worker_class, requests, data)
+
     worker_class = worker_class.to_s
     ar_job = find_ar_job_with_name(name).first_or_initialize
     ar_job.company = company
     ar_job.enabled = enabled
     ar_job.request_index = 0
     ar_job.worker_class = worker_class
+    ar_job.worker_requests_called = false
     ar_job.save!
-    self.new(name, enabled, company, worker_class)
+
+    jb = self.new(name, enabled, company, worker_class, requests, data)
+    jb.requests = requests.is_a?(Array) ? requests : [requests] unless requests.nil?
+    jb.data = data
+
+    jb
   end
 
   def self.find_job_with_name(name)
@@ -33,6 +42,15 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def find_ar_job
     self.class.find_ar_job_with_name(name)
+  end
+
+  def self.delete_job_with_name(name)
+    j = find_ar_job_with_name(name).first
+    j.destroy unless j.nil?
+  end
+
+  def get_persistent_value(attribute_name)
+    find_ar_job.pluck(attribute_name).first
   end
 
   def enabled=(value)
@@ -50,6 +68,26 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def requests=(r)
     find_ar_job.update_all(:requests => r.to_yaml)
+    super
+  end
+
+  def data
+    find_ar_job.pluck(:data).first
+    super
+  end
+
+  def data=(r)
+    find_ar_job.update_all(:data => r.to_yaml)
+    super
+  end
+
+  def worker_requests_called
+    find_ar_job.pluck(:worker_requests_called).first
+    super
+  end
+
+  def worker_requests_called=(value)
+    find_ar_job.update_all(:worker_requests_called => value)
     super
   end
 

@@ -97,6 +97,7 @@ QWC
         ticket = QBWC.storage_module::Session.new(user, company).ticket if company
         company ||= 'none'
         QBWC.logger.info "Company is '#{company}', ticket is '#{ticket}'."
+        QBWC.session_initializer.call unless QBWC.session_initializer.nil?
       else
         QBWC.logger.info "Authentication of user '#{params[:strUserName]}' failed."
       end

@@ -2,12 +2,14 @@ class QBWC::Job
 
   attr_reader :name, :company, :worker_class
 
-  def initialize(name, enabled, company, worker_class, requests = [])
+  def initialize(name, enabled, company, worker_class, requests = [], data = nil)
     @name = name
     @enabled = enabled
     @company = company || QBWC.company_file_path
     @worker_class = worker_class
+    @worker_requests_called = get_persistent_value(:worker_requests_called)
     @requests = requests
+    @data = data
     @request_index = 0
   end
 
@@ -18,7 +20,7 @@ class QBWC::Job
   def process_response(response, session, advance)
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    worker.handle_response(response)
+    worker.handle_response(response, self, data)
   end
 
   def advance_next_request
@@ -57,6 +59,22 @@ class QBWC::Job
     @requests = r
   end
 
+  def data
+    @data
+  end
+
+  def data=(d)
+    @data = d
+  end
+
+  def worker_requests_called
+    @worker_requests_called
+  end
+
+  def worker_requests_called=(value)
+    @worker_requests_called = value
+  end
+
   def request_index
     @request_index
   end
@@ -65,25 +83,30 @@ class QBWC::Job
     @request_index = ri
   end
 
-  def next
+  def next_request
     # Generate and save the requests to run when starting the job.
-    if requests.nil? || requests.empty?
+    unless self.worker_requests_called
       r = worker.requests
-      r = [r] if r.is_a?(Hash)
-      self.requests = r
+      self.worker_requests_called = true
+      unless r.nil?
+        r = [r] if r.is_a?(Hash)
+        self.requests = r
+      end
     end
+
     QBWC.logger.info("Requests available are '#{requests}'.")
     ri = request_index
     QBWC.logger.info("Request index is '#{ri}'.")
-    return nil if requests.nil? || ri >= requests.length
+    return nil if ri.nil? || requests.nil? || ri >= requests.length
     nr = requests[ri]
     QBWC.logger.info("Next request is '#{nr}'.")
     return QBWC::Request.new(nr)
   end
+  alias :next :next_request  # Deprecated method name 'next'
 
   def reset
     self.request_index = 0
-    self.requests = []
+    #self.requests = []
   end
 
 end

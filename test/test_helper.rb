@@ -127,9 +127,17 @@ end
 #-------------------------------------------
 def _authenticate_with_queued_job
   # Queue a job
-  QBWC.add_job(:customer_add_rq_job, true, COMPANY, QBWC::Worker) do
-    QBWC_CUSTOMER_ADD_RQ
-  end
+  QBWC.add_job(:customer_add_rq_job, true, COMPANY, QBWC::Worker)
 
   _authenticate
+end
+
+def simulate_response(session)
+  session.response = <<-EOF
+  <?xml version="1.0"?><?qbxml version="7.0"?>
+<QBXML>
+  <QBXMLMsgsRs onError="stopOnError">
+  </QBXMLMsgsRs>
+</QBXML>
+  EOF
 end
