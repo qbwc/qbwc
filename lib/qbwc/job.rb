@@ -7,7 +7,7 @@ class QBWC::Job
     @enabled = enabled
     @company = company || QBWC.company_file_path
     @worker_class = worker_class
-    @worker_requests_called = false
+    @worker_requests_called = get_persistent_value(:worker_requests_called)
     @requests = requests
     @data = data
     @request_index = 0
@@ -67,6 +67,14 @@ class QBWC::Job
     @data = d
   end
 
+  def worker_requests_called
+    @worker_requests_called
+  end
+
+  def worker_requests_called=(value)
+    @worker_requests_called = value
+  end
+
   def request_index
     @request_index
   end
@@ -77,9 +85,9 @@ class QBWC::Job
 
   def next_request
     # Generate and save the requests to run when starting the job.
-    unless @worker_requests_called
+    unless self.worker_requests_called
       r = worker.requests
-      @worker_requests_called = true
+      self.worker_requests_called = true
       unless r.nil?
         r = [r] if r.is_a?(Hash)
         self.requests = r

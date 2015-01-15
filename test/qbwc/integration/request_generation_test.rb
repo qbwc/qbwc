@@ -157,10 +157,12 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:integration_test_1, true, '', SingleRequestWorker)
     QBWC.add_job(:integration_test_2, true, '', MultipleRequestWorker)
     assert_equal 2, QBWC.jobs.length
+    QBWC.jobs.each {|job| assert job.worker_requests_called == false}
     session = QBWC::Session.new('foo', '')
 
     # one request from SingleRequestWorker
     assert_not_nil session.next_request
+    QBWC.jobs.each {|job| assert job.worker_requests_called == (job.name == 'integration_test_1') }
     simulate_response(session)
 
     # two requests from MultipleRequestWorker
@@ -172,6 +174,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     assert_equal 1, $SINGLE_REQUESTS_INVOKED_COUNT
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
+    QBWC.jobs.each {|job| assert job.worker_requests_called == true}
   end  
 
   class ShouldntRunWorker < QBWC::Worker
