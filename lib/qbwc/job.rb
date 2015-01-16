@@ -9,7 +9,6 @@ class QBWC::Job
     @worker_class = worker_class
     @requests = requests
     @request_index = 0
-    @requests_provided_when_job_added = get_persistent_value(:requests_provided_when_job_added)
   end
 
   def worker
