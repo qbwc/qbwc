@@ -20,7 +20,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     ar_job.worker_class = worker_class
     ar_job.save!
 
-    jb = self.new(name, enabled, company, worker_class)
+    jb = self.new(name, enabled, company, worker_class, requests)
     jb.requests = requests.is_a?(Array) ? requests : [requests] unless requests.nil?
 
     jb
