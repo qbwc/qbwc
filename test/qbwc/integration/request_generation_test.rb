@@ -26,7 +26,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class SingleRequestWorker < QBWC::Worker
     def requests
-      {:foo => 'bar'}
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
   end
 
@@ -41,8 +41,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   class MultipleRequestWorker < QBWC::Worker
     def requests
       [
-        {:foo => 'bar'},
-        {:bar => 'foo'}
+        {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
+        {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
   end
@@ -76,8 +76,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   class ShouldntRunWorker < QBWC::Worker
     def requests
       [
-        {:foo => 'bar'},
-        {:bar => 'foo'}
+        {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
+        {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
 
@@ -97,7 +97,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     def requests
       r = []
       $VARIABLE_REQUEST_COUNT.times do
-        r << {:foo => 'bar'}
+        r << {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
       end
       return r
     end
