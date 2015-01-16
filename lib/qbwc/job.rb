@@ -9,6 +9,7 @@ class QBWC::Job
     @worker_class = worker_class
     @requests = requests
     @request_index = 0
+    @requests_provided_when_job_added = get_persistent_value(:requests_provided_when_job_added)
   end
 
   def worker
@@ -65,15 +66,20 @@ class QBWC::Job
     @request_index = ri
   end
 
+  def requests_provided_when_job_added
+    @requests_provided_when_job_added
+  end
+
+  def requests_provided_when_job_added=(value)
+    @requests_provided_when_job_added = value
+  end
+
   def next
     # Generate and save the requests to run when starting the job.
-    unless @worker_requests_called
+    if (requests.nil? || requests.empty?) && ! self.requests_provided_when_job_added
       r = worker.requests
-      @worker_requests_called = true
-      unless r.nil?
-        r = [r] if r.is_a?(Hash)
-        self.requests = r
-      end
+      r = [r] if r.is_a?(Hash)
+      self.requests = r
     end
 
     QBWC.logger.info("Requests available are '#{requests}'.")

@@ -2,6 +2,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => true, :presence => true
     serialize :requests, Array
+    serialize :requests_provided_when_job_added
 
     def to_qbwc_job
       QBWC::ActiveRecord::Job.new(name, enabled, company, worker_class, requests)
@@ -22,6 +23,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
     jb = self.new(name, enabled, company, worker_class, requests)
     jb.requests = requests.is_a?(Array) ? requests : [requests] unless requests.nil?
+    jb.requests_provided_when_job_added = (! requests.nil?)
 
     jb
   end
@@ -40,6 +42,10 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     self.class.find_ar_job_with_name(name)
   end
 
+  def get_persistent_value(attribute_name)
+    find_ar_job.pluck(attribute_name).first
+  end
+
   def enabled=(value)
     find_ar_job.update_all(:enabled => value)
   end
@@ -55,6 +61,16 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def requests=(r)
     find_ar_job.update_all(:requests => r.to_yaml)
+    super
+  end
+
+  def requests_provided_when_job_added
+    find_ar_job.pluck(:requests_provided_when_job_added).first
+    super
+  end
+
+  def requests_provided_when_job_added=(value)
+    find_ar_job.update_all(:requests_provided_when_job_added => value)
     super
   end
 
