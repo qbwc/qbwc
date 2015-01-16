@@ -99,9 +99,9 @@ Use the [Onscreen Reference for Intuit Software Development Kits](https://develo
 
 ### Referencing memory values when constructing requests ###
 
-A QBWC::Worker#requests method cannot access values that are in-memory (local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using QBWC::Worker#requests, you can optionally construct and pass requests directly to QBWC.add_job (scalar request or array of requests). These requests will be immediately persisted by QBWC.add_job (in contrast to requests constructed by QBWC::Worker#requests, which are persisted during a QuickBooks Web Connector session).
+A `QBWC::Worker#requests` method cannot access values that are in-memory (global variables, local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using `QBWC::Worker#requests`, you can optionally construct and pass requests directly to `QBWC.add_job` (Hash, String, or array of Hashes and Strings). These requests will be immediately persisted by `QBWC.add_job` (in contrast to requests constructed by `QBWC::Worker#requests`, which are persisted during a QuickBooks Web Connector session).
 
-If requests are passed to QBWC.add_job, any QBWC::Worker#requests method will be ignored and will not be invoked during QuickBooks Web Connector sessions.
+If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method will be ignored and will not be invoked during QuickBooks Web Connector sessions.
 
 ### Check versions ###
 
