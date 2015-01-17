@@ -46,6 +46,8 @@ A job is associated to a worker, which is an object descending from `QBWC::Worke
 - `should_run?` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
 - `handle_response(response)` - defines what to do with the response from Quickbooks.
 
+All three methods are not invoked until a QuickBooks Web Connector session has been established with your web service.
+
 A sample worker to get a list of customers from QuickBooks:
 
 ```ruby
@@ -86,6 +88,12 @@ QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. 
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
+
+### Referencing memory values when constructing requests ###
+
+A `QBWC::Worker#requests` method cannot access values that are in-memory (global variables, local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using `QBWC::Worker#requests`, you can optionally construct and pass requests directly to `QBWC.add_job` (Hash, String, or array of Hashes and Strings). These requests will be immediately persisted by `QBWC.add_job` (in contrast to requests constructed by `QBWC::Worker#requests`, which are persisted during a QuickBooks Web Connector session).
+
+If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method will be ignored and will not be invoked during QuickBooks Web Connector sessions.
 
 ### Check versions ###
 

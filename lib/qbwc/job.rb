@@ -65,13 +65,22 @@ class QBWC::Job
     @request_index = ri
   end
 
+  def requests_provided_when_job_added
+    @requests_provided_when_job_added
+  end
+
+  def requests_provided_when_job_added=(value)
+    @requests_provided_when_job_added = value
+  end
+
   def next
     # Generate and save the requests to run when starting the job.
-    if requests.nil? || requests.empty?
+    if (requests.nil? || requests.empty?) && ! self.requests_provided_when_job_added
       r = worker.requests
       r = [r] if r.is_a?(Hash)
       self.requests = r
     end
+
     QBWC.logger.info("Requests available are '#{requests}'.")
     ri = request_index
     QBWC.logger.info("Request index is '#{ri}'.")
@@ -83,7 +92,7 @@ class QBWC::Job
 
   def reset
     self.request_index = 0
-    self.requests = []
+    self.requests = [] unless self.requests_provided_when_job_added
   end
 
 end

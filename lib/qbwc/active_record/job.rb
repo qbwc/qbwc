@@ -10,7 +10,8 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   end
 
   # Creates and persists a job.
-  def self.add_job(name, enabled, company, worker_class)
+  def self.add_job(name, enabled, company, worker_class, requests)
+
     worker_class = worker_class.to_s
     ar_job = find_ar_job_with_name(name).first_or_initialize
     ar_job.company = company
@@ -18,7 +19,12 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     ar_job.request_index = 0
     ar_job.worker_class = worker_class
     ar_job.save!
-    self.new(name, enabled, company, worker_class)
+
+    jb = self.new(name, enabled, company, worker_class, requests)
+    jb.requests = requests.is_a?(Array) ? requests : [requests] unless requests.nil?
+    jb.requests_provided_when_job_added = (! requests.nil? && ! requests.empty?)
+
+    jb
   end
 
   def self.find_job_with_name(name)
@@ -50,6 +56,16 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def requests=(r)
     find_ar_job.update_all(:requests => r.to_yaml)
+    super
+  end
+
+  def requests_provided_when_job_added
+    find_ar_job.pluck(:requests_provided_when_job_added).first
+    #super
+  end
+
+  def requests_provided_when_job_added=(value)
+    find_ar_job.update_all(:requests_provided_when_job_added => value)
     super
   end
 
