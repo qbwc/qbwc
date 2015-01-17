@@ -77,6 +77,16 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_nil session.next
 
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
+
+    # requests should be generated once per session
+    session2 = QBWC::Session.new('foo', '')
+    assert_not_nil session2.next
+    simulate_response(session2)
+    assert_not_nil session2.next
+    simulate_response(session2)
+    assert_nil session2.next
+
+    assert_equal 2, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
 
   test 'multiple jobs' do
