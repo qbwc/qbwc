@@ -92,7 +92,7 @@ class QBWC::Job
 
   def reset
     self.request_index = 0
-    #self.requests = []
+    self.requests = [] unless self.requests_provided_when_job_added
   end
 
 end

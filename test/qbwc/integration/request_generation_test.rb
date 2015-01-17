@@ -32,7 +32,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   class SingleRequestWorker < QBWC::Worker
     def requests
       $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
-      {:foo => 'bar'}
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
   end
 
@@ -68,8 +68,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     def requests
       $MULTIPLE_REQUESTS_INVOKED_COUNT += 1 if $MULTIPLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       [
-        {:foo => 'bar'},
-        {:bar => 'foo'}
+        {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
+        {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
   end
@@ -86,6 +86,16 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_nil session.next
 
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
+
+    # requests should be generated once per session
+    session2 = QBWC::Session.new('foo', '')
+    assert_not_nil session2.next
+    simulate_response(session2)
+    assert_not_nil session2.next
+    simulate_response(session2)
+    assert_nil session2.next
+
+    assert_equal 2, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
 
   test 'multiple jobs' do
@@ -136,8 +146,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   class ShouldntRunWorker < QBWC::Worker
     def requests
       [
-        {:foo => 'bar'},
-        {:bar => 'foo'}
+        {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
+        {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
 
@@ -157,7 +167,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     def requests
       r = []
       $VARIABLE_REQUEST_COUNT.times do
-        r << {:foo => 'bar'}
+        r << {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
       end
       return r
     end
@@ -215,15 +225,15 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     usr = SimulatedUserModel.new
     usr.name = QBWC_USERNAME
 
-    QBWC.add_job(:integration_test, true, '', RequestsArgumentEstablishesRequestEarlyWorker, {:name => usr.name})
+    QBWC.add_job(:integration_test, true, '', RequestsArgumentEstablishesRequestEarlyWorker, {:customer_query_rq => {:full_name => QBWC_USERNAME}})
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
     usr.name = 'bleech'
 
     session = QBWC::Session.new('foo', '')
     request = session.next
-    assert_match /Name.#{QBWC_USERNAME}.\/Name/, request.request
+    assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request.request
 
-    assert_equal [{:name => QBWC_USERNAME}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
+    assert_equal [{:customer_query_rq => {:full_name => QBWC_USERNAME}}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
   end
 
@@ -241,8 +251,8 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     usr2.name = 'usr2 name'
 
     multiple_requests = [
-      {:name => usr1.name},
-      {:name => usr2.name}
+      {:customer_query_rq => {:full_name => usr1.name}},
+      {:customer_query_rq => {:full_name => usr2.name}}
     ]
     QBWC.add_job(:integration_test, true, '', RequestsArgumentEstablishesRequestEarlyWorker, multiple_requests)
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
@@ -251,16 +261,17 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     session = QBWC::Session.new('foo', '')
     request1 = session.next
-    assert_match /Name.#{QBWC_USERNAME}.\/Name/, request1.request
+    assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request1.request
     simulate_response(session)
 
     request2 = session.next
-    assert_match /Name.usr2 name.\/Name/, request2.request
+    assert_match /FullName.usr2 name.\/FullName/, request2.request
     simulate_response(session)
 
     assert_nil session.next
 
-    assert_equal [{:name => QBWC_USERNAME}, {:name => 'usr2 name'}], QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
+    assert_equal multiple_requests[0], QBWC::ActiveRecord::Job::QbwcJob.first[:requests][0]
+    assert_equal multiple_requests[1], QBWC::ActiveRecord::Job::QbwcJob.first[:requests][1]
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
   end
 

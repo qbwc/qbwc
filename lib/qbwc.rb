@@ -22,7 +22,7 @@ module QBWC
   
   # Minimum quickbooks version required for use in qbxml requests
   mattr_accessor :min_version
-  @@min_version = 3.0
+  @@min_version = "3.0"
   
   # Quickbooks support url provided in qwc file, defaults to root_url
   mattr_accessor :support_site_url
@@ -40,7 +40,7 @@ module QBWC
   @@on_error = 'stopOnError'
 
   # Quickbooks Type (either :qb or :qbpos)
-  mattr_reader :api, :parser
+  mattr_reader :api
   @@api = :qb
 
   # Storage module
@@ -88,7 +88,10 @@ module QBWC
     def api=(api)
       raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
       @@api = api
-      @@parser = Qbxml.new(api) 
+    end
+
+    def parser
+      @@parser ||= Qbxml.new(api, min_version)
     end
 
     # Allow configuration overrides
