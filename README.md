@@ -103,9 +103,9 @@ A `QBWC::Worker#requests` method cannot access values that are in-memory (global
 
 If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method will be ignored and will not be invoked during QuickBooks Web Connector sessions.
 
-### Data passed to add_job ###
+### Referencing memory values when handling responses ###
 
-You can optionally provide arbitrary data directly to QBWC.add_job. If provided, this data will be passed to handle_response.
+Similarly, a `QBWC::Worker#handle_response` method cannot access values that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass arbitrary (serializable) data values to `QBWC.add_job`. This data will immediately be serialized and persisted by `QBWC.add_job`, then later deserialized and passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
 
 ### Check versions ###
 
