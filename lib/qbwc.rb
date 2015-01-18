@@ -10,43 +10,51 @@ module QBWC
   autoload :Request, 'qbwc/request'
   autoload :Worker, 'qbwc/worker'
 
-  # Web connector login credentials
+  # Credentials to be entered in QuickBooks Web Connector.
   mattr_accessor :username
-  @@username = 'foo'
+  @@username = nil
   mattr_accessor :password
-  @@password = 'bar'
-  
-  # Full path to pompany file 
+  @@password = nil
+
+  # Path to QuickBooks company file on the client. Empty string to use whatever file is open when the connector runs.
   mattr_accessor :company_file_path 
   @@company_file_path = ""
-  
-  # Minimum quickbooks version required for use in qbxml requests
+
+  # Instead of using hard coded username, password, and path, use a proc
+  # to determine who has access to what. Useful for multiple users or
+  # multiple company files.
+  mattr_accessor :authenticator
+  @@authenticator = nil
+
+  # QBXML version to use. Check the "Implementation" column in the QuickBooks Onscreen Reference to see which fields are supported in which versions. Newer versions of QuickBooks are backwards compatible with older QBXML versions.
   mattr_accessor :min_version
   @@min_version = "3.0"
-  
-  # Quickbooks support url provided in qwc file, defaults to root_url
-  mattr_accessor :support_site_url
-  @@support_site_url = nil
-  
-  # Quickbooks owner id provided in qwc file
-  mattr_accessor :owner_id
-  @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
-  
-  # How often to run web service (in minutes)
-  mattr_accessor :minutes_to_run
-  @@minutes_to_run = 5
-  
-  mattr_reader :on_error
-  @@on_error = 'stopOnError'
 
-  # Quickbooks Type (either :qb or :qbpos)
+  # Quickbooks type (either :qb or :qbpos).
   mattr_reader :api
   @@api = :qb
 
-  # Storage module
+  # Storage module. Only :active_record is currently supported.
   mattr_accessor :storage
   @@storage = :active_record
 
+  # Support URL shown in QuickBooks Web Connector. nil will use root path of the app.
+  mattr_accessor :support_site_url
+  @@support_site_url = nil
+
+  # Unique user GUID. If you want access by multiple users to the same file, you will need to modify this in the generated QWC file.
+  mattr_accessor :owner_id
+  @@owner_id = '{57F3B9B1-86F1-4fcc-B1EE-566DE1813D20}'
+
+  # How often to run web service (in minutes) or nil to only run manually.
+  mattr_accessor :minutes_to_run
+  @@minutes_to_run = nil
+
+  # In the event of an error running requests, :stop all work or :continue with the next request?
+  mattr_reader :on_error
+  @@on_error = 'stopOnError'
+
+  # Logger to use.
   mattr_accessor :logger
   @@logger = Rails.logger
   

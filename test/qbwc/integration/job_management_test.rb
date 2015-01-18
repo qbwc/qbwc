@@ -64,11 +64,11 @@ class JobManagementTest < ActionDispatch::IntegrationTest
   end
 
   class DeleteJobWorker < QBWC::Worker
-    def requests
+    def requests(job)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
 
-    def handle_response(resp, job, data)
+    def handle_response(resp, job, request, data)
       QBWC.delete_job(job.name)
     end
   end

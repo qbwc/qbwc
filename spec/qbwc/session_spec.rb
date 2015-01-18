@@ -114,11 +114,11 @@ describe QBWC::Session do
   end
 
   class QueryAndDeleteWorker < QBWC::Worker
-    def requests
+    def requests(job)
       {:name => 'mrjoecustomer'}
     end
 
-    def handle_response(resp, job, data)
+    def handle_response(resp, job, request, data)
        QBWC.delete_job(job.name)
     end
   end
