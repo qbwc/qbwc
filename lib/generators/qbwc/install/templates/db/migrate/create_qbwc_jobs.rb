@@ -8,6 +8,7 @@ class CreateQbwcJobs < ActiveRecord::Migration
       t.integer :request_index, :null => false, :default => 0
       t.text :requests
       t.boolean :requests_provided_when_job_added, :null => false, :default => false
+      t.text :data
       t.timestamps
     end
   end
