@@ -105,7 +105,7 @@ If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method wil
 
 ### Referencing memory values when handling responses ###
 
-Similarly, a `QBWC::Worker#handle_response` method cannot access values that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass arbitrary (serializable) data values to `QBWC.add_job`. This data will immediately be serialized and persisted by `QBWC.add_job`, then later deserialized and passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
+Similarly, a `QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, String, Array, or Hash) to `QBWC.add_job`. This data will immediately be persisted by `QBWC.add_job`, then later passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
 
 ### Check versions ###
 
