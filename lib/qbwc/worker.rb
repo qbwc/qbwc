@@ -9,7 +9,7 @@ module QBWC
       true
     end
 
-    def handle_response(response)
+    def handle_response(response, job)
     end
 
   end
