@@ -47,7 +47,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class HandleResponseOmitsJobWorker < QBWC::Worker
     def requests
-      {:foo => 'bar'}
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(*response)
       $HANDLE_RESPONSE_EXECUTED = true
