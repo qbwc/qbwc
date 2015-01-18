@@ -68,7 +68,8 @@ module QBWC
       storage_module::Job.find_job_with_name(name)
     end
 
-    def delete_job(name)
+    def delete_job(object_or_name)
+      name = (object_or_name.is_a?(Job) ? object_or_name.name : object_or_name)
       storage_module::Job.delete_job_with_name(name)
     end
 

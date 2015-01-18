@@ -89,7 +89,7 @@ After adding a job, it will remain active and will run every time QuickBooks Web
 
 ```ruby
 	def handle_response(r, job)
-		QBWC.delete_job(job.name)
+		QBWC.delete_job(job)
 	end
 
 ```

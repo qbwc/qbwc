@@ -41,12 +41,26 @@ class JobManagementTest < ActionDispatch::IntegrationTest
     assert_empty QBWC.jobs
   end
 
-  test "delete_job" do
+  test "delete_job by name" do
     jobname = :delete_job
     QBWC.add_job(jobname, true, 'my-company', QBWC::Worker)
     assert_not_nil QBWC.get_job(jobname)
     QBWC.delete_job(jobname)
     assert_nil QBWC.get_job(jobname)
+
+    # Degenerate case does not crash
+    QBWC.delete_job('')
+  end
+
+  test "delete_job by object" do
+    jobname = :delete_job
+    QBWC.add_job(jobname, true, 'my-company', QBWC::Worker)
+    job = QBWC.get_job(jobname)
+    QBWC.delete_job(job)
+    assert_nil QBWC.get_job(jobname)
+
+    # Degenerate case does not crash
+    QBWC.delete_job(nil)
   end
 
   class DeleteJobWorker < QBWC::Worker
