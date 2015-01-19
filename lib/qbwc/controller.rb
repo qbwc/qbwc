@@ -3,6 +3,10 @@ include WashOut
 
 module QBWC
   module Controller
+
+    AUTHENTICATE_NOT_VALID_USER = 'nvu'
+    AUTHENTICATE_NO_WORK = 'none'
+
     def self.included(base)
       base.class_eval do
         include WashOut::SOAP
@@ -56,6 +60,16 @@ module QBWC
     end
 
     def qwc
+      # Optional tag
+      scheduler_block = ''
+      if !QBWC.minutes_to_run.nil?
+        scheduler_block = <<SB
+   <Scheduler>
+      <RunEveryNMinutes>#{QBWC.minutes_to_run}</RunEveryNMinutes>
+   </Scheduler>
+SB
+      end
+
       qwc = <<QWC
 <QBWCXML>
    <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
@@ -68,9 +82,7 @@ module QBWC
    <FileID>{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}</FileID>
    <QBType>QBFS</QBType>
    <Style>Document</Style>
-   <Scheduler>
-      <RunEveryNMinutes>#{QBWC.minutes_to_run}</RunEveryNMinutes>
-   </Scheduler>
+   #{scheduler_block}
 </QBWCXML>
 QWC
       send_data qwc, :filename => "#{@filename || Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
@@ -89,19 +101,30 @@ QWC
     end
 
     def authenticate
-      QBWC.logger.info "Authenticating user '#{params[:strUserName]}'."
-      user = authenticate_user(params[:strUserName], params[:strPassword])
-      if user
-        QBWC.logger.info "User '#{params[:strUserName]}' authenticated."
-        company = current_company(user)
-        ticket = QBWC.storage_module::Session.new(user, company).ticket if company
-        company ||= 'none'
-        QBWC.logger.info "Company is '#{company}', ticket is '#{ticket}'."
+      username = params[:strUserName]
+      password = params[:strPassword]
+      if !QBWC.authenticator.nil?
+        company_file_path = QBWC.authenticator.call(username, password)
+      elsif username == QBWC.username && password == QBWC.password
+        company_file_path = QBWC.company_file_path
+      else
+        company_file_path = nil
+      end
+
+      ticket = nil
+      if company_file_path.nil?
+        QBWC.logger.info "Authentication of user '#{username}' failed."
+        company_file_path = AUTHENTICATE_NOT_VALID_USER
+      elsif !QBWC.pending_jobs(company_file_path).present?
+        QBWC.logger.info "Authentication of user '#{username}' succeeded, but no jobs pending for '#{company_file_path}'."
+        company_file_path = AUTHENTICATE_NO_WORK
         QBWC.session_initializer.call unless QBWC.session_initializer.nil?
       else
-        QBWC.logger.info "Authentication of user '#{params[:strUserName]}' failed."
+        QBWC.logger.info "Authentication of user '#{username}' succeeded, jobs are pending for '#{company_file_path}'."
+        ticket = QBWC.storage_module::Session.new(username, company_file_path).ticket
+        QBWC.session_initializer.call unless QBWC.session_initializer.nil?
       end
-      render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company || 'nvu']}}
+      render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company_file_path]}}
     end
 
     def send_request
@@ -137,16 +160,6 @@ QWC
     end
 
     protected
-
-    def authenticate_user(username, password)
-      username if username == QBWC.username && password == QBWC.password
-    end
-
-    def current_company(user)
-      pj = QBWC.pending_jobs(QBWC.company_file_path)
-      QBWC.logger.info "#{pj.length} pending jobs found for company '#{QBWC.company_file_path}'."
-      QBWC.company_file_path if pj.present?
-    end
 
     def get_session
       @session = QBWC.storage_module::Session.get(params[:ticket])

@@ -14,7 +14,7 @@ require 'qbwc'
 require 'qbwc/controller'
 require 'qbwc/active_record'
 
-COMPANY = ''
+COMPANY = 'c:\\QuickBooks\MyFile.QBW'
 QBWC_USERNAME = 'myUserName'
 QBWC_PASSWORD = 'myPassword'
 QBWC.api = :qb
@@ -132,6 +132,18 @@ def _authenticate_with_queued_job
   end
 
   _authenticate
+end
+
+#-------------------------------------------
+def _authenticate_wrong_password
+  # deep copy
+  bad_password_soap_data = Marshal.load(Marshal.dump(AUTHENTICATE_WASH_OUT_SOAP_DATA))
+  bad_password_soap_data[:Envelope][:Body][AUTHENTICATE_SOAP_ACTION][:strPassword] = 'something wrong'
+  @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
+  @request.env["wash_out.soap_data"]    = bad_password_soap_data
+  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+
+  post 'authenticate', use_route: :qbwc_action
 end
 
 def simulate_response(session)

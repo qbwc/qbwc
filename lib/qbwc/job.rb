@@ -17,9 +17,10 @@ class QBWC::Job
   end
 
   def process_response(response, session, advance)
+    completed_request = requests[request_index]
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    worker.handle_response(response, self, data)
+    worker.handle_response(response, self, completed_request, data)
   end
 
   def advance_next_request
@@ -41,7 +42,7 @@ class QBWC::Job
       QBWC.logger.info "Job '#{name}' not enabled."
       return false
     end
-    sr = worker.should_run?
+    sr = worker.should_run?(self)
     QBWC.logger.info "Job '#{name}' should_run?: #{sr}."
     return sr
   end
@@ -85,7 +86,7 @@ class QBWC::Job
   def next
     # Generate and save the requests to run when starting the job.
     if (requests.nil? || requests.empty?) && ! self.requests_provided_when_job_added
-      r = worker.requests
+      r = worker.requests(self)
       r = [r] if r.is_a?(Hash)
       self.requests = r
     end

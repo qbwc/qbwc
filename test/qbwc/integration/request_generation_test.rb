@@ -19,7 +19,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class NilRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       nil
     end
   end
@@ -33,7 +33,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class SingleRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
@@ -49,7 +49,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class HandleResponseOmitsJobWorker < QBWC::Worker
-    def requests
+    def requests(job)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(*response)
@@ -68,10 +68,10 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class HandleResponseWithDataWorker < QBWC::Worker
-    def requests
+    def requests(job)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
-    def handle_response(response, job, data)
+    def handle_response(response, job, request, data)
       $HANDLE_RESPONSE_IS_PASSED_DATA = (data == $HANDLE_RESPONSE_DATA)
     end
   end
@@ -88,24 +88,32 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class MultipleRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       $MULTIPLE_REQUESTS_INVOKED_COUNT += 1 if $MULTIPLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       [
         {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
         {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
+    def handle_response(response, job, request, data)
+      $REQUESTS_FOUND_IN_RESPONSE = request
+    end
   end
 
   test "multiple request worker" do
     $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
+    $REQUESTS_FOUND_IN_RESPONSE = []
 
     QBWC.add_job(:integration_test, true, '', MultipleRequestWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next
     simulate_response(session)
+    assert_equal ({:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}), $REQUESTS_FOUND_IN_RESPONSE
+
     assert_not_nil session.next
     simulate_response(session)
+    assert_equal ({:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}), $REQUESTS_FOUND_IN_RESPONSE
+
     assert_nil session.next
 
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
@@ -167,14 +175,14 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class ShouldntRunWorker < QBWC::Worker
-    def requests
+    def requests(job)
       [
         {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
         {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
 
-    def should_run?
+    def should_run?(job)
       false
     end
   end
@@ -187,7 +195,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   $VARIABLE_REQUEST_COUNT = 2
   class VariableRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       r = []
       $VARIABLE_REQUEST_COUNT.times do
         r << {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
@@ -209,7 +217,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class RequestsArgumentSuppressesRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       {:foo => 'bar'}
     end
   end
@@ -229,7 +237,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class RequestsArgumentOverridesRequestWorker < QBWC::Worker
-    def requests
+    def requests(job)
       nil
     end
   end
@@ -239,7 +247,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class RequestsArgumentEstablishesRequestEarlyWorker < QBWC::Worker
-    def requests
+    def requests(job)
       nil
     end
   end
@@ -261,7 +269,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class RequestsArgumentReturnsMultipleRequestsWorker < QBWC::Worker
-    def requests
+    def requests(job)
       nil
     end
   end

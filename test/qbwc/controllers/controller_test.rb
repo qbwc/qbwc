@@ -29,14 +29,21 @@ class QBWCControllerTest < ActionController::TestCase
     assert_match /UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body
   end
 
-  test "authenticate" do
+  test "authenticate with no jobs" do
     _authenticate
     assert_equal 0, QBWC.pending_jobs(COMPANY).count
+    assert @response.body.include?(QBWC::Controller::AUTHENTICATE_NO_WORK), @response.body
   end
 
-  test "authenticate with queued job" do
+  test "authenticate with jobs" do
     _authenticate_with_queued_job
     assert_equal 1, QBWC.pending_jobs(COMPANY).count
+    assert @response.body.include?(COMPANY), @response.body
+  end
+
+  test "authenticate fail" do
+    _authenticate_wrong_password
+    assert @response.body.include?(QBWC::Controller::AUTHENTICATE_NOT_VALID_USER), @response.body
   end
 
   test "authenticate with initialization block" do
