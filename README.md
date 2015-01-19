@@ -109,7 +109,7 @@ Similarly, a `QBWC::Worker#handle_response` method cannot access variables that 
 
 ### Sessions ###
 
-In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session (a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update). For this purpose, you may optionally provide an initialization block that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide an initialization block that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
 
 You assign this initialization block prior to any QuickBooks Web Connector session being established, outside of any `QBWC::Worker` classes. For example:
 
@@ -122,6 +122,8 @@ You assign this initialization block prior to any QuickBooks Web Connector sessi
         QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 
 ```
+
+Note: a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update.
 
 ### Check versions ###
 
