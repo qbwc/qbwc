@@ -56,6 +56,23 @@ class QBWCControllerTest < ActionController::TestCase
     assert initializer_called
   end
 
+  test "most recent initialization block is executed" do
+     initializer1_called = false
+     initializer2_called = false
+
+     QBWC.set_session_initializer() do
+        initializer1_called = true
+     end
+
+     QBWC.set_session_initializer() do
+        initializer2_called = true
+     end
+
+    _authenticate
+    assert ! initializer1_called
+    assert   initializer2_called
+  end
+
   test "send_request" do
     _authenticate_with_queued_job
 
