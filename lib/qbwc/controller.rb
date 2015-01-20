@@ -121,6 +121,7 @@ QWC
       else
         QBWC.logger.info "Authentication of user '#{username}' succeeded, jobs are pending for '#{company_file_path}'."
         ticket = QBWC.storage_module::Session.new(username, company_file_path).ticket
+        QBWC.session_initializer.call(get_session(ticket)) unless QBWC.session_initializer.nil?
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company_file_path]}}
     end
@@ -159,8 +160,8 @@ QWC
 
     protected
 
-    def get_session
-      @session = QBWC.storage_module::Session.get(params[:ticket])
+    def get_session(ticket = params[:ticket])
+      @session = QBWC.storage_module::Session.get(ticket)
     end
 
     def save_session

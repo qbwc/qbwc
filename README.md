@@ -107,6 +107,37 @@ If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method wil
 
 Similarly, a `QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, String, Array, or Hash) to `QBWC.add_job`. This data will immediately be persisted by `QBWC.add_job`, then later passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
 
+### Sessions ###
+
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs. This initialization code will not be invoked for any session in which no jobs are queued.
+
+You assign this initialization code either (a) during configuration, and/or (b) in application code by calling `set_session_initializer` (prior to any QuickBooks Web Connector session being established). For example:
+
+In config/initializers/qbwc.rb:
+
+```ruby
+c.session_initializer = Proc.new{|session|
+  puts "New QuickBooks Web Connector session has been established (configured session initializer)"
+}
+```
+
+In application code:
+```ruby
+        require 'qbwc'
+
+	QBWC.set_session_initializer() do |session|
+          puts "New QuickBooks Web Connector session has been established (overridden session initializer)"
+          @information_from_jobs = {}
+        end if the_application_needs_a_different_session_initializer
+
+        QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
+
+```
+
+Note: If you `set_session initializer` in your application code, you're only affecting the process that your application code runs in. A request to another process (e.g. if you're multiprocess or you restarted the server) means that QBWC won't see the session initializer.
+
+Note: a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update.
+
 ### Multiple companies and users ###
 
 If you want to have more than one user or connect to more than one QuickBooks company file, you will need to manually edit the QWC file before giving it to QuickBooks Web Connector.

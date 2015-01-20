@@ -50,6 +50,10 @@ module QBWC
   mattr_accessor :minutes_to_run
   @@minutes_to_run = nil
 
+  # Code to execute after each session is authenticated
+  mattr_accessor :session_initializer
+  @@session_initializer = nil
+
   # In the event of an error running requests, :stop all work or :continue with the next request?
   mattr_reader :on_error
   @@on_error = 'stopOnError'
@@ -88,6 +92,11 @@ module QBWC
       storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?})
     end
     
+    def set_session_initializer(&block)
+      @@session_initializer = block
+      self
+    end
+
     def on_error=(reaction)
       raise 'Quickbooks on_error must be :stop or :continue' unless [:stop, :continue].include?(reaction)
       @@on_error = "stopOnError" if reaction == :stop

@@ -15,6 +15,7 @@ class QBWCControllerTest < ActionController::TestCase
     #p @controller.view_paths
 
     QBWC.clear_jobs
+    QBWC.set_session_initializer() {|session| }
   end
 
   test "qwc" do
@@ -44,6 +45,40 @@ class QBWCControllerTest < ActionController::TestCase
   test "authenticate fail" do
     _authenticate_wrong_password
     assert @response.body.include?(QBWC::Controller::AUTHENTICATE_NOT_VALID_USER), @response.body
+  end
+
+  test "authenticate with initialization block" do
+     initializer_called = false
+     QBWC.set_session_initializer() do |session|
+        initializer_called = true
+        assert_not_nil session
+        assert_equal QBWC_USERNAME, session.user
+        assert_equal 0, session.progress
+        assert_nil session.error
+        #assert_not_nil session.current_job
+        #assert_not_nil session.pending_jobs
+        #assert_equal 1, session.pending_jobs.count
+     end
+
+    _authenticate_with_queued_job
+    assert initializer_called
+  end
+
+  test "most recent initialization block is executed" do
+     initializer1_called = false
+     initializer2_called = false
+
+     QBWC.set_session_initializer() do |session|
+        initializer1_called = true
+     end
+
+     QBWC.set_session_initializer() do |session|
+        initializer2_called = true
+     end
+
+    _authenticate_with_queued_job
+    assert ! initializer1_called
+    assert   initializer2_called
   end
 
   test "send_request" do
