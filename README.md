@@ -116,7 +116,7 @@ You assign this initialization code either (a) during configuration, and/or (b) 
 In config/initializers/qbwc.rb:
 
 ```ruby
-c.session_initializer = Proc.new{||
+c.session_initializer = Proc.new{|session|
   puts "New QuickBooks Web Connector session has been established (configured session initializer)"
 }
 ```
@@ -125,7 +125,7 @@ In application code:
 ```ruby
         require 'qbwc'
 
-	QBWC.set_session_initializer() do
+	QBWC.set_session_initializer() do |session|
           puts "New QuickBooks Web Connector session has been established (overridden session initializer)"
           @information_from_jobs = {}
         end if the_application_needs_a_different_session_initializer

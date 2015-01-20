@@ -21,7 +21,7 @@ QBWC.configure do |c|
 
   # Code to execute after each session is authenticated
   # Can be re-assigned by calling QBWC.set_session_initializer
-  # c.session_initializer = Proc.new{||
+  # c.session_initializer = Proc.new{|session|
   #   puts "New QuickBooks Web Connector session has been established"
   # }
 
