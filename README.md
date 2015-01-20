@@ -109,7 +109,7 @@ Similarly, a `QBWC::Worker#handle_response` method cannot access variables that 
 
 ### Sessions ###
 
-In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs. This initialization code will not be invoked for any session in which no jobs are queued.
 
 You assign this initialization code either (a) during configuration, and/or (b) in application code by calling `set_session_initializer` (prior to any QuickBooks Web Connector session being established). For example:
 

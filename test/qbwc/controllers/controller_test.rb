@@ -76,7 +76,7 @@ class QBWCControllerTest < ActionController::TestCase
         initializer2_called = true
      end
 
-    _authenticate
+    _authenticate_with_queued_job
     assert ! initializer1_called
     assert   initializer2_called
   end
