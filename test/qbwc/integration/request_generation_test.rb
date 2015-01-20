@@ -129,6 +129,46 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     assert_equal 2, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
 
+  class RequestsFromDbWorker < QBWC::Worker
+    $REQUESTS_FROM_DB = [
+        {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
+        {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}},
+        {:customer_query_rq => {:full_name => 'Quigley Brian Wally Colin'}},
+    ]
+
+    def requests(job)
+      $REQUESTS_FROM_DB
+    end
+
+    def handle_response(response, job, request, data)
+      $REQUESTS_FROM_DB.shift  # Simulate marking first request as completed
+      job.reset
+    end
+  end
+
+  test 'multiple requests from db' do
+    QBWC.add_job(:integration_test_multiple_requests_from_db, true, '', RequestsFromDbWorker)
+    assert_equal 1, QBWC.jobs.length
+    session = QBWC::Session.new('foo', '')
+
+    req1 = session.next_request
+    assert_not_nil req1
+    assert_match /xml.*FullName.*Quincy Bob William Carlos.*FullName/m, req1.request
+    simulate_response(session)
+
+    req2 = session.next_request
+    assert_not_nil req2
+    assert_match /xml.*FullName.*Quentin Billy Wyatt Charles.*FullName/m, req2.request
+    simulate_response(session)
+
+    req3 = session.next_request
+    assert_not_nil req3
+    assert_match /xml.*FullName.*Quigley Brian Wally Colin.*FullName/m, req3.request
+    simulate_response(session)
+
+    assert_nil session.next_request
+  end
+
   test 'multiple jobs' do
     $SINGLE_REQUESTS_INVOKED_COUNT   = 0
     $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
