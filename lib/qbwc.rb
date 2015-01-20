@@ -51,7 +51,7 @@ module QBWC
   @@minutes_to_run = nil
 
   # Code to execute after each session is authenticated
-  mattr_reader :session_initializer
+  mattr_accessor :session_initializer
   @@session_initializer = nil
 
   # In the event of an error running requests, :stop all work or :continue with the next request?

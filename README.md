@@ -109,19 +109,32 @@ Similarly, a `QBWC::Worker#handle_response` method cannot access variables that 
 
 ### Sessions ###
 
-In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide an initialization block that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
+In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs.
 
-You assign this initialization block prior to any QuickBooks Web Connector session being established, outside of any `QBWC::Worker` classes. For example:
+You assign this initialization code either (a) during configuration, and/or (b) in application code by calling `set_session_initializer` (prior to any QuickBooks Web Connector session being established). For example:
+
+In config/initializers/qbwc.rb:
 
 ```ruby
+c.session_initializer = Proc.new{||
+  puts "New QuickBooks Web Connector session has been established (configured session initializer)"
+}
+```
+
+In application code:
+```ruby
         require 'qbwc'
+
 	QBWC.set_session_initializer() do
-          puts "New QuickBooks Web Connector session has been established"
+          puts "New QuickBooks Web Connector session has been established (overridden session initializer)"
           @information_from_jobs = {}
-        end
+        end if the_application_needs_a_different_session_initializer
+
         QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 
 ```
+
+Note: If you `set_session initializer` in your application code, you're only affecting the process that your application code runs in. A request to another process (e.g. if you're multiprocess or you restarted the server) means that QBWC won't see the session initializer.
 
 Note: a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update.
 
