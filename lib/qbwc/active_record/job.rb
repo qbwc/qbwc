@@ -58,7 +58,6 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def requests
     find_ar_job.pluck(:requests).first
-    super
   end
 
   def requests=(r)
@@ -68,7 +67,6 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def requests_provided_when_job_added
     find_ar_job.pluck(:requests_provided_when_job_added).first
-    #super
   end
 
   def requests_provided_when_job_added=(value)
@@ -78,7 +76,6 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def data
     find_ar_job.pluck(:data).first
-    super
   end
 
   def data=(r)
