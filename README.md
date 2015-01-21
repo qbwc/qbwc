@@ -55,7 +55,7 @@ require 'qbwc'
 
 class CustomerTestWorker < QBWC::Worker
 
-	def requests
+	def requests(job)
 		{
 			:customer_query_rq => {
 				:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
