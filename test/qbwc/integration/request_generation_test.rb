@@ -5,7 +5,6 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   def setup
     RequestGenerationTest.app = Rails.application
-    Rails.logger = Logger.new('/dev/null')  # or STDOUT
     QBWC.clear_jobs
 
     $HANDLE_RESPONSE_DATA = nil

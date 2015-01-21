@@ -46,8 +46,11 @@ module QbwcTestApplication
       c.password = QBWC_PASSWORD
       c.company_file_path = COMPANY
       c.session_initializer = Proc.new{|session| $CONFIG_SESSION_INITIALIZER_PROC_EXECUTED = true }
-      c.logger = Logger.new('/dev/null') # or STDOUT
     end
+
+    # Logger
+    Rails.logger = Logger.new('/dev/null')  # or STDOUT
+    QBWC.logger = Rails.logger
   end
 
 end

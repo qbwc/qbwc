@@ -5,8 +5,6 @@ class RoutesTest < ActionDispatch::IntegrationTest
 
   def setup
     RoutesTest.app = Rails.application
-    Rails.logger = Logger.new('/dev/null')  # or STDOUT
-
     QBWC.clear_jobs
   end
 

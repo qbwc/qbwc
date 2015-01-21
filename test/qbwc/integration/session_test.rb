@@ -5,7 +5,6 @@ class SessionTest < ActionDispatch::IntegrationTest
 
   def setup
     SessionTest.app = Rails.application
-    Rails.logger = Logger.new('/dev/null')  # or STDOUT
     QBWC.clear_jobs
   end
 

@@ -9,7 +9,6 @@ class QBWCControllerTest < ActionController::TestCase
   def setup
     @routes = Rails.application.routes  # https://github.com/blowmage/minitest-rails/issues/133#issuecomment-36401436
     @controller = QbwcController.new    # http://stackoverflow.com/a/7743176
-    Rails.logger = Logger.new('/dev/null')  # or STDOUT
 
     @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
     #p @controller.view_paths
