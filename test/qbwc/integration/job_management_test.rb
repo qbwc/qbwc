@@ -77,7 +77,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:job_deletes_itself_after_running, true, COMPANY, DeleteJobWorker)
     assert_equal 1, QBWC.pending_jobs(COMPANY).length
     session = QBWC::Session.new('foo', COMPANY)
-    assert_not_nil session.next
+    assert_not_nil session.next_request
     simulate_response(session)
     assert_equal 0, QBWC.pending_jobs(COMPANY).length
   end

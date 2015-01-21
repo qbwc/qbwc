@@ -83,7 +83,7 @@ class QBWC::Job
     @requests_provided_when_job_added = value
   end
 
-  def next
+  def next_request
     # Generate and save the requests to run when starting the job.
     if (requests.nil? || requests.empty?) && ! self.requests_provided_when_job_added
       r = worker.requests(self)
@@ -99,6 +99,7 @@ class QBWC::Job
     QBWC.logger.info("Next request is '#{nr}'.")
     return QBWC::Request.new(nr)
   end
+  alias :next :next_request  # Deprecated method name 'next'
 
   def reset
     self.request_index = 0

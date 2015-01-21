@@ -27,18 +27,19 @@ class QBWC::Session
     self.progress == 100
   end
 
-  def next
+  def next_request
     return nil if current_job.nil?
-    until (request = current_job.next) do
+    until (request = current_job.next_request) do
       pending_jobs.shift
       reset(true) or break
     end
     self.progress = 100 if request.nil?
     request
   end
+  alias :next :next_request  # Deprecated method name 'next'
 
   def current_request
-    request = self.next
+    request = self.next_request
     if request && self.iterator_id.present?
       request = request.to_hash
       request.delete('xml_attributes')
@@ -57,7 +58,7 @@ class QBWC::Session
       parse_response_header(response)
       QBWC.logger.info "Processing response."
       self.current_job.process_response(response, self, iterator_id.blank? && (!self.error || QBWC::on_error == 'continueOnError'))
-      self.next unless self.error || self.iterator_id.present? # search next request
+      self.next_request unless self.error || self.iterator_id.present? # search next request
     rescue => e
       self.error = e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
