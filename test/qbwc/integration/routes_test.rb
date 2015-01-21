@@ -1,4 +1,4 @@
-$:<< File.expand_path(File.dirname(__FILE__) + '/../..')  # (for wash_out_helper.rb)
+$:<< File.expand_path(File.dirname(__FILE__) + '/../..')
 require 'test_helper.rb'
 
 class RoutesTest < ActionDispatch::IntegrationTest
