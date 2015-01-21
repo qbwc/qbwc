@@ -22,23 +22,72 @@ Then the migrations:
 
 `rake db:migrate`
 
-Open config/initializers/qbwc.rb and check the settings there. The defaults are reasonable, but make a new GUID for owner_id.
-
-(Re-)start your app.
+Open `config/initializers/qbwc.rb` and check the settings there. (Re-)start your app.
 
 Quickbooks *requires* HTTPS connections when connecting to remote machines. [ngrok](https://ngrok.com/) may be useful to fulfill this requirement.
 
-## QuickBooks Configuration
+
+### Authentication and multiple company files ###
+
+If connecting to more than one company file or if you want different logins for different users, you can configure QBWC authentication. This is a `Proc` in `config/initializers/qbwc.rb` that accepts the username and password and returns the path to the QuickBooks company file to access:
+
+```ruby
+c.authenticator = Proc.new{|username, password|
+  # qubert can access Oceanic
+  next "C:\\QuickBooks\\Oceanic.QBW" if username == "qubert" && password == "brittany"
+  # quimby can access Veridian
+  next "C:\\QuickBooks\\Veridian.QBW" if username == "quimby" && password == "bethany"
+  # no one else has access
+  next nil
+}
+```
+
+## QuickBooks configuration
 
 Install [QuickBooks Web Connector](http://marketplace.intuit.com/webconnector/) on the machine that has QuickBooks installed.
 
-For a single-user, single-company install, on the QuickBooks machine, visit the path /qbwc/qwc on your domain over an HTTPS connection. Download the file it provides. In QuickBooks Web Connector, click "Add an application", and pick the file. Give Quickbooks the password you specified in config/initializers/qbwc.rb. For more complicated configurations, see [Multiple companies and users below](#user-content-multiple-companies-and-users).
+For a single-user, single-company install, on the QuickBooks machine, visit the path /qbwc/qwc on your domain over an HTTPS connection. Download the file it provides. In QuickBooks Web Connector, click "Add an application", and pick the file. Give Quickbooks the password you specified in `config/initializers/qbwc.rb`.
 
 At this point, QuickBooks Web Connector should be able to send requests to your app, but will have nothing to do, and say "No data exchange required".
 
-## Creating Jobs
+### Multiple users and multiple company files ###
+
+If you want to have more than one person to connect to the same QuickBooks company file, you will need to manually edit the QWC file to change the `OwnerID` (any GUID will do) before giving it to QuickBooks Web Connector.
+
+If you want each person to have their own login, set up authentication per [Authentication and multiple company files](#authentication-and-multiple-company-files). In the QWC file, you will need to change `UserName`.
+
+If you are connecting to multiple company files, you will additionally need to change `AppName` and `FileID` (any GUID) to be unique to each file.
+
+
+## Creating jobs
 
 QuickBooks Web Connector (the app you installed above) acts as the HTTP client, and your app acts as the HTTP server. To have QuickBooks perform tasks, you must add a qbwc job to your app, then get QuickBooks Web Connector to check your app for work to do.
+
+To create a job (e.g. from `rails console` or wherever):
+
+```ruby
+require 'qbwc'
+QBWC.add_job(:list_customers, true, '', CustomerTestWorker)
+```
+
+* The first argument is a unique name for the job. You can use this later to disable or delete the job.
+* The second argument indicates whether the job is initially enabled.
+* The third argument specifies the path to the QuickBooks company file this job affects. An empty string will make the job run against any company file.
+* The fourth argument is your worker class. See the next section for a description of workers.
+
+Your job will be persisted in your database and will remain active and run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have have your job disable or delete itself after completion. For example:
+
+```ruby
+	def handle_response(r, job, request, data)
+		QBWC.delete_job(job)
+	end
+
+```
+
+Alternately, you can custom logic in your worker's `requests` and `should_run?` methods, as described below.
+
+
+## Workers ##
 
 A job is associated to a worker, which is an object descending from `QBWC::Worker` that can define three methods:
 
@@ -78,36 +127,20 @@ class CustomerTestWorker < QBWC::Worker
 end
 ```
 
-And to create the job (e.g. from `rails console` or wherever):
-
-```ruby
-require 'qbwc'
-QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
-```
-
-After adding a job, it will remain active and will run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have custom logic in your worker's `should_run?` or have your job disable or delete itself after completion. For example:
-
-```ruby
-	def handle_response(r, job, request, data)
-		QBWC.delete_job(job)
-	end
-
-```
-
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
 
 ### Referencing memory values when constructing requests ###
 
-A `QBWC::Worker#requests` method cannot access values that are in-memory (global variables, local variables, model attributes, etc.) at the time that QBWC.add_job is called; however, in lieu of using `QBWC::Worker#requests`, you can optionally construct and pass requests directly to `QBWC.add_job` (Hash, String, or array of Hashes and Strings). These requests will be immediately persisted by `QBWC.add_job` (in contrast to requests constructed by `QBWC::Worker#requests`, which are persisted during a QuickBooks Web Connector session).
+A `QBWC::Worker#requests` method cannot access values that are in-memory (global variables, local variables, model attributes, etc.) at the time that `QBWC.add_job` is called; however, in lieu of using `QBWC::Worker#requests`, you can construct and pass requests directly to `QBWC.add_job` (`Hash`, `String`, or array of `Hash`es and `String`s). These requests will be immediately persisted by `QBWC.add_job` (in contrast to requests constructed by `QBWC::Worker#requests`, which are persisted during a QuickBooks Web Connector session).
 
-If requests are passed to `QBWC.add_job`, any `QBWC::Worker#requests` method will be ignored and will not be invoked during QuickBooks Web Connector sessions.
+If requests are passed to `QBWC.add_job`, the `requests` method on your worker will be ignored.
 
 ### Referencing memory values when handling responses ###
 
 Similarly, a `QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, String, Array, or Hash) to `QBWC.add_job`. This data will immediately be persisted by `QBWC.add_job`, then later passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
 
-### Sessions ###
+## Sessions ##
 
 In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs. This initialization code will not be invoked for any session in which no jobs are queued.
 
@@ -138,30 +171,6 @@ Note: If you `set_session initializer` in your application code, you're only aff
 
 Note: a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update.
 
-### Multiple companies and users ###
-
-If you want to have more than one user or connect to more than one QuickBooks company file, you will need to manually edit the QWC file before giving it to QuickBooks Web Connector.
-
-* Change `AppName` and `FileID` to connect to another company file. `FileID` can be any GUID.
-* Change `OwnerID` (again, any GUID will do) for additional users connecting to the same company file.
-
-If connecting to more than one company or if you want different users to have different logins, you will have to configure QBWC authentication. In config/initializers/qbwc.rb:
-
-```ruby
-c.authenticator = Proc.new{|username, password|
-  # qubert can access Oceanic
-  next "C:\\QuickBooks\\Oceanic.QBW" if username == "qubert" && password == "brittany"
-  # quimby can access Veridian
-  next "C:\\QuickBooks\\Veridian.QBW" if username == "quimby" && password == "bethany"
-  # no one else has access
-  next nil
-}
-```
-
-You will additionally need to change `UserName` in the QWC file.
-
-When adding jobs, specify the company path the job should run against. You can use the same worker for multiple companies and have it check `job.company` to have custom behaviour.
-
 ## Contributing to qbwc
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
@@ -170,4 +179,4 @@ When adding jobs, specify the company path the job should run against. You can u
 * Start a feature/bugfix branch
 * Commit and push until you are happy with your contribution
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+* Run tests - `rake test`.
