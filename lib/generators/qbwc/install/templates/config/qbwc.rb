@@ -12,9 +12,9 @@ QBWC.configure do |c|
   # multiple company files.
   # c.authenticator = Proc.new{|username, password|
   #   # qubert can access Oceanic
-  #   next "C:\\QuickBooks\Oceanic.QBW" if username == "qubert" && password == "brittany"
+  #   next "C:\\QuickBooks\\Oceanic.QBW" if username == "qubert" && password == "brittany"
   #   # quimby can access Veridian
-  #   next "C:\\QuickBooks\Veridian.QBW" if username == "quimby" && password == "bethany"
+  #   next "C:\\QuickBooks\\Veridian.QBW" if username == "quimby" && password == "bethany"
   #   # no one else has access
   #   next nil
   # }
