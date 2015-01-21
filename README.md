@@ -150,9 +150,9 @@ If connecting to more than one company or if you want different users to have di
 ```ruby
 c.authenticator = Proc.new{|username, password|
   # qubert can access Oceanic
-  next "C:\\QuickBooks\Oceanic.QBW" if username == "qubert" && password == "brittany"
+  next "C:\\QuickBooks\\Oceanic.QBW" if username == "qubert" && password == "brittany"
   # quimby can access Veridian
-  next "C:\\QuickBooks\Veridian.QBW" if username == "quimby" && password == "bethany"
+  next "C:\\QuickBooks\\Veridian.QBW" if username == "quimby" && password == "bethany"
   # no one else has access
   next nil
 }
