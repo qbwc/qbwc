@@ -120,6 +120,18 @@ QBWC_CUSTOMER_ADD_RQ_LONG = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
 
 QBWC_CUSTOMER_ADD_RESPONSE_LONG = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerAddRs statusCode=\"0\" statusSeverity=\"Info\" statusMessage=\"Status OK\"><CustomerRet><ListID>8000001B-1405768916</ListID><TimeCreated>2014-07-19T07:21:56-05:00</TimeCreated><TimeModified>2014-07-19T07:21:56-05:00</TimeModified><EditSequence>1405768916</EditSequence><Name>mrjoecustomer</Name><FullName>Joseph Customer</FullName><IsActive>true</IsActive><Sublevel>0</Sublevel><CompanyName>Joes Garage</CompanyName><Salutation>Mr</Salutation><FirstName>Joe</FirstName><LastName>Customer</LastName><BillAddress><Addr1>123 Main St.</Addr1><City>Mountain View</City><State>CA</State><PostalCode>94566</PostalCode></BillAddress><Email>joecustomer@gmail.com</Email><Balance>0.00</Balance><TotalBalance>0.00</TotalBalance><AccountNumber>89087</AccountNumber><CreditLimit>2000.00</CreditLimit><JobStatus>None</JobStatus></CustomerRet></CustomerAddRs></QBXMLMsgsRs></QBXML>"
 
+QBWC_CUSTOMER_QUERY_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
+    <?qbxml version=\"7.0\"?>\r
+    <QBXML>\r
+      <QBXMLMsgsRq onError = \"stopOnError\">\r
+        <CustomerQueryRq>\r
+          <FullName>#{QBWC_USERNAME}</FullName>\r
+        </CustomerQueryRq>\r
+      </QBXMLMsgsRq>\r
+    </QBXML>\r"
+
+QBWC_CUSTOMER_QUERY_RESPONSE_INFO = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"0\" statusSeverity=\"Info\" statusMessage=\"Status OK\"><CustomerRet><ListID>8000001B-1405777862</ListID><TimeCreated>2014-07-30T21:11:20-05:00</TimeCreated><TimeModified>2005-07-30T21:11:20-05:00</TimeModified><EditSequence>1405777862</EditSequence><Name>#{QBWC_USERNAME}</Name><Salutation>Mr</Salutation><FullName>#{QBWC_USERNAME}</FullName><IsActive>true</IsActive><Sublevel>0</Sublevel><Email>#{QBWC_USERNAME}@gmail.com</Email><Balance>0.00</Balance><TotalBalance>0.00</TotalBalance><AccountNumber>123456789</AccountNumber><JobStatus>None</JobStatus></CustomerRet></CustomerQueryRs></QBXMLMsgsRs></QBXML>"
+
 QBWC_CUSTOMER_QUERY_RESPONSE_WARN = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"500\" statusSeverity=\"Warn\" statusMessage=\"The query request has not been fully completed. There was a required element (&quot;bleech&quot;) that could not be found in QuickBooks.\" /></QBXMLMsgsRs></QBXML>"
 
 QBWC_CUSTOMER_QUERY_RESPONSE_ERROR = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"3120\" statusSeverity=\"Error\" statusMessage=\"Object &quot;8000001B-1405768916&quot; specified in the request cannot be found.  QuickBooks error message: Invalid argument.  The specified record does not exist in the list.\" /></QBXMLMsgsRs></QBXML>"

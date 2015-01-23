@@ -8,6 +8,56 @@ class SessionTest < ActionDispatch::IntegrationTest
     QBWC.clear_jobs
   end
 
+  class ProgressTestWorker < QBWC::Worker
+    def requests(job)
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
+    end
+  end
+
+  test "progress increments when worker determines requests" do
+
+    # Add two jobs
+    QBWC.add_job(:session_test_1, true, COMPANY, ProgressTestWorker)
+    QBWC.add_job(:session_test_2, true, COMPANY, ProgressTestWorker)
+
+    assert_equal 2, QBWC.jobs.count
+    assert_equal 2, QBWC.pending_jobs(COMPANY).count
+
+    session = QBWC::Session.new(nil, COMPANY)
+
+    # Simulate controller 1st send_request and receive_response
+    request = session.current_request
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
+    assert_equal 0, session.progress
+
+    # Simulate controller 2nd send_request and receive_response
+    request = session.current_request
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
+    assert_equal 100, session.progress
+  end
+
+  test "progress increments when passing requests" do
+
+    # Add two jobs
+    QBWC.add_job(:session_test_1, true, COMPANY, QBWC::Worker, QBWC_CUSTOMER_ADD_RQ)
+    QBWC.add_job(:session_test_2, true, COMPANY, QBWC::Worker, QBWC_CUSTOMER_QUERY_RQ)
+
+    assert_equal 2, QBWC.jobs.count
+    assert_equal 2, QBWC.pending_jobs(COMPANY).count
+
+    session = QBWC::Session.new(nil, COMPANY)
+
+    # Simulate controller 1st send_request and receive_response
+    request = session.current_request
+    session.response = QBWC_CUSTOMER_ADD_RESPONSE_LONG
+    assert_equal 0, session.progress
+
+    # Simulate controller 2nd send_request and receive_response
+    request = session.current_request
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
+    assert_equal 100, session.progress
+  end
+
   class SessionSpecRequestWorker < QBWC::Worker
     def requests
       {:name => 'bleech'}

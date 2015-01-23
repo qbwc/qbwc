@@ -33,7 +33,7 @@ class QBWC::Session
       pending_jobs.shift
       reset(true) or break
     end
-    self.progress = 100 if request.nil?
+    self.progress = 100 if request.nil? && pending_jobs.empty?
     request
   end
   alias :next :next_request  # Deprecated method name 'next'
