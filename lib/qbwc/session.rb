@@ -16,6 +16,7 @@ class QBWC::Session
     @error = nil
     @progress = 0
     @iterator_id = nil
+    @initial_job_count = pending_jobs.length
 
     @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
 
@@ -33,7 +34,8 @@ class QBWC::Session
       pending_jobs.shift
       reset(true) or break
     end
-    self.progress = 100 if request.nil? && pending_jobs.empty?
+    jobs_completed = @initial_job_count - pending_jobs.length
+    self.progress = ((jobs_completed.to_f  / @initial_job_count.to_f ) * 100).to_i
     request
   end
   alias :next :next_request  # Deprecated method name 'next'

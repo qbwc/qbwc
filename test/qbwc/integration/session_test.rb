@@ -28,7 +28,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     # Simulate controller 1st send_request and receive_response
     request = session.current_request
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
-    assert_equal 0, session.progress
+    assert_equal 50, session.progress
 
     # Simulate controller 2nd send_request and receive_response
     request = session.current_request
@@ -50,7 +50,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     # Simulate controller 1st send_request and receive_response
     request = session.current_request
     session.response = QBWC_CUSTOMER_ADD_RESPONSE_LONG
-    assert_equal 0, session.progress
+    assert_equal 50, session.progress
 
     # Simulate controller 2nd send_request and receive_response
     request = session.current_request
