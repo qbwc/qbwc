@@ -71,6 +71,8 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
     assert_equal 100, session.progress
+    assert_equal '500', session.status_code
+    assert_equal 'Warn', session.status_severity
 
     # Simulate arbitrary controller action
     session = QBWC::ActiveRecord::Session.get(ticket_string)  # simulated get_session
@@ -89,6 +91,9 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
     assert_equal 0, session.progress
+    assert_equal '3120', session.status_code
+    assert_equal 'Error', session.status_severity
+    assert_equal 'QBWC ERROR: 3120 - Object "8000001B-1405768916" specified in the request cannot be found.  QuickBooks error message: Invalid argument.  The specified record does not exist in the list.', session.error
 
     # Simulate controller get_last_error
     session = QBWC::ActiveRecord::Session.get(ticket_string)  # simulated get_session

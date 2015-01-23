@@ -1,7 +1,7 @@
 class QBWC::Session
 
   attr_reader :user, :company, :ticket, :progress
-  attr_accessor :error
+  attr_accessor :error, :status_code, :status_severity
 
   @@session = nil
 
@@ -99,17 +99,18 @@ class QBWC::Session
     end
     return unless response.is_a?(Hash) && response['xml_attributes']
 
-    @status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
+    @status_code, @status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID')
     QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
 
-    if status_severity == 'Error'
+    if @status_severity == 'Error'
       QBWC.logger.error "Received error from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'"
       self.error = "QBWC ERROR: #{@status_code} - #{status_message}"
     else
-      QBWC.logger.warn "Received warning from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'" if status_severity == 'Warn'
+      QBWC.logger.warn "Received warning from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'" if @status_severity == 'Warn'
       self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0
     end
+
   end
 end
