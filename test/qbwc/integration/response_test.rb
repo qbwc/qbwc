@@ -73,6 +73,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     assert_equal 100, session.progress
     assert_equal '500', session.status_code
     assert_equal 'Warn', session.status_severity
+    assert_equal 'QBWC WARN: 500 - The query request has not been fully completed. There was a required element ("bleech") that could not be found in QuickBooks.', session.error
 
     # Simulate arbitrary controller action
     session = QBWC::ActiveRecord::Session.get(ticket_string)  # simulated get_session
