@@ -58,20 +58,10 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 100, session.progress
   end
 
-  class SessionSpecRequestWorker < QBWC::Worker
-    def requests
-      {:name => 'bleech'}
-    end
-  end
-
-  test "sends request only once when providing a code block to add_job" do
-    COMPANY = ''
-    JOBNAME = 'add_joe_customer'
-
-    QBWC.api = :qb
+  test "sends request only once when passing requests to add_job" do
 
     # Add a job and pass a request
-    QBWC.add_job(JOBNAME, true, COMPANY, SessionSpecRequestWorker, QBWC_CUSTOMER_ADD_RQ_LONG)
+    QBWC.add_job(:add_joe_customer, true, COMPANY, QBWC::Worker, QBWC_CUSTOMER_ADD_RQ_LONG)
 
     assert_equal 1, QBWC.jobs.count
     assert_equal 1, QBWC.pending_jobs(COMPANY).count
@@ -100,17 +90,13 @@ class SessionTest < ActionDispatch::IntegrationTest
   end
 
   test "processes warning responses and deletes the job" do
-    company = ''
-    qbwc_username = 'myUserName'
-
-    QBWC.api = :qb
 
     # Add a job
-    QBWC.add_job(:query_joe_customer, true, company, QueryAndDeleteWorker)
+    QBWC.add_job(:query_joe_customer, true, COMPANY, QueryAndDeleteWorker)
 
     # Simulate controller receive_response
-    ticket_string = QBWC::ActiveRecord::Session.new(qbwc_username, company).ticket
-    session = QBWC::Session.new(nil, company)
+    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
+    session = QBWC::Session.new(nil, COMPANY)
 
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
     assert_equal 100, session.progress
@@ -122,17 +108,13 @@ class SessionTest < ActionDispatch::IntegrationTest
   end
 
   test "processes error responses and deletes the job" do
-    company = ''
-    qbwc_username = 'myUserName'
-
-    QBWC.api = :qb
 
     # Add a job
-    QBWC.add_job(:query_joe_customer, true, company, QueryAndDeleteWorker)
+    QBWC.add_job(:query_joe_customer, true, COMPANY, QueryAndDeleteWorker)
 
     # Simulate controller receive_response
-    ticket_string = QBWC::ActiveRecord::Session.new(qbwc_username, company).ticket
-    session = QBWC::Session.new(nil, company)
+    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
+    session = QBWC::Session.new(nil, COMPANY)
 
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
     assert_equal 0, session.progress
