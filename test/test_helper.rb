@@ -132,7 +132,11 @@ QBWC_CUSTOMER_QUERY_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
 
 QBWC_CUSTOMER_QUERY_RESPONSE_INFO = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"0\" statusSeverity=\"Info\" statusMessage=\"Status OK\"><CustomerRet><ListID>8000001B-1405777862</ListID><TimeCreated>2014-07-30T21:11:20-05:00</TimeCreated><TimeModified>2005-07-30T21:11:20-05:00</TimeModified><EditSequence>1405777862</EditSequence><Name>#{QBWC_USERNAME}</Name><Salutation>Mr</Salutation><FullName>#{QBWC_USERNAME}</FullName><IsActive>true</IsActive><Sublevel>0</Sublevel><Email>#{QBWC_USERNAME}@gmail.com</Email><Balance>0.00</Balance><TotalBalance>0.00</TotalBalance><AccountNumber>123456789</AccountNumber><JobStatus>None</JobStatus></CustomerRet></CustomerQueryRs></QBXMLMsgsRs></QBXML>"
 
+QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN = 'The query request has not been fully completed. There was a required element ("bleech") that could not be found in QuickBooks.'
+
 QBWC_CUSTOMER_QUERY_RESPONSE_WARN = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"500\" statusSeverity=\"Warn\" statusMessage=\"The query request has not been fully completed. There was a required element (&quot;bleech&quot;) that could not be found in QuickBooks.\" /></QBXMLMsgsRs></QBXML>"
+
+QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR = 'Object "8000001B-1405768916" specified in the request cannot be found.  QuickBooks error message: Invalid argument.  The specified record does not exist in the list.'
 
 QBWC_CUSTOMER_QUERY_RESPONSE_ERROR = "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerQueryRs statusCode=\"3120\" statusSeverity=\"Error\" statusMessage=\"Object &quot;8000001B-1405768916&quot; specified in the request cannot be found.  QuickBooks error message: Invalid argument.  The specified record does not exist in the list.\" /></QBXMLMsgsRs></QBXML>"
 

@@ -102,4 +102,57 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
   end
 
+  test "processes warning then error" do
+
+    # Add jobs
+    QBWC.add_job(:query_joe_customer,       true, COMPANY, HandleResponseWithDataWorker)
+    QBWC.add_job(:query_joe_customer_again, true, COMPANY, HandleResponseWithDataWorker)
+
+    # Simulate controller authenticate
+    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
+    session = QBWC::Session.new(nil, COMPANY)
+
+    # Simulate controller receive_response
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
+    assert_equal '500',  session.status_code
+    assert_equal 'Warn', session.status_severity
+    assert_equal "QBWC WARN: 500 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN}", session.error
+
+    # Simulate controller send_request
+    assert_not_nil session.next_request
+
+    # Simulate controller receive_response
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
+    assert_equal '3120',  session.status_code
+    assert_equal 'Error', session.status_severity
+    assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
+  end
+
+  test "processes error then warning" do
+    QBWC.on_error = :continue
+
+    # Add jobs
+    QBWC.add_job(:query_joe_customer,       true, COMPANY, HandleResponseWithDataWorker)
+    QBWC.add_job(:query_joe_customer_again, true, COMPANY, HandleResponseWithDataWorker)
+
+    # Simulate controller authenticate
+    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
+    session = QBWC::Session.new(nil, COMPANY)
+
+    # Simulate controller receive_response
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
+    assert_equal '3120',  session.status_code
+    assert_equal 'Error', session.status_severity
+    assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
+
+    # Simulate controller send_request
+    assert_not_nil session.next_request
+
+    # Simulate controller receive_response
+    session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
+    assert_equal '500',  session.status_code
+    assert_equal 'Warn', session.status_severity
+    assert_equal "QBWC WARN: 500 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN}", session.error
+  end
+
 end
