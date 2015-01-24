@@ -29,7 +29,10 @@ class QBWC::Session
   end
 
   def next_request
-    return nil if current_job.nil?
+    if current_job.nil?
+      self.progress = 100
+      return nil
+    end
     until (request = current_job.next_request) do
       pending_jobs.shift
       reset(true) or break
@@ -59,7 +62,7 @@ class QBWC::Session
       QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
       QBWC.logger.info "Processing response."
-      self.current_job.process_response(response, self, iterator_id.blank?)
+      self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil?
       self.next_request # search next request
 
     rescue => e
