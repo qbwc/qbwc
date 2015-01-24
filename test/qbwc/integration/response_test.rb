@@ -65,15 +65,16 @@ class ResponseTest < ActionDispatch::IntegrationTest
     # Add a job
     QBWC.add_job(:query_joe_customer, true, COMPANY, QueryAndDeleteWorker)
 
-    # Simulate controller receive_response
+    # Simulate controller authenticate
     ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
     session = QBWC::Session.new(nil, COMPANY)
 
+    # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
     assert_equal 100, session.progress
     assert_equal '500', session.status_code
     assert_equal 'Warn', session.status_severity
-    assert_equal 'QBWC WARN: 500 - The query request has not been fully completed. There was a required element ("bleech") that could not be found in QuickBooks.', session.error
+    assert_equal "QBWC WARN: 500 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN}", session.error
 
     # Simulate arbitrary controller action
     session = QBWC::ActiveRecord::Session.get(ticket_string)  # simulated get_session
@@ -86,15 +87,16 @@ class ResponseTest < ActionDispatch::IntegrationTest
     # Add a job
     QBWC.add_job(:query_joe_customer, true, COMPANY, QueryAndDeleteWorker)
 
-    # Simulate controller receive_response
+    # Simulate controller authenticate
     ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
     session = QBWC::Session.new(nil, COMPANY)
 
+    # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
     assert_equal 0, session.progress
     assert_equal '3120', session.status_code
     assert_equal 'Error', session.status_severity
-    assert_equal 'QBWC ERROR: 3120 - Object "8000001B-1405768916" specified in the request cannot be found.  QuickBooks error message: Invalid argument.  The specified record does not exist in the list.', session.error
+    assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
 
     # Simulate controller get_last_error
     session = QBWC::ActiveRecord::Session.get(ticket_string)  # simulated get_session
