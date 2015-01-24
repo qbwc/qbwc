@@ -58,10 +58,10 @@ class QBWC::Session
       response = response[response.keys.first]
       QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
-      is_error = (self.error && self.status_severity == 'Error')
       QBWC.logger.info "Processing response."
-      self.current_job.process_response(response, self, iterator_id.blank? && (!is_error || QBWC::on_error == 'continueOnError'))
-      self.next_request unless is_error || self.iterator_id.present? # search next request
+      self.current_job.process_response(response, self, iterator_id.blank?)
+      self.next_request # search next request
+
     rescue => e
       self.error = e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"

@@ -93,7 +93,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
-    assert_equal 0, session.progress
+    assert_equal 100, session.progress
     assert_equal '3120', session.status_code
     assert_equal 'Error', session.status_severity
     assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
@@ -116,6 +116,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
+    assert_equal 50,     session.progress
     assert_equal '500',  session.status_code
     assert_equal 'Warn', session.status_severity
     assert_equal "QBWC WARN: 500 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN}", session.error
@@ -125,9 +126,12 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
+    assert_equal 100,     session.progress
     assert_equal '3120',  session.status_code
     assert_equal 'Error', session.status_severity
     assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
+
+    assert_nil session.next_request
   end
 
   test "processes error then warning" do
@@ -143,6 +147,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_ERROR
+    assert_equal 50,      session.progress
     assert_equal '3120',  session.status_code
     assert_equal 'Error', session.status_severity
     assert_equal "QBWC ERROR: 3120 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR}", session.error
@@ -152,9 +157,12 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     # Simulate controller receive_response
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_WARN
+    assert_equal 100, session.progress
     assert_equal '500',  session.status_code
     assert_equal 'Warn', session.status_severity
     assert_equal "QBWC WARN: 500 - #{QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN}", session.error
+
+    assert_nil session.next_request
   end
 
 end
