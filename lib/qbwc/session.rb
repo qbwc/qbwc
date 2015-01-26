@@ -1,7 +1,7 @@
 class QBWC::Session
 
   attr_reader :user, :company, :ticket, :progress
-  attr_accessor :error
+  attr_accessor :error, :status_code, :status_severity
 
   @@session = nil
 
@@ -58,9 +58,10 @@ class QBWC::Session
       response = response[response.keys.first]
       QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
+      is_error = (self.error && self.status_severity == 'Error')
       QBWC.logger.info "Processing response."
-      self.current_job.process_response(response, self, iterator_id.blank? && (!self.error || QBWC::on_error == 'continueOnError'))
-      self.next_request unless self.error || self.iterator_id.present? # search next request
+      self.current_job.process_response(response, self, iterator_id.blank? && (!is_error || QBWC::on_error == 'continueOnError'))
+      self.next_request unless is_error || self.iterator_id.present? # search next request
     rescue => e
       self.error = e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
@@ -94,22 +95,27 @@ class QBWC::Session
 
   def parse_response_header(response)
     self.iterator_id = nil
+    self.error = nil
+    self.status_code = nil
+    self.status_severity = nil
+
     if response.is_a? Array
       response = response.find {|r| r.is_a?(Hash) && r['xml_attributes'] && r['xml_attributes']['statusCode'].to_i > 1} || response.first
     end
     return unless response.is_a?(Hash) && response['xml_attributes']
 
-    @status_code, status_severity, status_message, iterator_remaining_count, iterator_id = \
+    @status_code, @status_severity, status_message, iterator_remaining_count, iterator_id = \
       response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
                                                'iteratorRemainingCount', 'iteratorID')
     QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
 
-    if status_severity == 'Error'
-      QBWC.logger.error "Received error from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'"
-      self.error = "QBWC ERROR: #{@status_code} - #{status_message}"
-    else
-      QBWC.logger.warn "Received warning from QuickBooks, statusCode: '#{@status_code}': '#{status_message}'" if status_severity == 'Warn'
-      self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0
+    errmsg = "QBWC #{@status_severity.upcase}: #{@status_code} - #{status_message}"
+    if @status_severity == 'Error' || @status_severity == 'Warn'
+      @status_severity == 'Error' ? QBWC.logger.error(errmsg) : QBWC.logger.warn(errmsg)
+      self.error = errmsg
     end
+
+    self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0 && @status_severity != 'Error'
+
   end
 end
