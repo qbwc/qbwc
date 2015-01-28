@@ -142,6 +142,16 @@ Similarly, a `QBWC::Worker#handle_response` method cannot access variables that 
 
 ## Sessions ##
 
+### Handling errors ###
+
+When any error response is received from QuickBooks Web Connector, by default the session will be halted and no further jobs or their requests requests will be processed. You can change this default behavior to continue processing jobs and their requests by assigning this in `config/initializers/qbwc.rb`:
+
+```ruby
+c.on_error = :continue
+```
+
+### Optional session initialization ###
+
 In certain cases, you may want to perform some initialization prior to each QuickBooks Web Connector session. For this purpose, you may optionally provide initialization code that will be invoked once when each QuickBooks Web Connector session is established, and prior to executing any queued jobs. This initialization code will not be invoked for any session in which no jobs are queued.
 
 You assign this initialization code either (a) during configuration, and/or (b) in application code by calling `set_session_initializer` (prior to any QuickBooks Web Connector session being established). For example:
