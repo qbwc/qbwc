@@ -17,6 +17,7 @@ class QBWC::Job
   end
 
   def process_response(response, session, advance)
+    QBWC.logger.info "Processing response."
     completed_request = requests[request_index]
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."

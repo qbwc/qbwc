@@ -24,12 +24,20 @@ class QBWC::Session
     reset(ticket.nil?)
   end
 
+  def response_is_error?
+    self.error && self.status_severity == 'Error'
+  end
+
+  def error_and_stop_requested?
+    response_is_error? && QBWC::on_error == 'stopOnError'
+  end
+
   def finished?
     self.progress == 100
   end
 
   def next_request
-    if current_job.nil?
+    if current_job.nil? || error_and_stop_requested?
       self.progress = 100
       return nil
     end
@@ -61,8 +69,7 @@ class QBWC::Session
       response = response[response.keys.first]
       QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
-      QBWC.logger.info "Processing response."
-      self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil?
+      self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil? || error_and_stop_requested?
       self.next_request # search next request
 
     rescue => e

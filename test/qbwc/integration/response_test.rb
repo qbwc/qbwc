@@ -125,7 +125,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     assert_nil session.next_request
   end
 
-  def _multi_request_helper(response1, expected_status_code1, expected_status_severity1, expected_session_error1, response2, expected_status_code2, expected_status_severity2, expected_session_error2, expected_progress1 = 50, expect_next_request1_to_be_nil = false)
+  def _multi_request_helper(response1, expected_status_code1, expected_status_severity1, expected_session_error1, response2, expected_status_code2, expected_status_severity2, expected_session_error2, expected_progress1 = 50)
 
     error_string1 = "QBWC #{expected_status_severity1.upcase}: #{expected_status_code1} - #{expected_session_error1}"
     error_string2 = "QBWC #{expected_status_severity2.upcase}: #{expected_status_code2} - #{expected_session_error2}"
@@ -142,7 +142,12 @@ class ResponseTest < ActionDispatch::IntegrationTest
     assert_equal error_string1,             session.error
 
     # Simulate controller send_request
-    expect_next_request1_to_be_nil ? assert_nil(session.next_request) : assert_not_nil(session.next_request)
+    if session.progress == 100
+      assert_nil(session.next_request)
+      return
+    else
+      assert_not_nil(session.next_request)
+    end
 
     # Simulate controller receive_response
     session.response = response2
@@ -167,7 +172,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
       expected_progress1)
   end
 
-  def _test_error_then_warning(expected_progress1 = 50, expect_next_request1_to_be_nil = false)
+  def _test_error_then_warning(expected_progress1 = 50)
     _multi_request_helper(
       QBWC_CUSTOMER_QUERY_RESPONSE_ERROR,
       '3120',
@@ -177,12 +182,11 @@ class ResponseTest < ActionDispatch::IntegrationTest
       '500',
       'Warn',
       QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN,
-      expected_progress1,
-      expect_next_request1_to_be_nil)
+      expected_progress1)
   end
 
   def _test_error_then_warning_that_stops
-    _test_error_then_warning(100, true)
+    _test_error_then_warning(100)
   end
 
   test "processes warning response stop" do
@@ -265,7 +269,6 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   test "processes error then warning stop 2jobs" do
-    skip("Not correct yet")
     QBWC.on_error = :stop
     QBWC.add_job(:query_joe_customer,       true, COMPANY, HandleResponseWithDataWorker)
     QBWC.add_job(:query_joe_customer_again, true, COMPANY, HandleResponseWithDataWorker)
