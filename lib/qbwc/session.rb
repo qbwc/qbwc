@@ -67,7 +67,6 @@ class QBWC::Session
       QBWC.logger.info 'Parsing response.'
       response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
       response = response[response.keys.first]
-      QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
       self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil? || error_and_stop_requested?
       self.next_request # search next request
@@ -104,6 +103,8 @@ class QBWC::Session
   end
 
   def parse_response_header(response)
+    QBWC.logger.info 'Parsing headers.'
+
     self.iterator_id = nil
     self.error = nil
     self.status_code = nil
@@ -119,10 +120,9 @@ class QBWC::Session
                                                'iteratorRemainingCount', 'iteratorID')
     QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
 
-    errmsg = "QBWC #{@status_severity.upcase}: #{@status_code} - #{status_message}"
     if @status_severity == 'Error' || @status_severity == 'Warn'
-      @status_severity == 'Error' ? QBWC.logger.error(errmsg) : QBWC.logger.warn(errmsg)
-      self.error = errmsg
+      self.error = "QBWC #{@status_severity.upcase}: #{@status_code} - #{status_message}"
+      @status_severity == 'Error' ? QBWC.logger.error(self.error) : QBWC.logger.warn(self.error)
     end
 
     self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0 && @status_severity != 'Error'
