@@ -241,31 +241,27 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   test "processes warning then error stop 2requests byworker" do
-    skip("Not correct yet")
     QBWC.on_error = :stop
     QBWC.add_job(:multiple_request_job, true, COMPANY, MultiRequestWorker)
-    _test_warning_then_error
+    _test_warning_then_error(0)
   end
 
   test "processes warning then error continue 2requests byworker" do
-    skip("Not correct yet")
     QBWC.on_error = :continue
     QBWC.add_job(:multiple_request_job, true, COMPANY, MultiRequestWorker)
-    _test_warning_then_error
+    _test_warning_then_error(0)
   end
 
   test "processes warning then error stop 2requests byargument" do
-    skip("Not correct yet")
     QBWC.on_error = :stop
     QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
-    _test_warning_then_error
+    _test_warning_then_error(0)
   end
 
   test "processes warning then error continue 2requests byargument" do
-    skip("Not correct yet")
     QBWC.on_error = :continue
     QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
-    _test_warning_then_error
+    _test_warning_then_error(0)
   end
 
   test "processes error then warning stop 2jobs" do
@@ -283,31 +279,27 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   test "processes error then warning stop 2requests byworker" do
-    skip("Not correct yet")
     QBWC.on_error = :stop
     QBWC.add_job(:multiple_request_job, true, COMPANY, MultiRequestWorker)
     _test_error_then_warning_that_stops
   end
 
   test "processes error then warning continue 2requests byworker" do
-    skip("Not correct yet")
     QBWC.on_error = :continue
     QBWC.add_job(:multiple_request_job, true, COMPANY, MultiRequestWorker)
-    _test_error_then_warning
+    _test_error_then_warning(0)
   end
 
   test "processes error then warning stop 2requests byargument" do
-    skip("Not correct yet")
     QBWC.on_error = :stop
     QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
     _test_error_then_warning_that_stops
   end
 
   test "processes error then warning continue 2requests byargument" do
-    skip("Not correct yet")
     QBWC.on_error = :continue
     QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
-    _test_error_then_warning
+    _test_error_then_warning(0)
   end
 
 end
