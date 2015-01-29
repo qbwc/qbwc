@@ -173,7 +173,7 @@ Note: a QuickBooks Web Connector session is established when you manually run (u
 
 ## Handling errors ##
 
-By default, when an error response is received from QuickBooks, no further requests will be processed in the current job or in subsequent jobs. 
+By default, when an error response is received from QuickBooks, `QBWC::Worker#handle_response` will be invoked but no further requests will be processed in the current job or in subsequent jobs. 
 However, the job will remain persisted and so will be attempted again at next QuickBooks Web Connector session. Unless there is some intervention, presumably the job will fail again and block all remaining jobs and their requests from being serviced.
 
 To have qbwc continue with the next request after receiving an error, set `on_error` to `:continue` in `config/initializers/qbwc.rb`.

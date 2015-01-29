@@ -21,6 +21,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     QBWC.on_error = :stop
     QBWC.clear_jobs
 
+    $HANDLE_RESPONSE_EXECUTED = false
     $HANDLE_RESPONSE_DATA = nil
     $HANDLE_RESPONSE_IS_PASSED_DATA = false
   end
@@ -35,11 +36,13 @@ class ResponseTest < ActionDispatch::IntegrationTest
       expect_error = "QBWC #{resp[:severity].upcase}: #{resp[:code]} - #{resp[:message]}"
 
       # Simulate controller receive_response
+      $HANDLE_RESPONSE_EXECUTED = false
       session.response = resp[:response]
       assert_equal resp[:progress], session.progress unless resp[:progress].nil?
       assert_equal resp[:code],     session.status_code
       assert_equal resp[:severity], session.status_severity
       assert_equal expect_error,    session.error
+      assert $HANDLE_RESPONSE_EXECUTED
 
       # Simulate controller send_request
       if session.progress == 100
@@ -75,6 +78,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(response, job, request, data)
+      $HANDLE_RESPONSE_EXECUTED = true
       $HANDLE_RESPONSE_IS_PASSED_DATA = (data == $HANDLE_RESPONSE_DATA)
     end
   end
@@ -100,7 +104,6 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   test "handle_response must use splat operator when omitting job argument" do
-    $HANDLE_RESPONSE_EXECUTED = false
     QBWC.add_job(:integration_test, true, '', HandleResponseOmitsJobWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next_request
@@ -197,6 +200,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
       ]
     end
     def handle_response(resp, job, request, data)
+      $HANDLE_RESPONSE_EXECUTED = true
     end
   end
 
@@ -230,13 +234,13 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
   test "processes warning then error stop 2requests byargument" do
     QBWC.on_error = :stop
-    QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
+    QBWC.add_job(:multiple_request_job, true, COMPANY, HandleResponseWithDataWorker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
     _test_warning_then_error(0)
   end
 
   test "processes warning then error continue 2requests byargument" do
     QBWC.on_error = :continue
-    QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
+    QBWC.add_job(:multiple_request_job, true, COMPANY, HandleResponseWithDataWorker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
     _test_warning_then_error(0)
   end
 
@@ -268,13 +272,13 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
   test "processes error then warning stop 2requests byargument" do
     QBWC.on_error = :stop
-    QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
+    QBWC.add_job(:multiple_request_job, true, COMPANY, HandleResponseWithDataWorker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
     _test_error_then_warning_that_stops
   end
 
   test "processes error then warning continue 2requests byargument" do
     QBWC.on_error = :continue
-    QBWC.add_job(:multiple_request_job, true, COMPANY, QBWC::Worker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
+    QBWC.add_job(:multiple_request_job, true, COMPANY, HandleResponseWithDataWorker, [QBWC_CUSTOMER_QUERY_RQ, QBWC_CUSTOMER_QUERY_RQ])
     _test_error_then_warning(0)
   end
 
