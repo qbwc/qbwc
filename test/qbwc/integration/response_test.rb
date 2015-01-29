@@ -3,6 +3,19 @@ require 'test_helper.rb'
 
 class ResponseTest < ActionDispatch::IntegrationTest
 
+  WARN_RESPONSE = {
+    :response => QBWC_CUSTOMER_QUERY_RESPONSE_WARN,
+    :code     => '500',
+    :severity => 'Warn',
+    :message  => QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN,
+  }
+  ERROR_RESPONSE = {
+    :response => QBWC_CUSTOMER_QUERY_RESPONSE_ERROR,
+    :code     => '3120',
+    :severity => 'Error',
+    :message  => QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR,
+  }
+
   def setup
     ResponseTest.app = Rails.application
     QBWC.on_error = :stop
@@ -10,6 +23,51 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
     $HANDLE_RESPONSE_DATA = nil
     $HANDLE_RESPONSE_IS_PASSED_DATA = false
+  end
+
+  def _receive_responses(*responses)
+
+    # Simulate controller authenticate
+    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
+    session = QBWC::Session.new(nil, COMPANY)
+
+    responses.each do |resp|
+      expect_error = "QBWC #{resp[:severity].upcase}: #{resp[:code]} - #{resp[:message]}"
+
+      # Simulate controller receive_response
+      session.response = resp[:response]
+      assert_equal resp[:progress], session.progress unless resp[:progress].nil?
+      assert_equal resp[:code],     session.status_code
+      assert_equal resp[:severity], session.status_severity
+      assert_equal expect_error,    session.error
+
+      # Simulate controller send_request
+      if session.progress == 100
+        assert_nil(session.next_request)
+        return
+      else
+        assert_not_nil(session.next_request)
+      end
+    end
+
+  end
+
+  def _test_warning_then_error(expected_progress1 = 50)
+    warn  = WARN_RESPONSE.merge(:progress => expected_progress1)
+    error = ERROR_RESPONSE.merge(:progress => 100)
+
+    _receive_responses(warn, error)
+  end
+
+  def _test_error_then_warning(expected_progress1 = 50)
+    error = ERROR_RESPONSE.merge(:progress => expected_progress1)
+    warn  = WARN_RESPONSE.merge(:progress => 100)
+
+    _receive_responses(error, warn)
+  end
+
+  def _test_error_then_warning_that_stops
+    _test_error_then_warning(100)
   end
 
   class HandleResponseWithDataWorker < QBWC::Worker
@@ -107,110 +165,28 @@ class ResponseTest < ActionDispatch::IntegrationTest
 
   end
 
-  def _single_request_helper(response, expected_status_code, expected_status_severity, expected_session_error)
-    error_string = "QBWC #{expected_status_severity.upcase}: #{expected_status_code} - #{expected_session_error}"
-
-    # Simulate controller authenticate
-    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
-    session = QBWC::Session.new(nil, COMPANY)
-
-    # Simulate controller receive_response
-    session.response = response
-    assert_equal 100,                      session.progress
-    assert_equal expected_status_code,     session.status_code
-    assert_equal expected_status_severity, session.status_severity
-    assert_equal error_string,             session.error
-
-    # Simulate controller send_request
-    assert_nil session.next_request
-  end
-
-  def _multi_request_helper(response1, expected_status_code1, expected_status_severity1, expected_session_error1, response2, expected_status_code2, expected_status_severity2, expected_session_error2, expected_progress1 = 50)
-
-    error_string1 = "QBWC #{expected_status_severity1.upcase}: #{expected_status_code1} - #{expected_session_error1}"
-    error_string2 = "QBWC #{expected_status_severity2.upcase}: #{expected_status_code2} - #{expected_session_error2}"
-
-    # Simulate controller authenticate
-    ticket_string = QBWC::ActiveRecord::Session.new(QBWC_USERNAME, COMPANY).ticket
-    session = QBWC::Session.new(nil, COMPANY)
-
-    # Simulate controller receive_response
-    session.response = response1
-    assert_equal expected_progress1,        session.progress
-    assert_equal expected_status_code1,     session.status_code
-    assert_equal expected_status_severity1, session.status_severity
-    assert_equal error_string1,             session.error
-
-    # Simulate controller send_request
-    if session.progress == 100
-      assert_nil(session.next_request)
-      return
-    else
-      assert_not_nil(session.next_request)
-    end
-
-    # Simulate controller receive_response
-    session.response = response2
-    assert_equal 100,                       session.progress
-    assert_equal expected_status_code2,     session.status_code
-    assert_equal expected_status_severity2, session.status_severity
-    assert_equal error_string2,             session.error
-
-    assert_nil session.next_request
-  end
-
-  def _test_warning_then_error(expected_progress1 = 50)
-    _multi_request_helper(
-      QBWC_CUSTOMER_QUERY_RESPONSE_WARN,
-      '500',
-      'Warn',
-      QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN,
-      QBWC_CUSTOMER_QUERY_RESPONSE_ERROR,
-      '3120',
-      'Error',
-      QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR,
-      expected_progress1)
-  end
-
-  def _test_error_then_warning(expected_progress1 = 50)
-    _multi_request_helper(
-      QBWC_CUSTOMER_QUERY_RESPONSE_ERROR,
-      '3120',
-      'Error',
-      QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR,
-      QBWC_CUSTOMER_QUERY_RESPONSE_WARN,
-      '500',
-      'Warn',
-      QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN,
-      expected_progress1)
-  end
-
-  def _test_error_then_warning_that_stops
-    _test_error_then_warning(100)
-  end
-
   test "processes warning response stop" do
     QBWC.on_error = :stop
     QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
-    _single_request_helper(QBWC_CUSTOMER_QUERY_RESPONSE_WARN, '500', 'Warn', QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN)
+    _receive_responses(WARN_RESPONSE.merge(:progress => 100))
   end
 
   test "processes warning response continue" do
     QBWC.on_error = :continue
     QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
-    _single_request_helper(QBWC_CUSTOMER_QUERY_RESPONSE_WARN, '500', 'Warn', QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_WARN)
+    _receive_responses(WARN_RESPONSE.merge(:progress => 100))
   end
 
   test "processes error response stop" do
     QBWC.on_error = :stop
     QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
-    _single_request_helper(QBWC_CUSTOMER_QUERY_RESPONSE_ERROR, '3120', 'Error', QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR)
+    _receive_responses(ERROR_RESPONSE.merge(:progress => 100))
   end
 
   test "processes error response continue" do
     QBWC.on_error = :continue
     QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
-    _single_request_helper(QBWC_CUSTOMER_QUERY_RESPONSE_ERROR, '3120', 'Error', QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR)
+    _receive_responses(ERROR_RESPONSE.merge(:progress => 100))
   end
 
   class MultiRequestWorker < QBWC::Worker
