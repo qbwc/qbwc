@@ -48,9 +48,9 @@ class ResponseTest < ActionDispatch::IntegrationTest
       if session.progress == 100
         assert_nil(session.next_request)
         return
-      else
-        assert_not_nil(session.next_request)
       end
+
+      assert_not_nil(session.next_request)
     end
 
   end
