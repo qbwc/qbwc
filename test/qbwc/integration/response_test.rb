@@ -77,7 +77,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     def requests(job)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
-    def handle_response(response, job, request, data)
+    def handle_response(response, session, job, request, data)
       $HANDLE_RESPONSE_EXECUTED = true
       $HANDLE_RESPONSE_IS_PASSED_DATA = (data == $HANDLE_RESPONSE_DATA)
     end
@@ -103,7 +103,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "handle_response must use splat operator when omitting job argument" do
+  test "handle_response must use splat operator when omitting remaining arguments" do
     QBWC.add_job(:integration_test, true, '', HandleResponseOmitsJobWorker)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next_request
@@ -117,7 +117,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
       {:name => 'mrjoecustomer'}
     end
 
-    def handle_response(resp, job, request, data)
+    def handle_response(resp, session, job, request, data)
        QBWC.delete_job(job.name)
     end
   end
@@ -199,7 +199,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
         {:customer_query_rq => {:full_name => 'Second Request'}},
       ]
     end
-    def handle_response(resp, job, request, data)
+    def handle_response(resp, session, job, request, data)
       $HANDLE_RESPONSE_EXECUTED = true
     end
   end

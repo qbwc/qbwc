@@ -78,7 +78,7 @@ QBWC.add_job(:list_customers, true, '', CustomerTestWorker)
 Your job will be persisted in your database and will remain active and run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have have your job disable or delete itself after completion. For example:
 
 ```ruby
-	def handle_response(r, job, request, data)
+	def handle_response(r, session, job, request, data)
 		QBWC.delete_job(job)
 	end
 
@@ -93,7 +93,7 @@ A job is associated to a worker, which is an object descending from `QBWC::Worke
 
 - `requests(job)` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
 - `should_run?(job)` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
-- `handle_response(response, job, request, data)` - defines what to do with the response from Quickbooks.
+- `handle_response(response, session, job, request, data)` - defines what to do with the response from Quickbooks.
 
 All three methods are not invoked until a QuickBooks Web Connector session has been established with your web service.
 
@@ -113,7 +113,7 @@ class CustomerTestWorker < QBWC::Worker
 		}
 	end
 
-	def handle_response(r, job, request, data)
+	def handle_response(r, session, job, request, data)
 		# handle_response will get customers in groups of 100. When this is 0, we're done.
 		complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
 

@@ -21,7 +21,7 @@ class QBWC::Job
     completed_request = requests[request_index]
     advance_next_request if advance
     QBWC.logger.info "Job '#{name}' received response: '#{response}'."
-    worker.handle_response(response, self, completed_request, data)
+    worker.handle_response(response, session, self, completed_request, data)
   end
 
   def advance_next_request

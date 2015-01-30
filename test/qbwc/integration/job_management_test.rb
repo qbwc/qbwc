@@ -69,7 +69,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
 
-    def handle_response(resp, job, request, data)
+    def handle_response(resp, session, job, request, data)
       QBWC.delete_job(job.name)
     end
   end

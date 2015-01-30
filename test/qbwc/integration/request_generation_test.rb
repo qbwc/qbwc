@@ -52,7 +52,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
         {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
-    def handle_response(response, job, request, data)
+    def handle_response(response, session, job, request, data)
       $REQUESTS_FOUND_IN_RESPONSE = request
     end
   end
@@ -97,7 +97,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
       $REQUESTS_FROM_DB
     end
 
-    def handle_response(response, job, request, data)
+    def handle_response(response, session, job, request, data)
       $REQUESTS_FROM_DB.shift  # Simulate marking first request as completed
       job.reset
     end
