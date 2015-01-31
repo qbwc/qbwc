@@ -24,12 +24,23 @@ class QBWC::Session
     reset(ticket.nil?)
   end
 
+  def response_is_error?
+    self.error && self.status_severity == 'Error'
+  end
+
+  def error_and_stop_requested?
+    response_is_error? && QBWC::on_error == 'stopOnError'
+  end
+
   def finished?
     self.progress == 100
   end
 
   def next_request
-    return nil if current_job.nil?
+    if current_job.nil? || error_and_stop_requested?
+      self.progress = 100
+      return nil
+    end
     until (request = current_job.next_request) do
       pending_jobs.shift
       reset(true) or break
@@ -56,12 +67,10 @@ class QBWC::Session
       QBWC.logger.info 'Parsing response.'
       response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
       response = response[response.keys.first]
-      QBWC.logger.info 'Parsing headers.'
       parse_response_header(response)
-      is_error = (self.error && self.status_severity == 'Error')
-      QBWC.logger.info "Processing response."
-      self.current_job.process_response(response, self, iterator_id.blank? && (!is_error || QBWC::on_error == 'continueOnError'))
-      self.next_request unless is_error || self.iterator_id.present? # search next request
+      self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil?
+      self.next_request # search next request
+
     rescue => e
       self.error = e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
@@ -94,6 +103,8 @@ class QBWC::Session
   end
 
   def parse_response_header(response)
+    QBWC.logger.info 'Parsing headers.'
+
     self.iterator_id = nil
     self.error = nil
     self.status_code = nil
@@ -109,10 +120,9 @@ class QBWC::Session
                                                'iteratorRemainingCount', 'iteratorID')
     QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
 
-    errmsg = "QBWC #{@status_severity.upcase}: #{@status_code} - #{status_message}"
     if @status_severity == 'Error' || @status_severity == 'Warn'
-      @status_severity == 'Error' ? QBWC.logger.error(errmsg) : QBWC.logger.warn(errmsg)
-      self.error = errmsg
+      self.error = "QBWC #{@status_severity.upcase}: #{@status_code} - #{status_message}"
+      @status_severity == 'Error' ? QBWC.logger.error(self.error) : QBWC.logger.warn(self.error)
     end
 
     self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0 && @status_severity != 'Error'
