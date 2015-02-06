@@ -65,9 +65,11 @@ class QBWC::Session
   def response=(qbxml_response)
     begin
       QBWC.logger.info 'Parsing response.'
-      response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
-      response = response[response.keys.first]
-      parse_response_header(response)
+      unless qbxml_response.nil?
+        response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
+        response = response[response.keys.first]
+        parse_response_header(response)
+      end
       self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil?
       self.next_request # search next request
 
