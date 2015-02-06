@@ -94,6 +94,24 @@ class ResponseTest < ActionDispatch::IntegrationTest
     assert $HANDLE_RESPONSE_IS_PASSED_DATA
   end
 
+  class HandleResponseRaisesExceptionWorker < QBWC::Worker
+    def requests(job)
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
+    end
+    def handle_response(response, session, job, request, data)
+      raise "Exception in handle_response"
+    end
+  end
+
+  test "handle_response raises exception" do
+    QBWC.add_job(:integration_test, true, '', HandleResponseRaisesExceptionWorker)
+    session = QBWC::Session.new('foo', '')
+    assert_not_nil session.next_request
+    simulate_response(session)
+    assert_nil session.next_request
+    assert_equal "Exception in handle_response", session.error
+  end
+
   class HandleResponseOmitsJobWorker < QBWC::Worker
     def requests(job)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
