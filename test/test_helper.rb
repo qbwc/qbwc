@@ -166,6 +166,36 @@ SEND_REQUEST_PARAMS = {
 
 SEND_REQUEST_SOAP_ACTION = :sendRequestXML
 
+
+RECEIVE_RESPONSE_PARAMS = {
+  :ticket   => "60676ae302a35ead77c81b16993ef073ff3c930e",
+  :response => "<?xml version=\"1.0\" ?><QBXML><QBXMLMsgsRs><CustomerAddRs statusCode=\"0\" statusSeverity=\"Info\" statusMessage=\"Status OK\"><CustomerRet><ListID>8000007B-1420967073</ListID><TimeCreated>2015-02-03T07:49:33-05:00</TimeCreated><TimeModified>2015-02-03T07:49:33-05:00</TimeModified><EditSequence>1420967073</EditSequence><Name>mrjoecustomer</Name><FullName>Joseph Customer</FullName><IsActive>true</IsActive><Sublevel>0</Sublevel><Email>joecustomer@gmail.com</Email><Balance>0.00</Balance><TotalBalance>0.00</TotalBalance><AccountNumber>8</AccountNumber><JobStatus>None</JobStatus></CustomerRet></CustomerAddRs></QBXMLMsgsRs></QBXML>", 
+  :hresult => nil,
+  :message => nil}
+
+RECEIVE_RESPONSE_ERROR_PARAMS = {
+  :ticket   => "40fddf910fa903bde3caee77da7b30ab0bc90804",
+  :response => nil,
+  :hresult  => "0x80040400",
+  :message  => "QuickBooks found an error when parsing the provided XML text stream."
+}
+
+RECEIVE_RESPONSE_SOAP_ACTION = :receiveResponseXML
+
+#-------------------------------------------
+def _simulate_soap_request(http_action, soap_action, soap_params)
+
+  ticket = QBWC::ActiveRecord::Session::QbwcSession.first.ticket
+  wash_out_soap_data = { :Envelope => { :Body => { soap_action => soap_params.update(:ticket => ticket) }}}
+
+  # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
+  @request.env["wash_out.soap_action"]  = soap_action.to_s
+  @request.env["wash_out.soap_data"]    = wash_out_soap_data
+  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+
+  post http_action, use_route: :qbwc_action
+end
+
 #-------------------------------------------
 def _authenticate
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/

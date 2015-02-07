@@ -13,8 +13,12 @@ class QBWCControllerTest < ActionController::TestCase
     @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
     #p @controller.view_paths
 
+    QBWC.on_error = :stop
+    QBWC::ActiveRecord::Session::QbwcSession.all.each {|qbs| qbs.destroy}
     QBWC.clear_jobs
     QBWC.set_session_initializer() {|session| }
+
+    $HANDLE_RESPONSE_EXECUTED = false
   end
 
   test "qwc" do
@@ -82,16 +86,70 @@ class QBWCControllerTest < ActionController::TestCase
 
   test "send_request" do
     _authenticate_with_queued_job
+    _simulate_soap_request('send_request', SEND_REQUEST_SOAP_ACTION, SEND_REQUEST_PARAMS)
+  end
 
-    ticket = QBWC::ActiveRecord::Session::QbwcSession.first.ticket
-    send_request_wash_out_soap_data = { :Envelope => { :Body => { SEND_REQUEST_SOAP_ACTION => SEND_REQUEST_PARAMS.update(:ticket => ticket) }}}
+  test "receive_response" do
+    _authenticate_with_queued_job
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_PARAMS)
 
-    # send_request
-    @request.env["wash_out.soap_action"]  = SEND_REQUEST_SOAP_ACTION.to_s
-    @request.env["wash_out.soap_data"]    = send_request_wash_out_soap_data
-    @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+    assert_match /tns:receiveResponseXMLResult.*100..tns:receiveResponseXMLResult/, @response.body
+  end
 
-    post 'send_request', use_route: :qbwc_action
+  class CheckErrorValuesWorker < QBWC::Worker
+    def worker_assert_equal(expected_value, value, tag)
+      raise "#{tag} is not correct" if expected_value != value && ! expected_value.blank?
+    end
+
+    def requests(job)
+      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
+    end
+
+    def handle_response(response, session, job, request, expected)
+      unless expected.blank?
+        worker_assert_equal(expected[:session_error],           session.error,           "session.error")
+        worker_assert_equal(expected[:session_status_code],     session.status_code,     "session.status_code")
+        worker_assert_equal(expected[:session_status_severity], session.status_severity, "session.status_severity")
+      end
+      $HANDLE_RESPONSE_EXECUTED = true
+    end
+  end
+
+  def _receive_response_error_helper(receive_response_xml_result, schedule_second_job)
+    expected_values = {
+      :session_error           => RECEIVE_RESPONSE_ERROR_PARAMS[:message],
+      :session_status_code     => RECEIVE_RESPONSE_ERROR_PARAMS[:hresult],
+      :session_status_severity => nil,
+    }
+
+    QBWC.add_job(:customer_add_rq_job1, true, COMPANY, CheckErrorValuesWorker, nil, expected_values)
+    QBWC.add_job(:customer_add_rq_job2, true, COMPANY, CheckErrorValuesWorker) if schedule_second_job
+
+    _authenticate
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_ERROR_PARAMS)
+
+    assert $HANDLE_RESPONSE_EXECUTED  # https://github.com/skryl/qbwc/pull/50#discussion_r23764154
+    assert_match /tns:receiveResponseXMLResult.*#{receive_response_xml_result}..tns:receiveResponseXMLResult/, @response.body
+  end
+
+  test "receive_response error stop" do
+    QBWC.on_error = :stop
+    _receive_response_error_helper(-1, false)
+  end
+
+  test "receive_response error continue" do
+    QBWC.on_error = :continue
+    _receive_response_error_helper(100, false)
+  end
+
+  test "receive_response error stop 2jobs" do
+    QBWC.on_error = :stop
+    _receive_response_error_helper(-1, true)
+  end
+
+  test "receive_response error continue 2jobs" do
+    QBWC.on_error = :continue
+    _receive_response_error_helper(50, true)
   end
 
 end
