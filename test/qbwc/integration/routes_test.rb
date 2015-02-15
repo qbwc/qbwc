@@ -5,6 +5,15 @@ class RoutesTest < ActionDispatch::IntegrationTest
 
   def setup
     RoutesTest.app = Rails.application
+
+    # Initialize sets view paths
+    RoutesTest.app.initialize! unless RoutesTest.app.initialized?
+
+    # Assign routes
+    QbwcTestApplication::Application.routes.draw do
+      _assign_routes
+    end
+
     QBWC.clear_jobs
   end
 

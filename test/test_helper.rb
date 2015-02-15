@@ -35,6 +35,7 @@ module QbwcTestApplication
   class Application < Rails::Application
     Rails.application.configure do
       config.secret_key_base = "stub"
+      config.eager_load = false
     end
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
@@ -55,7 +56,7 @@ module QbwcTestApplication
 
 end
 
-QbwcTestApplication::Application.routes.draw do
+def _assign_routes
 
   # Manually stub these generated routes:
   #          GET        /qbwc/action(.:format)  qbwc#_generate_wsdl
@@ -73,6 +74,10 @@ QbwcTestApplication::Application.routes.draw do
 
   # Stub a root route
   root :to => "qbwc#qwc"
+end
+
+QbwcTestApplication::Application.routes.draw do
+  _assign_routes
 end
 
 class QbwcController < ActionController::Base
