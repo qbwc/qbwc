@@ -127,9 +127,7 @@ QWC
     end
 
     def send_request
-      request = @session.current_request
-      request = request.try(:request) || ''
-      QBWC.logger.info("Current request is #{request}") if QBWC.log_sensitive_lines
+      request = @session.request_to_send
       render :soap => {'tns:sendRequestXMLResult' => request}
     end
 

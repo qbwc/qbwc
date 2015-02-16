@@ -62,6 +62,14 @@ class QBWC::Session
     request
   end
 
+  def request_to_send
+    request = current_request.try(:request) || ''
+    QBWC.logger.info("Sending request from job #{current_job.name}")
+    QBWC.logger.info(request) if QBWC.log_sensitive_lines
+
+    request
+  end
+
   def response=(qbxml_response)
     begin
       QBWC.logger.info 'Parsing response.'
