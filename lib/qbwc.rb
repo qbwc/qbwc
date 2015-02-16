@@ -62,6 +62,10 @@ module QBWC
   mattr_accessor :logger
   @@logger = Rails.logger
   
+  # Some log lines contain sensitive information
+  mattr_accessor :log_sensitive_lines
+  @@log_sensitive_lines = Rails.env == 'production' ? false : true
+
   class << self
 
     def storage_module
