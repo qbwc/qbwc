@@ -16,11 +16,11 @@ class QBWC::Job
     worker_class.constantize.new
   end
 
-  def process_response(response, session, advance)
+  def process_response(qbxml_response, response, session, advance)
     QBWC.logger.info "Processing response."
     completed_request = requests[request_index]
     advance_next_request if advance
-    QBWC.logger.info "Job '#{name}' received response: '#{response}'." if QBWC.log_sensitive_lines
+    QBWC.logger.info "Job '#{name}' received response: '#{qbxml_response}'." if QBWC.log_sensitive_lines
     worker.handle_response(response, session, self, completed_request, data)
   end
 
