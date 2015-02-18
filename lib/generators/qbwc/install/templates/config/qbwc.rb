@@ -51,5 +51,5 @@ QBWC.configure do |c|
 
   # Some log lines contain sensitive information
   # (default false on production, true otherwise)
-  # c.log_sensitive_lines = false
+  # c.log_requests_and_responses = false
 end

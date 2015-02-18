@@ -136,6 +136,7 @@ QWC
         QBWC.logger.warn "#{params[:hresult]}: #{params[:message]}"
         @session.error = params[:message]
         @session.status_code = params[:hresult]
+        @session.status_severity = 'Error'
       end
       @session.response = params[:response]
       render :soap => {'tns:receiveResponseXMLResult' => (QBWC::on_error == 'continueOnError' || @session.error.nil?) ? @session.progress : -1}

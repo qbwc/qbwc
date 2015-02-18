@@ -120,7 +120,7 @@ class QBWCControllerTest < ActionController::TestCase
     expected_values = {
       :session_error           => RECEIVE_RESPONSE_ERROR_PARAMS[:message],
       :session_status_code     => RECEIVE_RESPONSE_ERROR_PARAMS[:hresult],
-      :session_status_severity => nil,
+      :session_status_severity => 'Error',
     }
 
     QBWC.add_job(:customer_add_rq_job1, true, COMPANY, CheckErrorValuesWorker, nil, expected_values)

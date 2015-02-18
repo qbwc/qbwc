@@ -63,8 +63,8 @@ module QBWC
   @@logger = Rails.logger
   
   # Some log lines contain sensitive information
-  mattr_accessor :log_sensitive_lines
-  @@log_sensitive_lines = Rails.env == 'production' ? false : true
+  mattr_accessor :log_requests_and_responses
+  @@log_requests_and_responses = Rails.env == 'production' ? false : true
 
   class << self
 
