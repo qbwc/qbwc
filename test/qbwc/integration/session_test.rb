@@ -79,4 +79,16 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 100, session.progress
   end
 
+  test "request_to_send when no requests" do
+
+    QBWC.add_job(:add_joe_customer, true, COMPANY, QBWC::Worker, [])
+
+    assert_equal 1, QBWC.jobs.count
+    assert_equal 1, QBWC.pending_jobs(COMPANY).count
+
+    # Simulate controller send_request
+    session = QBWC::Session.new(nil, COMPANY)
+    request = session.request_to_send
+  end
+
 end
