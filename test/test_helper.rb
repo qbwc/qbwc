@@ -85,6 +85,13 @@ class QbwcController < ActionController::Base
   include QBWC::Controller
 end
 
+QBWC_EMPTY_RESPONSE = "<?xml version=\"1.0\"?>\r
+    <?qbxml version=\"7.0\"?>\r
+    <QBXML>\r
+      <QBXMLMsgsRs onError=\"stopOnError\">\r
+      </QBXMLMsgsRs>\r
+    </QBXML>\r"
+
 QBWC_CUSTOMER_ADD_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
     <?qbxml version=\"7.0\"?>\r
     <QBXML>\r
@@ -231,12 +238,7 @@ def _authenticate_wrong_password
   post 'authenticate', use_route: :qbwc_action
 end
 
-def simulate_response(session)
-  session.response = <<-EOF
-  <?xml version="1.0"?><?qbxml version="7.0"?>
-<QBXML>
-  <QBXMLMsgsRs onError="stopOnError">
-  </QBXMLMsgsRs>
-</QBXML>
-  EOF
+#-------------------------------------------
+def simulate_response(session, response=QBWC_EMPTY_RESPONSE)
+  session.response = response
 end

@@ -89,7 +89,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:integration_test, true, '', HandleResponseWithDataWorker, nil, $HANDLE_RESPONSE_DATA)
     session = QBWC::Session.new('foo', '')
     assert_not_nil session.next_request
-    simulate_response(session)
+    simulate_response(session, QBWC_CUSTOMER_ADD_RESPONSE_LONG)
     assert_nil session.next_request
     assert $HANDLE_RESPONSE_IS_PASSED_DATA
   end

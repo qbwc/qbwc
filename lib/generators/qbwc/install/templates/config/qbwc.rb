@@ -48,4 +48,8 @@ QBWC.configure do |c|
 
   # Logger to use.
   c.logger = Rails.logger
+
+  # Some log lines contain sensitive information
+  # (default false on production, true otherwise)
+  # c.log_requests_and_responses = false
 end

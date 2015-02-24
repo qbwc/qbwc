@@ -62,6 +62,15 @@ class QBWC::Session
     request
   end
 
+  def request_to_send
+    current_job_name = current_job.name
+    request = current_request.try(:request) || ''
+    QBWC.logger.info("Sending request from job #{current_job_name}")
+    QBWC.logger.info(request) if QBWC.log_requests_and_responses
+
+    request
+  end
+
   def response=(qbxml_response)
     begin
       QBWC.logger.info 'Parsing response.'
@@ -70,7 +79,7 @@ class QBWC::Session
         response = response[response.keys.first]
         parse_response_header(response)
       end
-      self.current_job.process_response(response, self, iterator_id.blank?) unless self.current_job.nil?
+      self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
       self.next_request # search next request
 
     rescue => e

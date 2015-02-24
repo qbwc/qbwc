@@ -85,7 +85,8 @@ class QBWCControllerTest < ActionController::TestCase
   end
 
   test "send_request" do
-    _authenticate_with_queued_job
+    QBWC.add_job(:customer_add_rq_job, true, COMPANY, QBWC::Worker, QBWC_CUSTOMER_ADD_RQ)
+    _authenticate
     _simulate_soap_request('send_request', SEND_REQUEST_SOAP_ACTION, SEND_REQUEST_PARAMS)
   end
 

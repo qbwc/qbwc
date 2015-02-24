@@ -16,11 +16,11 @@ class QBWC::Job
     worker_class.constantize.new
   end
 
-  def process_response(response, session, advance)
+  def process_response(qbxml_response, response, session, advance)
     QBWC.logger.info "Processing response."
     completed_request = requests[request_index]
     advance_next_request if advance
-    QBWC.logger.info "Job '#{name}' received response: '#{response}'."
+    QBWC.logger.info "Job '#{name}' received response: '#{qbxml_response}'." if QBWC.log_requests_and_responses
     worker.handle_response(response, session, self, completed_request, data)
   end
 
@@ -92,12 +92,12 @@ class QBWC::Job
       self.requests = r
     end
 
-    QBWC.logger.info("Requests available are '#{requests}'.")
+    QBWC.logger.info("Requests available are '#{requests}'.") if QBWC.log_requests_and_responses
     ri = request_index
     QBWC.logger.info("Request index is '#{ri}'.")
     return nil if ri.nil? || requests.nil? || ri >= requests.length
     nr = requests[ri]
-    QBWC.logger.info("Next request is '#{nr}'.")
+    QBWC.logger.info("Next request is '#{nr}'.") if QBWC.log_requests_and_responses
     return QBWC::Request.new(nr)
   end
   alias :next :next_request  # Deprecated method name 'next'
