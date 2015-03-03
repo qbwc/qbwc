@@ -39,7 +39,27 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:integration_test, true, '', SingleRequestWorker)
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == false}
     session = QBWC::Session.new('foo', '')
-    assert_not_nil session.next_request
+    nr = session.next_request
+    assert_not_nil nr
+    assert_match /FullName.*Quincy Bob William Carlos.*FullName/, nr.request
+    simulate_response(session)
+    assert_nil session.next_request
+  end
+
+  class SingleStringRequestWorker < QBWC::Worker
+    def requests(job)
+      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
+      QBWC_CUSTOMER_QUERY_RQ
+    end
+  end
+
+  test "simple string request worker" do
+    QBWC.add_job(:integration_test, true, '', SingleStringRequestWorker)
+    QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == false}
+    session = QBWC::Session.new('foo', '')
+    nr = session.next_request
+    assert_not_nil nr
+    assert_match /FullName.*#{QBWC_USERNAME}.*FullName/, nr.request
     simulate_response(session)
     assert_nil session.next_request
   end
