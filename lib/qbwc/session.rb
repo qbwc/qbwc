@@ -107,6 +107,7 @@ class QBWC::Session
   def reset(reset_job = false)
     self.current_job = pending_jobs.first
     self.current_job.reset if reset_job && self.current_job
+    return self.current_job
   end
 
   def pending_jobs

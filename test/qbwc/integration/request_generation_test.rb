@@ -171,6 +171,20 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == (job.name == 'integration_test_2')}
   end
 
+  # https://github.com/skryl/qbwc/issues/58
+  test 'multiple jobs when first job has no requests' do
+    QBWC.add_job(:test_empty,  true, '', QBWC::Worker, [])
+    QBWC.add_job(:test_income, true, '', QBWC::Worker, [{:account_query_rq => {:active_status => 'All', :account_type => 'Income'}}])
+    session = QBWC::Session.new('foo', '')
+
+    # No requests from :test_empty
+
+    # One request from :test_income
+    assert_not_nil session.next_request
+    simulate_response(session)
+    assert_nil session.next_request
+  end
+
   class ShouldntRunWorker < QBWC::Worker
     def requests(job)
       [
