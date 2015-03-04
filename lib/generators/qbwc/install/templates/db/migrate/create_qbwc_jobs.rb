@@ -1,6 +1,6 @@
 class CreateQbwcJobs < ActiveRecord::Migration
   def change
-    create_table :qbwc_jobs do |t|
+    create_table :qbwc_jobs, :force => true do |t|
       t.string :name
       t.string :company, :limit => 1000
       t.string :worker_class, :limit => 100
@@ -9,7 +9,7 @@ class CreateQbwcJobs < ActiveRecord::Migration
       t.text :requests
       t.boolean :requests_provided_when_job_added, :null => false, :default => false
       t.text :data
-      t.timestamps
+      t.timestamps :null => false
     end
   end
 end

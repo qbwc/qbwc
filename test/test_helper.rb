@@ -19,6 +19,8 @@ QBWC_USERNAME = 'myUserName'
 QBWC_PASSWORD = 'myPassword'
 QBWC.api = :qb
 
+ActiveSupport::TestCase.test_order = :random if defined? ActiveSupport::TestCase.test_order=()
+
 #-------------------------------------------
 # http://coryforsyth.com/2013/06/02/programmatically-list-routespaths-from-inside-your-rails-app/
 def _inspect_routes
@@ -71,6 +73,8 @@ def _assign_routes
 
   # Route needed for test_qwc 
   get 'qbwc/action' => 'qbwc#action'
+
+  get 'qbwc/authenticate' => 'qbwc#authenticate'
 
   # Stub a root route
   root :to => "qbwc#qwc"
@@ -215,7 +219,7 @@ def _authenticate
   @request.env["wash_out.soap_data"]    = AUTHENTICATE_WASH_OUT_SOAP_DATA
   @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
 
-  post 'authenticate', use_route: :qbwc_action
+  process(:authenticate)
 end
 
 #-------------------------------------------
@@ -235,7 +239,7 @@ def _authenticate_wrong_password
   @request.env["wash_out.soap_data"]    = bad_password_soap_data
   @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
 
-  post 'authenticate', use_route: :qbwc_action
+  process(:authenticate)
 end
 
 #-------------------------------------------

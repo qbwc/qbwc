@@ -74,7 +74,7 @@ SB
 <QBWCXML>
    <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
    <AppID></AppID>
-   <AppURL>#{qbwc_action_path(:only_path => false)}</AppURL>
+   <AppURL>#{qbwc_action_url(:only_path => false)}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>#{@username || QBWC.username}</UserName>

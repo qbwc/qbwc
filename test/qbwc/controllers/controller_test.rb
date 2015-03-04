@@ -23,7 +23,7 @@ class QBWCControllerTest < ActionController::TestCase
 
   test "qwc" do
     #_inspect_routes
-    get 'qwc', use_route: :qbwc_qwc
+    process(:qwc)
 
     assert_match /QBWCXML/,                                                 @response.body
     assert_match /AppName.*QbwcTestApplication development.*AppName/,       @response.body
