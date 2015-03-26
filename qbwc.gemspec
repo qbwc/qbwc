@@ -24,15 +24,16 @@ Gem::Specification.new do |s|
 
   s.add_dependency "qbxml", [">= 0.2.0"]
   s.add_dependency "wash_out", [">= 0.7.1"]
+
   s.add_development_dependency('guard')
   s.add_development_dependency('guard-rspec')
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
-
   s.add_development_dependency('activerecord')
   s.add_development_dependency('actionpack')
   s.add_development_dependency('rails', [">= 4.1.0"])
   s.add_development_dependency('sqlite3')
   s.add_development_dependency('minitest')
+  s.add_development_dependency('rake')
 end
