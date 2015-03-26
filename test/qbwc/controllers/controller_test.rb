@@ -26,7 +26,7 @@ class QBWCControllerTest < ActionController::TestCase
     process(:qwc)
 
     assert_match /QBWCXML/,                                                 @response.body
-    assert_match /AppName.*QbwcTestApplication development.*AppName/,       @response.body
+    assert_match Regexp.new("AppName.*QbwcTestApplication #{Rails.env}.*AppName"),       @response.body
     assert_match /AppURL.*http:\/\/test.host\/qbwc\/action.*AppURL/,        @response.body
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body

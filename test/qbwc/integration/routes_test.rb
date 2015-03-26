@@ -22,7 +22,7 @@ class RoutesTest < ActionDispatch::IntegrationTest
     get '/qbwc/qwc'
 
     assert_match /QBWCXML/,                                                 @response.body
-    assert_match /AppName.*QbwcTestApplication development.*AppName/,       @response.body
+    assert_match Regexp.new("AppName.*QbwcTestApplication #{Rails.env}.*AppName"),       @response.body
     assert_match /AppURL.*http:\/\/www.example.com\/qbwc\/action.*AppURL/,  @response.body
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/www.example.com\/.*AppSupport/,     @response.body
