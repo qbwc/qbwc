@@ -5,8 +5,8 @@ require "qbwc/version"
 Gem::Specification.new do |s|
   s.name        = "qbwc"
   s.version     = QBWC::VERSION
-  s.authors     = ["Alex Skryl", "Russell Osborne", "German Garcia"]
-  s.email       = ["rut216@gmail.com", "russell@burningpony.com", "geermc4@gmail.com"]
+  s.authors     = ["Alex Skryl", "Russell Osborne", "German Garcia", "Jason Barnabe"]
+  s.email       = ["rut216@gmail.com", "russell@burningpony.com", "geermc4@gmail.com", "jason.barnabe@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{A Rails interface for Intuit's Quickbooks Web Connector}
   s.description = %q{A Rails interface for Intuit's Quickbooks Web Connector that's OPEN SOURCE!}
