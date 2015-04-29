@@ -72,7 +72,7 @@ SB
 
       qwc = <<QWC
 <QBWCXML>
-   <AppName>#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}</AppName>
+   <AppName>#{app_name}</AppName>
    <AppID></AppID>
    <AppURL>#{qbwc_action_url(:only_path => false)}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
@@ -155,6 +155,10 @@ QWC
 
     def get_last_error
       render :soap => {'tns:getLastErrorResult' => @session.error || ''}
+    end
+
+    def app_name
+      "#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}"
     end
 
     def file_id
