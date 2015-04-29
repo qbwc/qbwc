@@ -79,7 +79,7 @@ SB
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
    <UserName>#{@username || QBWC.username}</UserName>
    <OwnerID>#{QBWC.owner_id}</OwnerID>
-   <FileID>{#{SecureRandom.uuid}}</FileID>
+   <FileID>{#{@file_id || SecureRandom.uuid}}</FileID>
    <QBType>QBFS</QBType>
    <Style>Document</Style>
    #{scheduler_block}
