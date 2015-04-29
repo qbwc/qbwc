@@ -31,6 +31,7 @@ class QBWCControllerTest < ActionController::TestCase
     assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
     assert_match /AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body
     assert_match /UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body
+    assert_match /FileID.*{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}.*FileID/,  @response.body
   end
 
   test "authenticate with no jobs" do
