@@ -54,12 +54,12 @@ At this point, QuickBooks Web Connector should be able to send requests to your 
 
 ### Multiple users and multiple company files ###
 
-If you want to have more than one person to connect to the same QuickBooks company file, you will need to manually edit the QWC file to change the `OwnerID` (any GUID will do) before giving it to QuickBooks Web Connector.
-
 If you want each person to have their own login, set up authentication per [Authentication and multiple company files](#authentication-and-multiple-company-files). In the QWC file, you will need to change `UserName`.
 
-If you are connecting to multiple company files, you will additionally need to change `AppName` and `FileID` (any GUID) to be unique to each file.
-
+If you are connecting to multiple company files, you will additionally
+need to change `AppName` and `FileID` (any GUID) to be unique to each
+file. Alternatively you can override the `file_id` in the generated
+`QbwcController` to supply your own `FileID` when generating the file.
 
 ## Creating jobs
 
