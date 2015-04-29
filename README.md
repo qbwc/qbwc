@@ -58,10 +58,7 @@ If you want to have more than one person to connect to the same QuickBooks compa
 
 If you want each person to have their own login, set up authentication per [Authentication and multiple company files](#authentication-and-multiple-company-files). In the QWC file, you will need to change `UserName`.
 
-If you are connecting to multiple company files, you will additionally
-need to change `AppName` and `FileID` (any GUID) to be unique to each
-file. Alternatively you can override the `file_id` in the generated
-`QbwcController` to supply your own `FileID` when generating the file.
+If you are connecting to multiple company files, you will additionally need to change `AppName` and `FileID` (any GUID) to be unique to each file. In the generated `QbwcController` you can override the `file_id` method to customize `FileID` and `app_name` to customize `AppName`.
 
 ## Creating jobs
 
