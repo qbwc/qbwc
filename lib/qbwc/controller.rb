@@ -162,7 +162,7 @@ QWC
     end
 
     def file_id
-      SecureRandom.uuid
+      '90A44FB5-33D9-4815-AC85-BC87A7E7D1EB'
     end
 
     protected
