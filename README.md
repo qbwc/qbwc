@@ -131,15 +131,41 @@ end
 
 Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
 
-### Referencing memory values when constructing requests ###
+### Defining requests outside of a worker ###
 
-A `QBWC::Worker#requests` method cannot access values that are in-memory (global variables, local variables, model attributes, etc.) at the time that `QBWC.add_job` is called; however, in lieu of using `QBWC::Worker#requests`, you can construct and pass requests directly to `QBWC.add_job` (`Hash`, `String`, or array of `Hash`es and `String`s). These requests will be immediately persisted by `QBWC.add_job` (in contrast to requests constructed by `QBWC::Worker#requests`, which are persisted during a QuickBooks Web Connector session).
+You can pass requests (via a `Hash`, `String`, or array of `Hash`es and `String`s) to `QBWC.add_job` rather than having `QBWC::Worker#requests` define them.
 
-If requests are passed to `QBWC.add_job`, the `requests` method on your worker will be ignored.
+```ruby
+require 'qbwc'
+requests = {
+	:customer_query_rq => {
+		:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+		:max_returned => 100
+	}
+}
+# QBWC will run the contents of the requests variable, and will not use CustomerTestWorker#requests.
+QBWC.add_job(:list_customers, true, '', CustomerTestWorker, requests)
+```
 
-### Referencing memory values when handling responses ###
+### Passing data to a worker ###
 
-Similarly, a `QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, String, Array, or Hash) to `QBWC.add_job`. This data will immediately be persisted by `QBWC.add_job`, then later passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
+`QBWC::Worker#handle_response` method cannot access variables that are in-memory at the time that `QBWC.add_job` is called; however, you can optionally pass a serializable value (for example, `String`, `Array`, or `Hash`) to `QBWC.add_job`. This data will be passed to `QBWC::Worker#handle_response` during a QuickBooks Web Connector session.
+
+```ruby
+require 'qbwc'
+extra_data = "something important"
+QBWC.add_job(:list_customers, true, '', CustomerTestWorker, nil, extra_data)
+
+class CustomerTestWorker < QBWC::Worker
+
+	# ...
+
+	def handle_response(r, session, job, request, data)
+		# data here is "something important"
+	end
+
+end
+```
 
 ## Sessions ##
 
