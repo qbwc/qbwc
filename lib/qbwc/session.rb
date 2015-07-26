@@ -58,7 +58,7 @@ class QBWC::Session
       request.delete('xml_attributes')
       request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => self.iterator_id}
       request = QBWC::Request.new(request)
-    end 
+    end
     request
   end
 
@@ -76,7 +76,15 @@ class QBWC::Session
       QBWC.logger.info 'Parsing response.'
       unless qbxml_response.nil?
         response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
-        response = response[response.keys.first]
+
+        query_key = response.keys.first
+        response = response[query_key]
+        if response.is_a?(Hash) &&
+           query_key =~ /_query_rs$/ &&
+           response_key = response.keys.detect{|k| k == query_key.gsub("query_rs", "ret")}
+          response[response_key] = [response[response_key]].flatten
+        end
+
         parse_response_header(response)
       end
       self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
