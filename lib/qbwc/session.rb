@@ -136,7 +136,7 @@ class QBWC::Session
     return unless response.is_a?(Hash) && response['xml_attributes']
 
     @status_code, @status_severity, status_message, iterator_remaining_count, iterator_id = \
-      response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage', 
+      response['xml_attributes'].values_at('statusCode', 'statusSeverity', 'statusMessage',
                                                'iteratorRemainingCount', 'iteratorID')
     QBWC.logger.info "Parsed headers. statusSeverity: '#{status_severity}'. statusCode: '#{@status_code}'"
 

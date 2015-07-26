@@ -155,4 +155,3 @@ class QBWCControllerTest < ActionController::TestCase
   end
 
 end
-
