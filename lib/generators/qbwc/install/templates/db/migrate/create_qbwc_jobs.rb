@@ -11,5 +11,7 @@ class CreateQbwcJobs < ActiveRecord::Migration
       t.text :data
       t.timestamps :null => false
     end
+    add_index :qbwc_jobs, :name, unique: true
+    add_index :qbwc_jobs, :company
   end
 end

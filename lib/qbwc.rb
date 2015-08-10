@@ -54,6 +54,10 @@ module QBWC
   mattr_accessor :session_initializer
   @@session_initializer = nil
 
+  # Code to execute after each session has completed all jobs without errors
+  mattr_accessor :session_complete_success
+  @@session_complete_success = nil
+
   # In the event of an error running requests, :stop all work or :continue with the next request?
   mattr_reader :on_error
   @@on_error = 'stopOnError'
@@ -89,10 +93,10 @@ module QBWC
       storage_module::Job.delete_job_with_name(name)
     end
 
-    def pending_jobs(company)
+    def pending_jobs(company, session)
       js = jobs
       QBWC.logger.info "#{js.length} jobs exist, checking for pending jobs for company '#{company}'."
-      storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?})
+      storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?(session)})
     end
     
     def set_session_initializer(&block)

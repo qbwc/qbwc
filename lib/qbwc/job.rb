@@ -38,12 +38,12 @@ class QBWC::Job
     self.enabled = false
   end
 
-  def pending?
+  def pending?(session)
     if !enabled?
       QBWC.logger.info "Job '#{name}' not enabled."
       return false
     end
-    sr = worker.should_run?(self)
+    sr = worker.should_run?(self, session, @data)
     QBWC.logger.info "Job '#{name}' should_run?: #{sr}."
     return sr
   end
@@ -84,10 +84,10 @@ class QBWC::Job
     @requests_provided_when_job_added = value
   end
 
-  def next_request
+  def next_request(session)
     # Generate and save the requests to run when starting the job.
     if (requests.nil? || requests.empty?) && ! self.requests_provided_when_job_added
-      r = worker.requests(self)
+      r = worker.requests(self, session, @data)
       r = [r] unless r.nil? || r.is_a?(Array)
       self.requests = r
     end

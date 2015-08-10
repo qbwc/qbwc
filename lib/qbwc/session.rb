@@ -39,14 +39,16 @@ class QBWC::Session
   def next_request
     if current_job.nil? || error_and_stop_requested?
       self.progress = 100
+      complete_with_success unless response_is_error?
       return nil
     end
-    until (request = current_job.next_request) do
+    until (request = current_job.next_request(self)) do
       pending_jobs.shift
       reset(true) or break
     end
     jobs_completed = @initial_job_count - pending_jobs.length
     self.progress = ((jobs_completed.to_f  / @initial_job_count.to_f ) * 100).to_i
+    complete_with_success if finished?
     request
   end
   alias :next :next_request  # Deprecated method name 'next'
@@ -92,6 +94,10 @@ class QBWC::Session
   def save
   end
 
+  def began_at
+    @session.created_at
+  end
+
   def destroy
     self.freeze
     @@session = nil
@@ -111,7 +117,11 @@ class QBWC::Session
   end
 
   def pending_jobs
-    @pending_jobs ||= QBWC.pending_jobs(@company)
+    @pending_jobs ||= QBWC.pending_jobs(@company, self)
+  end
+
+  def complete_with_success
+    QBWC.session_complete_success.call(self) if QBWC.session_complete_success
   end
 
   def parse_response_header(response)
