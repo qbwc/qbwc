@@ -15,7 +15,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class NilRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       nil
     end
   end
@@ -29,7 +29,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class SingleRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
@@ -47,7 +47,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class SingleStringRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       QBWC_CUSTOMER_QUERY_RQ
     end
@@ -65,7 +65,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class MultipleRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       $MULTIPLE_REQUESTS_INVOKED_COUNT += 1 if $MULTIPLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       [
         {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
@@ -113,7 +113,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
         {:customer_query_rq => {:full_name => 'Quigley Brian Wally Colin'}},
     ]
 
-    def requests(job)
+    def requests(job, session, data)
       $REQUESTS_FROM_DB
     end
 
@@ -206,14 +206,14 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
   end
 
   class ShouldntRunWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       [
         {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}},
         {:customer_query_rq => {:full_name => 'Quentin Billy Wyatt Charles'}}
       ]
     end
 
-    def should_run?(job)
+    def should_run?(job, session, data)
       false
     end
   end
@@ -226,7 +226,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   $VARIABLE_REQUEST_COUNT = 2
   class VariableRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       r = []
       $VARIABLE_REQUEST_COUNT.times do
         r << {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}

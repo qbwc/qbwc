@@ -9,6 +9,7 @@ class QBWCControllerTest < ActionController::TestCase
   def setup
     @routes = Rails.application.routes  # https://github.com/blowmage/minitest-rails/issues/133#issuecomment-36401436
     @controller = QbwcController.new    # http://stackoverflow.com/a/7743176
+    @session = QBWC::Session.new('foo', '')
 
     @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
     #p @controller.view_paths
@@ -36,13 +37,13 @@ class QBWCControllerTest < ActionController::TestCase
 
   test "authenticate with no jobs" do
     _authenticate
-    assert_equal 0, QBWC.pending_jobs(COMPANY).count
+    assert_equal 0, QBWC.pending_jobs(COMPANY, @session).count
     assert @response.body.include?(QBWC::Controller::AUTHENTICATE_NO_WORK), @response.body
   end
 
   test "authenticate with jobs" do
     _authenticate_with_queued_job
-    assert_equal 1, QBWC.pending_jobs(COMPANY).count
+    assert_equal 1, QBWC.pending_jobs(COMPANY, @session).count
     assert @response.body.include?(COMPANY), @response.body
   end
 
@@ -103,7 +104,7 @@ class QBWCControllerTest < ActionController::TestCase
       raise "#{tag} is not correct" if expected_value != value && ! expected_value.blank?
     end
 
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
 

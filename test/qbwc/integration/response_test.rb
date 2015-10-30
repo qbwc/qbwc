@@ -74,7 +74,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   class HandleResponseWithDataWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(response, session, job, request, data)
@@ -95,7 +95,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   class HandleResponseRaisesExceptionWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(response, session, job, request, data)
@@ -113,7 +113,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   class HandleResponseOmitsJobWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
     def handle_response(*response)
@@ -131,7 +131,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   class QueryAndDeleteWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       {:name => 'mrjoecustomer'}
     end
 
@@ -211,7 +211,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
   end
 
   class MultiRequestWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       [
         {:customer_query_rq => {:full_name => 'First Request'}},
         {:customer_query_rq => {:full_name => 'Second Request'}},
