@@ -24,6 +24,10 @@ class QBWC::Session
     reset(ticket.nil?)
   end
 
+  def key
+    [user, company]
+  end
+
   def response_is_error?
     self.error && self.status_severity == 'Error'
   end

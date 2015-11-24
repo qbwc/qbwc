@@ -1,7 +1,8 @@
 class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => true, :presence => true
-    serialize :requests, Array
+    serialize :requests, Hash
+    serialize :request_index, Hash
     serialize :data
 
     def to_qbwc_job
@@ -12,20 +13,23 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   # Creates and persists a job.
   def self.add_job(name, enabled, company, worker_class, requests, data)
-
     worker_class = worker_class.to_s
     ar_job = find_ar_job_with_name(name).first_or_initialize
     ar_job.company = company
     ar_job.enabled = enabled
-    ar_job.request_index = 0
+    ar_job.request_index = {}
     ar_job.worker_class = worker_class
     ar_job.save!
 
     jb = self.new(name, enabled, company, worker_class, requests, data)
-    jb.requests = requests.is_a?(Array) ? requests : [requests] unless requests.nil?
+    unless requests.nil? || requests.empty?
+      request_hash = { [nil, company] => [requests].flatten }
+
+      jb.requests = request_hash
+      ar_job.update_attribute :requests, request_hash
+    end
     jb.requests_provided_when_job_added = (! requests.nil? && ! requests.empty?)
     jb.data = data
-
     jb
   end
 
@@ -56,13 +60,14 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     find_ar_job.where(:enabled => true).exists?
   end
 
-  def requests
-    find_ar_job.pluck(:requests).first
+  def requests(session)
+    @requests = find_ar_job.pluck(:requests).first
+    super
   end
 
-  def requests=(r)
-    find_ar_job.update_all(:requests => r)
+  def set_requests(session, requests)
     super
+    find_ar_job.update_all(:requests => @requests)
   end
 
   def requests_provided_when_job_added
@@ -83,17 +88,27 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     super
   end
 
-  def request_index
-    find_ar_job.pluck(:request_index).first
+  def request_index(session)
+    (find_ar_job.pluck(:request_index).first || {})[session.key] || 0
   end
 
-  def request_index=(nr)
-    find_ar_job.update_all(:request_index => nr)
+  def set_request_index(session, index)
+    find_ar_job.each do |jb|
+      jb.request_index[session.key] = index
+      jb.save
+    end
   end
 
-  def advance_next_request
-    nr = request_index
-    self.request_index = nr + 1
+  def advance_next_request(session)
+    nr = request_index(session)
+    set_request_index session, nr + 1
+  end
+
+  def reset
+    super
+    job = find_ar_job
+    job.update_all :request_index => {}
+    job.update_all(:requests => {}) unless self.requests_provided_when_job_added
   end
 
   def self.list_jobs

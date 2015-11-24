@@ -104,6 +104,11 @@ module QBWC
       self
     end
 
+    def set_session_complete_success(&block)
+      @@session_complete_success = block
+      self
+    end
+
     def on_error=(reaction)
       raise 'Quickbooks on_error must be :stop or :continue' unless [:stop, :continue].include?(reaction)
       @@on_error = "stopOnError" if reaction == :stop

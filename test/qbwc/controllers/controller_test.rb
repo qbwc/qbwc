@@ -22,6 +22,11 @@ class QBWCControllerTest < ActionController::TestCase
     $HANDLE_RESPONSE_EXECUTED = false
   end
 
+  def teardown
+    QBWC.session_initializer = nil
+    QBWC.session_complete_success = nil
+  end
+
   test "qwc" do
     #_inspect_routes
     process(:qwc)
@@ -153,6 +158,35 @@ class QBWCControllerTest < ActionController::TestCase
   test "receive_response error continue 2jobs" do
     QBWC.on_error = :continue
     _receive_response_error_helper(50, true)
+  end
+
+
+  test "session_complete_success block called upon successful completion" do
+    block_called = false
+    QBWC.on_error = :stop
+    QBWC.set_session_complete_success do |session|
+      block_called = true
+      assert_not_nil session
+      assert_equal QBWC_USERNAME, session.user
+      assert_equal 100, session.progress
+      assert_not_nil session.began_at
+    end
+
+    _authenticate_with_queued_job
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_PARAMS)
+    assert block_called
+  end
+
+  test "session_complete_success block not called upon failed completion" do
+    block_called = false
+    QBWC.on_error = :stop
+    QBWC.session_complete_success = lambda do |session|
+      block_called = true
+    end
+
+    _authenticate_with_queued_job
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_ERROR_PARAMS)
+    assert !block_called
   end
 
 end
