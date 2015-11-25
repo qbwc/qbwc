@@ -7,6 +7,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
     JobManagementTest.app = Rails.application
     Rails.logger = Logger.new('/dev/null')  # or STDOUT
     QBWC.clear_jobs
+    @session = QBWC::Session.new('foo', '')
   end
 
   test "add_job" do
@@ -20,13 +21,13 @@ class JobManagementTest < ActionDispatch::IntegrationTest
 
   test "pending_jobs" do
     QBWC.add_job(:integration_test, true, 'my-company', QBWC::Worker)
-    assert_equal 1, QBWC.pending_jobs('my-company').length
-    assert_empty QBWC.pending_jobs('another-company')
+    assert_equal 1, QBWC.pending_jobs('my-company', @session).length
+    assert_empty QBWC.pending_jobs('another-company', @session)
   end
 
   test "pending_jobs_disabled" do
     QBWC.add_job(:integration_test, false, 'my-company', QBWC::Worker)
-    assert_empty QBWC.pending_jobs('my-company')
+    assert_empty QBWC.pending_jobs('my-company', @session)
   end
 
   test "get_job" do
@@ -65,7 +66,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
   end
 
   class DeleteJobWorker < QBWC::Worker
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
 
@@ -76,11 +77,11 @@ class JobManagementTest < ActionDispatch::IntegrationTest
 
   test "job deletes itself after running" do
     QBWC.add_job(:job_deletes_itself_after_running, true, COMPANY, DeleteJobWorker)
-    assert_equal 1, QBWC.pending_jobs(COMPANY).length
     session = QBWC::Session.new('foo', COMPANY)
+    assert_equal 1, QBWC.pending_jobs(COMPANY, session).length
     assert_not_nil session.next_request
     simulate_response(session)
-    assert_equal 0, QBWC.pending_jobs(COMPANY).length
+    assert_equal 0, QBWC.pending_jobs(COMPANY, session).length
   end
 
 end

@@ -115,13 +115,17 @@ QWC
       if company_file_path.nil?
         QBWC.logger.info "Authentication of user '#{username}' failed."
         company_file_path = AUTHENTICATE_NOT_VALID_USER
-      elsif !QBWC.pending_jobs(company_file_path).present?
-        QBWC.logger.info "Authentication of user '#{username}' succeeded, but no jobs pending for '#{company_file_path}'."
-        company_file_path = AUTHENTICATE_NO_WORK
       else
-        QBWC.logger.info "Authentication of user '#{username}' succeeded, jobs are pending for '#{company_file_path}'."
         ticket = QBWC.storage_module::Session.new(username, company_file_path).ticket
-        QBWC.session_initializer.call(get_session(ticket)) unless QBWC.session_initializer.nil?
+        session = get_session(ticket)
+
+        if !QBWC.pending_jobs(company_file_path, session).present?
+          QBWC.logger.info "Authentication of user '#{username}' succeeded, but no jobs pending for '#{company_file_path}'."
+          company_file_path = AUTHENTICATE_NO_WORK
+        else
+          QBWC.logger.info "Authentication of user '#{username}' succeeded, jobs are pending for '#{company_file_path}'."
+          QBWC.session_initializer.call(session) unless QBWC.session_initializer.nil?
+        end
       end
       render :soap => {"tns:authenticateResult" => {"tns:string" => [ticket || '', company_file_path]}}
     end

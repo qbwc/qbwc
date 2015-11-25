@@ -79,9 +79,9 @@ QBWC.add_job(:list_customers, true, '', CustomerTestWorker)
 Your job will be persisted in your database and will remain active and run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have have your job disable or delete itself after completion. For example:
 
 ```ruby
-	def handle_response(r, session, job, request, data)
-		QBWC.delete_job(job)
-	end
+  def handle_response(r, session, job, request, data)
+    QBWC.delete_job(job)
+  end
 
 ```
 
@@ -92,8 +92,8 @@ Alternately, you can custom logic in your worker's `requests` and `should_run?` 
 
 A job is associated to a worker, which is an object descending from `QBWC::Worker` that can define three methods:
 
-- `requests(job)` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
-- `should_run?(job)` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
+- `requests(job, session, data)` - defines the request(s) that QuickBooks should process - returns a `Hash` or an `Array` of `Hash`es.
+- `should_run?(job, session, data)` - whether this job should run (e.g. you can have a job run only under certain circumstances) - returns `Boolean` and defaults to `true`.
 - `handle_response(response, session, job, request, data)` - defines what to do with the response from Quickbooks.
 
 All three methods are not invoked until a QuickBooks Web Connector session has been established with your web service.
@@ -105,25 +105,25 @@ require 'qbwc'
 
 class CustomerTestWorker < QBWC::Worker
 
-	def requests(job)
-		{
-			:customer_query_rq => {
-				:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-				:max_returned => 100
-			}
-		}
-	end
+  def requests(job, session, data)
+    {
+      :customer_query_rq => {
+        :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+        :max_returned => 100
+      }
+    }
+  end
 
-	def handle_response(r, session, job, request, data)
-		# handle_response will get customers in groups of 100. When this is 0, we're done.
-		complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
+  def handle_response(r, session, job, request, data)
+    # handle_response will get customers in groups of 100. When this is 0, we're done.
+    complete = r['xml_attributes']['iteratorRemainingCount'] == '0'
 
-		r['customer_ret'].each do |qb_cus|
-			qb_id = qb_cus['list_id']
-			qb_name = qb_cus['name']
-			Rails.logger.info("#{qb_id} #{qb_name}")
-		end
-	end
+    r['customer_ret'].each do |qb_cus|
+      qb_id = qb_cus['list_id']
+      qb_name = qb_cus['name']
+      Rails.logger.info("#{qb_id} #{qb_name}")
+    end
+  end
 
 end
 ```
@@ -138,10 +138,10 @@ You can pass requests (via a `Hash`, `String`, or array of `Hash`es and `String`
 ```ruby
 require 'qbwc'
 requests = {
-	:customer_query_rq => {
-		:xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
-		:max_returned => 100
-	}
+  :customer_query_rq => {
+    :xml_attributes => { "requestID" =>"1", 'iterator'  => "Start" },
+    :max_returned => 100
+  }
 }
 # QBWC will run the contents of the requests variable, and will not use CustomerTestWorker#requests.
 QBWC.add_job(:list_customers, true, '', CustomerTestWorker, requests)
@@ -158,11 +158,11 @@ QBWC.add_job(:list_customers, true, '', CustomerTestWorker, nil, extra_data)
 
 class CustomerTestWorker < QBWC::Worker
 
-	# ...
+  # ...
 
-	def handle_response(r, session, job, request, data)
-		# data here is "something important"
-	end
+  def handle_response(r, session, job, request, data)
+    # data here is "something important"
+  end
 
 end
 ```
@@ -183,20 +183,31 @@ c.session_initializer = Proc.new{|session|
 
 In application code:
 ```ruby
-        require 'qbwc'
+  require 'qbwc'
 
-	QBWC.set_session_initializer() do |session|
-          puts "New QuickBooks Web Connector session has been established (overridden session initializer)"
-          @information_from_jobs = {}
-        end if the_application_needs_a_different_session_initializer
+  QBWC.set_session_initializer() do |session|
+    puts "New QuickBooks Web Connector session has been established (overridden session initializer)"
+    @information_from_jobs = {}
+  end if the_application_needs_a_different_session_initializer
 
-        QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
+  QBWC.add_job(:list_customers, false, '', CustomerTestWorker)
 
 ```
 
-Note: If you `set_session initializer` in your application code, you're only affecting the process that your application code runs in. A request to another process (e.g. if you're multiprocess or you restarted the server) means that QBWC won't see the session initializer.
+Note: If you `set_session_initializer` in your application code, you're only affecting the process that your application code runs in. A request to another process (e.g. if you're multiprocess or you restarted the server) means that QBWC won't see the session initializer.
 
 Note: a QuickBooks Web Connector session is established when you manually run (update) an application's web service in QuickBooks Web Connector, or when QuickBooks Web Connector automatically executes a scheduled update.
+
+Similarly, it is possible to set a block to be run upon successful completion of a session.
+
+```ruby
+  QBWC.session_complete_success = lambda do |session|
+    total_time = Time.now - session.began_at
+    puts "Total run time of this session was #{total_time}s"
+  end
+```
+
+Note that if `QBWC.on_error == :stop` and an error is encountered, this block will not be run.
 
 ## Handling errors ##
 

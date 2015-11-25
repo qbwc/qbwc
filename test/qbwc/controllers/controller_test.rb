@@ -9,6 +9,7 @@ class QBWCControllerTest < ActionController::TestCase
   def setup
     @routes = Rails.application.routes  # https://github.com/blowmage/minitest-rails/issues/133#issuecomment-36401436
     @controller = QbwcController.new    # http://stackoverflow.com/a/7743176
+    @session = QBWC::Session.new('foo', '')
 
     @controller.prepend_view_path("#{Gem::Specification.find_by_name("wash_out").gem_dir}/app/views")
     #p @controller.view_paths
@@ -19,6 +20,11 @@ class QBWCControllerTest < ActionController::TestCase
     QBWC.set_session_initializer() {|session| }
 
     $HANDLE_RESPONSE_EXECUTED = false
+  end
+
+  def teardown
+    QBWC.session_initializer = nil
+    QBWC.session_complete_success = nil
   end
 
   test "qwc" do
@@ -36,13 +42,13 @@ class QBWCControllerTest < ActionController::TestCase
 
   test "authenticate with no jobs" do
     _authenticate
-    assert_equal 0, QBWC.pending_jobs(COMPANY).count
+    assert_equal 0, QBWC.pending_jobs(COMPANY, @session).count
     assert @response.body.include?(QBWC::Controller::AUTHENTICATE_NO_WORK), @response.body
   end
 
   test "authenticate with jobs" do
     _authenticate_with_queued_job
-    assert_equal 1, QBWC.pending_jobs(COMPANY).count
+    assert_equal 1, QBWC.pending_jobs(COMPANY, @session).count
     assert @response.body.include?(COMPANY), @response.body
   end
 
@@ -103,7 +109,7 @@ class QBWCControllerTest < ActionController::TestCase
       raise "#{tag} is not correct" if expected_value != value && ! expected_value.blank?
     end
 
-    def requests(job)
+    def requests(job, session, data)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
 
@@ -152,6 +158,35 @@ class QBWCControllerTest < ActionController::TestCase
   test "receive_response error continue 2jobs" do
     QBWC.on_error = :continue
     _receive_response_error_helper(50, true)
+  end
+
+
+  test "session_complete_success block called upon successful completion" do
+    block_called = false
+    QBWC.on_error = :stop
+    QBWC.set_session_complete_success do |session|
+      block_called = true
+      assert_not_nil session
+      assert_equal QBWC_USERNAME, session.user
+      assert_equal 100, session.progress
+      assert_not_nil session.began_at
+    end
+
+    _authenticate_with_queued_job
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_PARAMS)
+    assert block_called
+  end
+
+  test "session_complete_success block not called upon failed completion" do
+    block_called = false
+    QBWC.on_error = :stop
+    QBWC.session_complete_success = lambda do |session|
+      block_called = true
+    end
+
+    _authenticate_with_queued_job
+    _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_ERROR_PARAMS)
+    assert !block_called
   end
 
 end

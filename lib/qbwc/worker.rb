@@ -1,11 +1,11 @@
 module QBWC
   class Worker
 
-    def requests(job)
+    def requests(job, session, data)
       []
     end
 
-    def should_run?(job)
+    def should_run?(job, session, data)
       true
     end
 
