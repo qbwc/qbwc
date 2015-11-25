@@ -11,12 +11,12 @@ module QBWC
       desc "Copy Quickbooks Web Connector default files"
       source_root File.expand_path('../templates', __FILE__)
       argument :controller_name, :type => :string, :default => 'qbwc'
-      
+
       def copy_config
          template('config/qbwc.rb', "config/initializers/qbwc.rb")
       end
 
-      def copy_controller 
+      def copy_controller
          template('controllers/qbwc_controller.rb', "app/controllers/#{controller_name}_controller.rb")
       end
 
@@ -34,7 +34,7 @@ module QBWC
         route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
         route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
       end
-      
+
     end
   end
 end

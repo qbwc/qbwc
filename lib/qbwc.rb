@@ -17,7 +17,7 @@ module QBWC
   @@password = nil
 
   # Path to QuickBooks company file on the client. Empty string to use whatever file is open when the connector runs.
-  mattr_accessor :company_file_path 
+  mattr_accessor :company_file_path
   @@company_file_path = ""
 
   # Instead of using hard coded username, password, and path, use a proc
@@ -65,7 +65,7 @@ module QBWC
   # Logger to use.
   mattr_accessor :logger
   @@logger = Rails.logger
-  
+
   # Some log lines contain sensitive information
   mattr_accessor :log_requests_and_responses
   @@log_requests_and_responses = Rails.env == 'production' ? false : true
@@ -98,7 +98,7 @@ module QBWC
       QBWC.logger.info "#{js.length} jobs exist, checking for pending jobs for company '#{company}'."
       storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?(session)})
     end
-    
+
     def set_session_initializer(&block)
       @@session_initializer = block
       self
@@ -114,7 +114,7 @@ module QBWC
       @@on_error = "stopOnError" if reaction == :stop
       @@on_error = "continueOnError" if reaction == :continue
     end
-    
+
     def api=(api)
       raise 'Quickbooks type must be :qb or :qbpos' unless [:qb, :qbpos].include?(api)
       @@api = api
@@ -134,5 +134,5 @@ module QBWC
     end
 
   end
-  
+
 end

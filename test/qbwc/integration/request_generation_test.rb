@@ -168,7 +168,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     assert_equal 1, $SINGLE_REQUESTS_INVOKED_COUNT
     assert_equal 1, $MULTIPLE_REQUESTS_INVOKED_COUNT
-  end  
+  end
 
   test 'multiple jobs using different request techniques' do
     $MULTIPLE_REQUESTS_INVOKED_COUNT = 0
