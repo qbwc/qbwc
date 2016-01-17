@@ -3,6 +3,9 @@ require 'test_helper.rb'
 
 class JobManagementTest < ActionDispatch::IntegrationTest
 
+  REQUESTS_AS_HASH   = {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
+  REQUESTS_AS_STRING = QBWC_CUSTOMER_ADD_RQ
+
   def setup
     JobManagementTest.app = Rails.application
     Rails.logger = Logger.new('/dev/null')  # or STDOUT
@@ -16,6 +19,26 @@ class JobManagementTest < ActionDispatch::IntegrationTest
 
     # Overwrite existing job
     QBWC.add_job(:integration_test, true, 'my-company', QBWC::Worker)
+    assert_equal 1, QBWC.jobs.length
+  end
+
+  test "add_job requests as hash" do
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker, REQUESTS_AS_HASH)
+    assert_equal 1, QBWC.jobs.length
+  end
+
+  test "add_job requests as array of hashes" do
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker, [REQUESTS_AS_HASH])
+    assert_equal 1, QBWC.jobs.length
+  end
+
+  test "add_job requests as string" do
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker, REQUESTS_AS_STRING)
+    assert_equal 1, QBWC.jobs.length
+  end
+
+  test "add_job requests as array of strings" do
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker, [REQUESTS_AS_STRING])
     assert_equal 1, QBWC.jobs.length
   end
 
@@ -73,7 +96,7 @@ class JobManagementTest < ActionDispatch::IntegrationTest
 
   class DeleteJobWorker < QBWC::Worker
     def requests(job, session, data)
-      {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
+      REQUESTS_AS_HASH
     end
 
     def handle_response(resp, session, job, request, data)
