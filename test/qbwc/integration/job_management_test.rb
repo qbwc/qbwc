@@ -25,6 +25,12 @@ class JobManagementTest < ActionDispatch::IntegrationTest
     assert_empty QBWC.pending_jobs('another-company', @session)
   end
 
+  test "pending_jobs with default session" do
+    QBWC.add_job(:integration_test, true, 'my-company', QBWC::Worker)
+    assert_equal 1, QBWC.pending_jobs('my-company').length
+    assert_empty QBWC.pending_jobs('another-company')
+  end
+
   test "pending_jobs_disabled" do
     QBWC.add_job(:integration_test, false, 'my-company', QBWC::Worker)
     assert_empty QBWC.pending_jobs('my-company', @session)

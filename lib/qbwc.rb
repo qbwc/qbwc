@@ -93,7 +93,7 @@ module QBWC
       storage_module::Job.delete_job_with_name(name)
     end
 
-    def pending_jobs(company, session)
+    def pending_jobs(company, session = QBWC::Session.get)
       js = jobs
       QBWC.logger.info "#{js.length} jobs exist, checking for pending jobs for company '#{company}'."
       storage_module::Job.sort_in_time_order(js.select {|job| job.company == company && job.pending?(session)})

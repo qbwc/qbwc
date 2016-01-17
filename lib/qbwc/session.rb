@@ -5,7 +5,7 @@ class QBWC::Session
 
   @@session = nil
 
-	def self.get(ticket)
+	def self.get(ticket = nil)
 		@@session
 	end
 
