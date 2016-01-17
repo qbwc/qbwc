@@ -41,8 +41,12 @@ module QbwcTestApplication
     end
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/index_qbwc_jobs'
+    require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/change_request_index'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_sessions'
     ActiveRecord::Migration.run(CreateQbwcJobs)
+    ActiveRecord::Migration.run(IndexQbwcJobs)
+    ActiveRecord::Migration.run(ChangeRequestIndex)
     ActiveRecord::Migration.run(CreateQbwcSessions)
     QBWC.configure do |c|
       c.username = QBWC_USERNAME

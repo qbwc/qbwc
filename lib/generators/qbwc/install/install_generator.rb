@@ -23,6 +23,8 @@ module QBWC
       def active_record
         migration_template 'db/migrate/create_qbwc_jobs.rb',     'db/migrate/create_qbwc_jobs.rb'
         migration_template 'db/migrate/create_qbwc_sessions.rb', 'db/migrate/create_qbwc_sessions.rb'
+        migration_template 'db/migrate/index_qbwc_jobs.rb',      'db/migrate/index_qbwc_jobs.rb'
+        migration_template 'db/migrate/change_request_index.rb', 'db/migrate/change_request_index.rb'
       end
 
       def self.next_migration_number(dirname)
