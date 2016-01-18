@@ -42,6 +42,30 @@ class JobManagementTest < ActionDispatch::IntegrationTest
     assert_equal 1, QBWC.jobs.length
   end
 
+  test "requests" do
+    job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
+    session = QBWC::Session.new('foo', '')
+    assert_nil job.requests(session)
+  end
+
+  test "requests with default session" do
+    job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
+    session = QBWC::Session.new('foo', '')
+    assert_nil job.requests
+  end
+
+  test "next_request" do
+    job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
+    session = QBWC::Session.new('foo', '')
+    assert_nil job.next_request(session)
+  end
+
+  test "next_request with default session" do
+    job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
+    session = QBWC::Session.new('foo', '')
+    assert_nil job.next_request
+  end
+
   test "pending_jobs" do
     QBWC.add_job(:integration_test, true, 'my-company', QBWC::Worker)
     assert_equal 1, QBWC.pending_jobs('my-company', @session).length
