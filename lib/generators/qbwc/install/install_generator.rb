@@ -12,6 +12,10 @@ module QBWC
       source_root File.expand_path('../templates', __FILE__)
       argument :controller_name, :type => :string, :default => 'qbwc'
       
+      def routes_rb
+         "config/routes.rb"
+      end
+
       def copy_config
          template('config/qbwc.rb', "config/initializers/qbwc.rb")
       end
@@ -31,10 +35,24 @@ module QBWC
         ::ActiveRecord::Generators::Base.next_migration_number(dirname)
       end
 
+     def route1
+        "wash_out :#{controller_name}"
+     end
+
+     def route2
+        "get '#{controller_name}/qwc' => '#{controller_name}#qwc'"
+     end
+
+     def route3
+        "get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'"
+     end
+
+     # Idempotent routes inspired by https://github.com/thoughtbot/administrate/issues/232
+     # Idempotent routes fixed permanently by https://github.com/rails/rails/issues/22082
      def setup_routes
-        route("wash_out :#{controller_name}")
-        route("get '#{controller_name}/qwc' => '#{controller_name}#qwc'")
-        route("get '#{controller_name}/action' => '#{controller_name}#_generate_wsdl'")
+        route(route1) unless File.new(routes_rb).read.include?(route1)
+        route(route2) unless File.new(routes_rb).read.include?(route2)
+        route(route3) unless File.new(routes_rb).read.include?(route3)
       end
       
     end
