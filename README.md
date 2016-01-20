@@ -30,7 +30,7 @@ Quickbooks *requires* HTTPS connections when connecting to remote machines. [ngr
 
 
 ## Upgrading from prior versions
-Version 1.0.0 requires rerunning migrations.
+Upgrading to the current version requires running new migrations.
 
 Run the generator:
 
@@ -39,6 +39,10 @@ Run the generator:
 Then the migrations:
 
 `rake db:migrate`
+`rake RAILS_ENV=test db:migrate`
+
+In production, ensure that no jobs are queued, then:
+`rake RAILS_ENV=production db:migrate`
 
 
 ### Authentication and multiple company files ###
