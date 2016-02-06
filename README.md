@@ -29,22 +29,6 @@ Open `config/initializers/qbwc.rb` and check the settings there. (Re-)start your
 Quickbooks *requires* HTTPS connections when connecting to remote machines. [ngrok](https://ngrok.com/) may be useful to fulfill this requirement.
 
 
-## Upgrading from prior versions
-Upgrading to the current version requires running new migrations.
-
-Run the generator:
-
-`rails generate qbwc:install`
-
-Then the migrations:
-
-`rake db:migrate`
-`rake RAILS_ENV=test db:migrate`
-
-In production, ensure that no jobs are queued, then:
-`rake RAILS_ENV=production db:migrate`
-
-
 ### Authentication and multiple company files ###
 
 If connecting to more than one company file or if you want different logins for different users, you can configure QBWC authentication. This is a `Proc` in `config/initializers/qbwc.rb` that accepts the username and password and returns the path to the QuickBooks company file to access:
