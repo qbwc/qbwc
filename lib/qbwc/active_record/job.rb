@@ -60,7 +60,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     find_ar_job.where(:enabled => true).exists?
   end
 
-  def requests(session)
+  def requests(session = QBWC::Session.get)
     @requests = find_ar_job.pluck(:requests).first
     super
   end

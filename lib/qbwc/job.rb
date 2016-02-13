@@ -97,7 +97,7 @@ class QBWC::Job
     @requests_provided_when_job_added = value
   end
 
-  def next_request(session)
+  def next_request(session = QBWC::Session.get)
     reqs = requests session
 
     # Generate and save the requests to run when starting the job.
