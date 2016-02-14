@@ -17,7 +17,6 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     ar_job = find_ar_job_with_name(name).first_or_initialize
     ar_job.company = company
     ar_job.enabled = enabled
-    ar_job.request_index = {}
     ar_job.worker_class = worker_class
     ar_job.save!
 

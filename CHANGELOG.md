@@ -20,6 +20,8 @@ Then the migrations:
 In production, ensure that no jobs are queued, then:
 `rake RAILS_ENV=production db:migrate`
 
+The `requests` and `should_run?` methods of `QBWC::Worker` now take three parameters: `job`, `session`, and `data`. Any workers that implement these methods should be updated to accept the additional parameters.
+
 **Fixed bugs:**
 
 - Placeholder [\#156](https://github.com/qbwc/qbwc/issues/156)
