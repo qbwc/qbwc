@@ -24,13 +24,11 @@ The `requests` and `should_run?` methods of `QBWC::Worker` now take three parame
 
 **Fixed bugs:**
 
-- Placeholder [\#156](https://github.com/qbwc/qbwc/issues/156)
+- Removed 1000-character restriction on list of pending jobs [\#76](https://github.com/qbwc/qbwc/pull/76) ([rchekaluk](https://github.com/rchekaluk))
 
-**Closed issues:**
+**New features:**
 
-- Placeholder [\#129](https://github.com/qbwc/qbwc/issues/129)
-
-**Merged pull requests:**
-
-- Placeholder [\#235](https://github.com/qbwc/qbwc/pull/235) ([mamnun](https://github.com/mamnun))
-
+- App name and FileID provided to QuickBooks can now be overridden by implementing `app_name` and `file_id` in the generated QbwcController. [\#72](https://github.com/qbwc/qbwc/pull/72) ([r38y](https://github.com/r38y))
+- `requests` and `should_run?` now receive the session and data Hash as arguments. This allows for greater control over which requests happen in a run. [\#80](https://github.com/qbwc/qbwc/pull/80) ([bkroeker](https://github.com/bkroeker))
+- Added the `session_complete_success` configuration to specify a block to execute when the session completes.  [\#80](https://github.com/qbwc/qbwc/pull/80) ([bkroeker](https://github.com/bkroeker))
+- Added some indexes to qbwc_jobs for better performance with many jobs are defined. [\#80](https://github.com/qbwc/qbwc/pull/80) ([bkroeker](https://github.com/bkroeker))
