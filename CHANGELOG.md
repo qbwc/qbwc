@@ -1,8 +1,8 @@
 
 # Change Log
 
-## [1.0.0](https://github.com/qbwc/qbwc/tree/2.0.4) (2016-12-04)
-[Full Changelog](https://github.com/qbwc/qbwc/compare/2.0.3...2.0.4)
+## [1.0.0](https://github.com/qbwc/qbwc/releases/tag/v1.0.0) (2016-03-02)
+[Full Changelog](https://github.com/qbwc/qbwc/compare/0.1.0...1.0.0)
 
 **Upgrading:**
 
