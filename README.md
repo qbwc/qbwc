@@ -14,6 +14,10 @@ and run
 
 `bundle install`
 
+## Upgrade
+
+Read [the changelog](CHANGELOG.md) if upgrading from previous versions.
+
 ## Configuration
 
 Run the generator:
