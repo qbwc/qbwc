@@ -15,7 +15,12 @@ class ResponseTest < ActionDispatch::IntegrationTest
     :severity => 'Error',
     :message  => QBWC_CUSTOMER_QUERY_STATUS_MESSAGE_ERROR,
   }
-
+  BAD_EMPTY_RESPONSE = {
+    :response => QBWC_BAD_EMPTY_RESPONSE,
+    :code     => nil,
+    :severity => nil,
+    :message  => nil,
+  }
   def setup
     ResponseTest.app = Rails.application
     QBWC.on_error = :stop
@@ -33,7 +38,7 @@ class ResponseTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new(nil, COMPANY)
 
     responses.each do |resp|
-      expect_error = "QBWC #{resp[:severity].upcase}: #{resp[:code]} - #{resp[:message]}"
+      expect_error = "QBWC #{resp[:severity].upcase}: #{resp[:code]} - #{resp[:message]}" if resp[:severity]
 
       # Simulate controller receive_response
       $HANDLE_RESPONSE_EXECUTED = false
@@ -209,7 +214,13 @@ class ResponseTest < ActionDispatch::IntegrationTest
     QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
     _receive_responses(ERROR_RESPONSE.merge(:progress => 100))
   end
-
+  
+  test "processes empty response continue" do
+    QBWC.on_error = :continue
+    QBWC.add_job(:query_joe_customer, true, COMPANY, HandleResponseWithDataWorker)
+    _receive_responses(BAD_EMPTY_RESPONSE)
+  end
+  
   class MultiRequestWorker < QBWC::Worker
     def requests(job, session, data)
       [

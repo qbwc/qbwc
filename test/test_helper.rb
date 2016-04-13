@@ -14,6 +14,8 @@ require 'qbwc'
 require 'qbwc/controller'
 require 'qbwc/active_record'
 
+$VERBOSE = nil
+
 COMPANY = 'c:\\QuickBooks\MyFile.QBW'
 QBWC_USERNAME = 'myUserName'
 QBWC_PASSWORD = 'myPassword'
@@ -97,6 +99,13 @@ QBWC_EMPTY_RESPONSE = "<?xml version=\"1.0\"?>\r
     <?qbxml version=\"7.0\"?>\r
     <QBXML>\r
       <QBXMLMsgsRs onError=\"stopOnError\">\r
+      </QBXMLMsgsRs>\r
+    </QBXML>\r"
+
+QBWC_BAD_EMPTY_RESPONSE = "<?xml version=\"1.0\"?>\r
+    <?qbxml version=\"7.0\"?>\r
+    <QBXML>\r
+      <QBXMLMsgsRs />\r
       </QBXMLMsgsRs>\r
     </QBXML>\r"
 
