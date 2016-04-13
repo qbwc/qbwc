@@ -106,7 +106,6 @@ QBWC_BAD_EMPTY_RESPONSE = "<?xml version=\"1.0\"?>\r
     <?qbxml version=\"7.0\"?>\r
     <QBXML>\r
       <QBXMLMsgsRs />\r
-      </QBXMLMsgsRs>\r
     </QBXML>\r"
 
 QBWC_CUSTOMER_ADD_RQ = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r
