@@ -133,7 +133,7 @@ end
 ```
 
 
-Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).
+Use the [Onscreen Reference for Intuit Software Development Kits](https://developer-static.intuit.com/qbSDK-current/Common/newOSR/index.html) (use Format: qbXML) to see request and response formats to use in your jobs. Use underscored, lowercased versions of all tags (e.g. `customer_query_rq`, not `CustomerQueryRq`).  Note that while requests include the top-level tag (e.g. `customer_query_rq`), the response hash passed to `QBWC::Worker#handle_response` does not include a corresponding top-level tag such as `customer_query_rs` (despite it being in the actual QBXML and shown in the OSR).
 
 ### Defining requests outside of a worker ###
 
