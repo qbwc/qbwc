@@ -82,9 +82,10 @@ class QBWC::Session
       QBWC.logger.info 'Parsing response.'
       unless qbxml_response.nil?
         response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"]
-        response = Qbxml::Hash.new if response == ""
-        response = response.except("xml_attributes")
-        response = response[response.keys.first]
+        if response.respond_to?(:except)
+          response = response.except("xml_attributes")
+          response = response[response.keys.first]
+        end
         parse_response_header(response)
       end
       self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
