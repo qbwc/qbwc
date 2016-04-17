@@ -23,10 +23,10 @@ class QBWC::Job
 
   def process_response(qbxml_response, response, session, advance)
     QBWC.logger.info "Processing response."
+    QBWC.logger.info "Job '#{name}' received response: '#{qbxml_response}'." if QBWC.log_requests_and_responses
     request_list = requests(session)
     completed_request = request_list[request_index(session)] if request_list
     advance_next_request(session) if advance
-    QBWC.logger.info "Job '#{name}' received response: '#{qbxml_response}'." if QBWC.log_requests_and_responses
     worker.handle_response(response, session, self, completed_request, data)
   end
 
