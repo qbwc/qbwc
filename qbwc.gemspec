@@ -25,8 +25,6 @@ Gem::Specification.new do |s|
   s.add_dependency "qbxml", [">= 0.3.0"]
   s.add_dependency "wash_out", [">= 0.10.0"]
 
-  s.add_development_dependency('guard')
-  s.add_development_dependency('guard-rspec')
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
