@@ -1,9 +1,8 @@
 language: ruby
 rvm:
-  - 1.9
   - 2.0
   - 2.1
   - 2.2
-  - 2.3
+  - 2.3.1 # https://github.com/travis-ci/travis-ci/issues/5361
 before_install:
   - gem update bundler

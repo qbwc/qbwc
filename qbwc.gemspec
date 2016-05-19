@@ -22,6 +22,8 @@ Gem::Specification.new do |s|
     "README.md"
   ]
 
+  s.required_ruby_version = '>= 2.0.0'
+
   s.add_dependency "qbxml", [">= 0.3.0"]
   s.add_dependency "wash_out", [">= 0.10.0"]
 
