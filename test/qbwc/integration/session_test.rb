@@ -129,12 +129,10 @@ class SessionTest < ActionDispatch::IntegrationTest
   test "session ticket generated does not collide with others generated in the same second" do
     QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
 
-    100.times do
+    Time.stub :now, Time.at(1466694710) do
       timothy_session  = QBWC::Session.new("timothy", COMPANY)
       margaret_session = QBWC::Session.new("margaret", COMPANY)
-      puts timothy_session.ticket
-      puts "_______________"
-      puts margaret_session.ticket
+
       assert timothy_session.ticket != margaret_session.ticket
     end
   end
