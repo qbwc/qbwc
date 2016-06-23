@@ -1,7 +1,7 @@
 class CreateQbwcSessions < ActiveRecord::Migration
   def change
     create_table :qbwc_sessions, :force => true do |t|
-      t.string :ticket
+      t.string :ticket, :null => false
       t.string :user
       t.string :company, :limit => 1000
       t.integer :progress, :null => false, :default => 0
