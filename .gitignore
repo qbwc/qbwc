@@ -3,3 +3,4 @@ Gemfile.lock
 pkg
 .ruby-gemset
 .ruby-version
+db/testdb.sqlite3
