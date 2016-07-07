@@ -136,4 +136,39 @@ class SessionTest < ActionDispatch::IntegrationTest
       assert timothy_session.ticket != margaret_session.ticket
     end
   end
+
+  test "two sessions that advance to the next request_index should not clobber each other" do
+    QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
+
+    timothy_session  = QBWC::Session.new("timothy", COMPANY)
+    margaret_session = QBWC::Session.new("margaret", COMPANY)
+
+    job = QBWC.jobs.first
+    job.set_request_index(timothy_session, 0)
+    job.set_request_index(margaret_session, 0)
+
+    threads = []
+    threads << Thread.new {
+      # TODO add the sleep to this call to save
+      job.set_request_index(timothy_session, 1)
+    }
+    threads << Thread.new {
+      sleep(0.25)
+      job.set_request_index(margaret_session, 1)
+    }
+
+    threads.each { |thread| thread.join }
+
+    assert_equal 1, job.request_index(timothy_session)
+    assert_equal 1, job.request_index(margaret_session)
+  end
+
+  # get a job object for a job
+  # update the request index for two dummy sessions (A and B) to be 0
+  # (in a thread) call set_request_index(A, 1)
+  # sleep for .25
+  # (in another thread) call set_request_index(B, 1)
+  # collect
+  # assert that request index is 1 for A, 1 for B
+
 end
