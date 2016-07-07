@@ -39,7 +39,8 @@ module QbwcTestApplication
       config.secret_key_base = "stub"
       config.eager_load = false
     end
-    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+    File.unlink("db/testdb.sqlite3")
+    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => "db/testdb.sqlite3")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/index_qbwc_jobs'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/change_request_index'
