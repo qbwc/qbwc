@@ -147,20 +147,43 @@ class SessionTest < ActionDispatch::IntegrationTest
     job.set_request_index(timothy_session, 0)
     job.set_request_index(margaret_session, 0)
 
-    threads = []
-    threads << Thread.new {
-      # TODO add the sleep to this call to save
-      job.set_request_index(timothy_session, 1)
-    }
-    threads << Thread.new {
-      sleep(0.25)
-      job.set_request_index(margaret_session, 1)
-    }
+    delayed_save_for_tim = lambda do
+      @@sleep_1_for_timothy_and_0_for_margaret ||= 1
+      the_delay = @@sleep_1_for_timothy_and_0_for_margaret
+      @@sleep_1_for_timothy_and_0_for_margaret = 0
+      sleep(the_delay)
 
-    threads.each { |thread| thread.join }
+      self.send("__minitest_any_instance_stub__save")
+    end
 
-    assert_equal 1, job.request_index(timothy_session)
-    assert_equal 1, job.request_index(margaret_session)
+    QBWC::ActiveRecord::Job::QbwcJob.stub_any_instance(:save, delayed_save_for_tim) do
+      threads = []
+      threads << Thread.new {
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+        error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_request_index(timothy_session, 1)
+        end
+        assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads << Thread.new {
+        sleep(0.25)
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+        error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_request_index(margaret_session, 1)
+        end
+        assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads.each { |thread| thread.join }
+    end
+
+    # Because both updates failed due to SQLite3's lack of graceful handling of locks, we would expect that nothing changed.
+    # In the "real" world, the DB would force margaret to wait for a lock
+    assert_equal 0, job.request_index(margaret_session)
+    assert_equal 0, job.request_index(timothy_session)
   end
 
   # get a job object for a job
