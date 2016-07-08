@@ -139,7 +139,7 @@ class SessionTest < ActionDispatch::IntegrationTest
 
   test "two sessions that advance to the next request_index should not clobber each other" do
     # In pseudocode, we are doing this:
-    #   Advance Tim's request_index, mocking a delay between the SELECT and the UPDATE inside set_request_index
+    #   Advance Tim's request_index, mocking a delay between the SELECT and the UPDATE inside advance_next_request
     #   Advance Margaret's request index between Tim's SELECT and his UPDATE
     #   This would cause Margaret's update to effectively be rolled back because Tim ends up saving the wrong value for Margaret
     #
@@ -153,8 +153,6 @@ class SessionTest < ActionDispatch::IntegrationTest
     margaret_session = QBWC::Session.new("margaret", COMPANY)
 
     job = QBWC.jobs.first
-    job.set_request_index(timothy_session, 0)
-    job.set_request_index(margaret_session, 0)
 
     delayed_save_for_tim = lambda do
       @@sleep_1_for_timothy_and_0_for_margaret ||= 1
@@ -171,7 +169,7 @@ class SessionTest < ActionDispatch::IntegrationTest
         # This would not blow up in mysql (or any other real DBMS),
         # but since we're using sqlite3 to test, we look for an explosion
         error = assert_raises(ActiveRecord::StatementInvalid) do
-          job.set_request_index(timothy_session, 1)
+          job.advance_next_request(timothy_session)
         end
         assert_match /SQLite3::BusyException/, error.message
       }
@@ -181,7 +179,7 @@ class SessionTest < ActionDispatch::IntegrationTest
         # This would not blow up in mysql (or any other real DBMS),
         # but since we're using sqlite3 to test, we look for an explosion
         error = assert_raises(ActiveRecord::StatementInvalid) do
-          job.set_request_index(margaret_session, 1)
+          job.advance_next_request(margaret_session)
         end
         assert_match /SQLite3::BusyException/, error.message
       }

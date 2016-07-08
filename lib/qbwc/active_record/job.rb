@@ -91,20 +91,17 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     (find_ar_job.pluck(:request_index).first || {})[session.key] || 0
   end
 
-  def set_request_index(session, index)
+  def advance_next_request(session)
     find_ar_job.each do |jb|
       jb.with_lock do
-        jb.request_index[session.key] = index
+        current_index = jb.request_index[session.key] || 0
+        jb.request_index[session.key] = current_index + 1
         jb.save
       end
     end
   end
 
-  def advance_next_request(session)
-    nr = request_index(session)
-    set_request_index session, nr + 1
-  end
-
+  # TODO: @jhmoore this is a problem
   def reset
     super
     job = find_ar_job
