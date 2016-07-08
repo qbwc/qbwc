@@ -138,6 +138,15 @@ class SessionTest < ActionDispatch::IntegrationTest
   end
 
   test "two sessions that advance to the next request_index should not clobber each other" do
+    # In pseudocode, we are doing this:
+    #   Advance Tim's request_index, mocking a delay between the SELECT and the UPDATE inside set_request_index
+    #   Advance Margaret's request index between Tim's SELECT and his UPDATE
+    #   This would cause Margaret's update to effectively be rolled back because Tim ends up saving the wrong value for Margaret
+    #
+    # The solution is to perform the select and update inside of a transaction with locking, 
+    # ensuring that the record that is SELECTed doesn't change before its UPDATEd.
+    # This forces Margaret to wait until Tim has finished his operation before she can lock the row for her update.
+
     QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
 
     timothy_session  = QBWC::Session.new("timothy", COMPANY)
@@ -185,13 +194,4 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 0, job.request_index(margaret_session)
     assert_equal 0, job.request_index(timothy_session)
   end
-
-  # get a job object for a job
-  # update the request index for two dummy sessions (A and B) to be 0
-  # (in a thread) call set_request_index(A, 1)
-  # sleep for .25
-  # (in another thread) call set_request_index(B, 1)
-  # collect
-  # assert that request index is 1 for A, 1 for B
-
 end
