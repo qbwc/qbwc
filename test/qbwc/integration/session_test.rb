@@ -143,7 +143,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     #   Advance Margaret's request index between Tim's SELECT and his UPDATE
     #   This would cause Margaret's update to effectively be rolled back because Tim ends up saving the wrong value for Margaret
     #
-    # The solution is to perform the select and update inside of a transaction with locking, 
+    # The solution is to perform the select and update inside of a transaction with locking,
     # ensuring that the record that is SELECTed doesn't change before its UPDATEd.
     # This forces Margaret to wait until Tim has finished his operation before she can lock the row for her update.
 
@@ -191,5 +191,56 @@ class SessionTest < ActionDispatch::IntegrationTest
     # In the "real" world, the DB would force margaret to wait for a lock
     assert_equal 0, job.request_index(margaret_session)
     assert_equal 0, job.request_index(timothy_session)
+  end
+
+  test "two sessions that set requests should not clobber each other" do
+    # same case as above, but with requests
+
+    QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
+
+    timothy_session  = QBWC::Session.new("timothy", COMPANY)
+    margaret_session = QBWC::Session.new("margaret", COMPANY)
+    timothy_requests = {:customer_query_rq => {:full_name => 'Timothy'}}
+    margaret_requests = {:customer_query_rq => {:full_name => 'Margaret'}}
+
+    job = QBWC.jobs.first
+
+    delayed_save_for_tim = lambda do
+      @@requests_sleep_1_for_timothy_and_0_for_margaret ||= 1
+      the_delay = @@requests_sleep_1_for_timothy_and_0_for_margaret
+      @@requests_sleep_1_for_timothy_and_0_for_margaret = 0
+      sleep(the_delay)
+
+      self.send("__minitest_any_instance_stub__save")
+    end
+
+    QBWC::ActiveRecord::Job::QbwcJob.stub_any_instance(:save, delayed_save_for_tim) do
+      threads = []
+      threads << Thread.new {
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+        error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_requests(timothy_session, timothy_requests)
+       end
+       assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads << Thread.new {
+        sleep(0.25)
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+       error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_requests(margaret_session, margaret_requests)
+       end
+       assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads.each { |thread| thread.join }
+    end
+
+    # Because both updates failed due to SQLite3's lack of graceful handling of locks, we would expect that nothing changed.
+    # In the "real" world, the DB would force margaret to wait for a lock
+    assert_equal nil, job.requests(margaret_session)
+    assert_equal nil, job.requests(timothy_session)
   end
 end

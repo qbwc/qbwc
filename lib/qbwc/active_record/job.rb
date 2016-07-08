@@ -65,8 +65,14 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   end
 
   def set_requests(session, requests)
-    super
-    find_ar_job.update_all(:requests => @requests)
+    find_ar_job.each do |jb|
+      jb.with_lock do
+        jb.requests ||= {}
+        jb.requests[session.key] = requests
+        jb.save
+        @requests = jb.requests
+      end
+    end
   end
 
   def requests_provided_when_job_added
