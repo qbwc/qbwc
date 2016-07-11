@@ -144,7 +144,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     #   This would cause Margaret's update to effectively be rolled back because Tim ends up saving the wrong value for Margaret
     #
     # The solution is to perform the select and update inside of a transaction with locking,
-    # ensuring that the record that is SELECTed doesn't change before its UPDATEd.
+    # ensuring that the record that is SELECTed doesn't change before it is UPDATEd.
     # This forces Margaret to wait until Tim has finished his operation before she can lock the row for her update.
 
     QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
@@ -188,7 +188,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     end
 
     # Because both updates failed due to SQLite3's lack of graceful handling of locks, we would expect that nothing changed.
-    # In the "real" world, the DB would force margaret to wait for a lock
+    # In the "real" world, the DB would force margaret to wait for a lock, and we could assert that both had advanced to 1
     assert_equal 0, job.request_index(margaret_session)
     assert_equal 0, job.request_index(timothy_session)
   end
@@ -239,27 +239,30 @@ class SessionTest < ActionDispatch::IntegrationTest
     end
 
     # Because both updates failed due to SQLite3's lack of graceful handling of locks, we would expect that nothing changed.
-    # In the "real" world, the DB would force margaret to wait for a lock
+    # In the "real" world, the DB would force Margaret to wait for a lock
     assert_equal nil, job.requests(margaret_session)
     assert_equal nil, job.requests(timothy_session)
   end
-
-
 
   test "resetting a session doesn't reset other people's sessions" do
     QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
     job = QBWC.jobs.first
 
-    timothy_session  = QBWC::Session.new("timothy", COMPANY)
-    timothy_requests = {:customer_query_rq => {:full_name => 'Timothy'}}
-    job.set_requests(timothy_session, timothy_requests)
-
     margaret_session = QBWC::Session.new("margaret", COMPANY)
-    margaret_requests = {:customer_query_rq => {:full_name => 'Margaret'}}
+    margaret_requests = [
+      {:customer_query_rq => {:full_name => 'Margaret Customer 1'}},
+      {:customer_query_rq => {:full_name => 'Margaret Customer 2'}}
+    ]
     job.set_requests(margaret_session, margaret_requests)
 
     margaret_session.next_request
-    margaret_session.next_request
+
+    timothy_session  = QBWC::Session.new("timothy", COMPANY)
+    timothy_requests = [
+      {:customer_query_rq => {:full_name => 'Timothy Customer 1'}},
+      {:customer_query_rq => {:full_name => 'Timothy Customer 2'}}
+    ]
+    job.set_requests(timothy_session, timothy_requests)
 
     assert_equal timothy_requests, job.requests(timothy_session)
     assert_equal margaret_requests, job.requests(margaret_session)
