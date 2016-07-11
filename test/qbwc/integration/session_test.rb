@@ -243,4 +243,25 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal nil, job.requests(margaret_session)
     assert_equal nil, job.requests(timothy_session)
   end
+
+
+
+  test "resetting a session doesn't reset other people's sessions" do
+    QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
+    job = QBWC.jobs.first
+
+    timothy_session  = QBWC::Session.new("timothy", COMPANY)
+    timothy_requests = {:customer_query_rq => {:full_name => 'Timothy'}}
+    job.set_requests(timothy_session, timothy_requests)
+
+    margaret_session = QBWC::Session.new("margaret", COMPANY)
+    margaret_requests = {:customer_query_rq => {:full_name => 'Margaret'}}
+    job.set_requests(margaret_session, margaret_requests)
+
+    margaret_session.next_request
+    margaret_session.next_request
+
+    assert_equal timothy_requests, job.requests(timothy_session)
+    assert_equal margaret_requests, job.requests(margaret_session)
+  end
 end

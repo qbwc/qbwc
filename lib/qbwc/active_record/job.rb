@@ -107,12 +107,30 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     end
   end
 
-  # TODO: @jhmoore this is a problem
-  def reset
-    super
-    job = find_ar_job
-    job.update_all :request_index => {}
-    job.update_all(:requests => {}) unless self.requests_provided_when_job_added
+  # # ORIG
+  # def reset(session)
+  #   super
+  #   job = find_ar_job
+  #   job.update_all :request_index => {}
+  #   job.update_all(:requests => {}) unless self.requests_provided_when_job_added
+  # end
+  def reset(session)
+    find_ar_job.each do |jb|
+      jb.with_lock do
+        jb.requests ||= {}
+        jb.request_index ||= {}
+
+        unless self.requests_provided_when_job_added
+          jb.requests.delete(session.key)
+          @requests = jb.requests
+        end
+
+        jb.request_index.delete(session.key)
+        @request_index = jb.request_index
+
+        jb.save
+      end
+    end
   end
 
   def self.list_jobs
