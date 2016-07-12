@@ -3,7 +3,7 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'minitest/autorun'
-
+require 'minitest/stub_any_instance'
 require 'active_support'
 require 'active_record'
 require 'action_controller'
@@ -39,7 +39,8 @@ module QbwcTestApplication
       config.secret_key_base = "stub"
       config.eager_load = false
     end
-    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+    db_path = ENV["TEST_SQLITE_DB"] || Tempfile.new("sqlite-qb").path
+    ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => db_path, :timeout => 10000)
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/index_qbwc_jobs'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/change_request_index'

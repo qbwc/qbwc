@@ -65,8 +65,14 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   end
 
   def set_requests(session, requests)
-    super
-    find_ar_job.update_all(:requests => @requests)
+    find_ar_job.each do |ar_job|
+      ar_job.with_lock do
+        ar_job.requests ||= {}
+        ar_job.requests[session.key] = requests
+        ar_job.save
+        @requests = ar_job.requests
+      end
+    end
   end
 
   def requests_provided_when_job_added
@@ -91,23 +97,33 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     (find_ar_job.pluck(:request_index).first || {})[session.key] || 0
   end
 
-  def set_request_index(session, index)
-    find_ar_job.each do |jb|
-      jb.request_index[session.key] = index
-      jb.save
+  def advance_next_request(session)
+    find_ar_job.each do |ar_job|
+      ar_job.with_lock do
+        current_index = ar_job.request_index[session.key] || 0
+        ar_job.request_index[session.key] = current_index + 1
+        ar_job.save
+      end
     end
   end
 
-  def advance_next_request(session)
-    nr = request_index(session)
-    set_request_index session, nr + 1
-  end
+  def reset(session)
+    find_ar_job.each do |ar_job|
+      ar_job.with_lock do
+        ar_job.requests ||= {}
+        ar_job.request_index ||= {}
 
-  def reset
-    super
-    job = find_ar_job
-    job.update_all :request_index => {}
-    job.update_all(:requests => {}) unless self.requests_provided_when_job_added
+        unless self.requests_provided_when_job_added
+          ar_job.requests.delete(session.key)
+          @requests = ar_job.requests
+        end
+
+        ar_job.request_index.delete(session.key)
+        @request_index = ar_job.request_index
+
+        ar_job.save
+      end
+    end
   end
 
   def self.list_jobs
