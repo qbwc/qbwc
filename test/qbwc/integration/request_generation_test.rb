@@ -1,6 +1,8 @@
 $:<< File.expand_path(File.dirname(__FILE__) + '/../..')
 require 'test_helper.rb'
 
+$SINGLE_REQUESTS_INVOKED_COUNT = 0
+
 class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   def setup
@@ -41,7 +43,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
     nr = session.next_request
     assert_not_nil nr
-    assert_match /FullName.*Quincy Bob William Carlos.*FullName/, nr.request
+    assert_match(/FullName.*Quincy Bob William Carlos.*FullName/, nr.request)
     simulate_response(session)
     assert_nil session.next_request
   end
@@ -59,7 +61,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
     nr = session.next_request
     assert_not_nil nr
-    assert_match /FullName.*#{QBWC_USERNAME}.*FullName/, nr.request
+    assert_match(/FullName.*#{QBWC_USERNAME}.*FullName/, nr.request)
     simulate_response(session)
     assert_nil session.next_request
   end
@@ -130,17 +132,17 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     req1 = session.next_request
     assert_not_nil req1
-    assert_match /xml.*FullName.*Quincy Bob William Carlos.*FullName/m, req1.request
+    assert_match(/xml.*FullName.*Quincy Bob William Carlos.*FullName/m, req1.request)
     simulate_response(session)
 
     req2 = session.next_request
     assert_not_nil req2
-    assert_match /xml.*FullName.*Quentin Billy Wyatt Charles.*FullName/m, req2.request
+    assert_match(/xml.*FullName.*Quentin Billy Wyatt Charles.*FullName/m, req2.request)
     simulate_response(session)
 
     req3 = session.next_request
     assert_not_nil req3
-    assert_match /xml.*FullName.*Quigley Brian Wally Colin.*FullName/m, req3.request
+    assert_match(/xml.*FullName.*Quigley Brian Wally Colin.*FullName/m, req3.request)
     simulate_response(session)
 
     assert_nil session.next_request
@@ -261,11 +263,11 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
     request = session.next_request
     assert_not_nil request
-    assert_match /CustomerAddRq.*\/CustomerAddRq/m, request.request
+    assert_match(/CustomerAddRq.*\/CustomerAddRq/m, request.request)
     simulate_response(session)
     assert_nil session.next_request
 
-    assert_match /CustomerAddRq.*\/CustomerAddRq/m, extract_request(QBWC::ActiveRecord::Job::QbwcJob.first, session)[0]
+    assert_match(/CustomerAddRq.*\/CustomerAddRq/m, extract_request(QBWC::ActiveRecord::Job::QbwcJob.first, session)[0])
     QBWC.jobs.each {|job| assert job.requests_provided_when_job_added == true}
   end
 
@@ -296,7 +298,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     session = QBWC::Session.new('foo', '')
     request = session.next_request
     assert_not_nil request
-    assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request.request
+    assert_match(/FullName.#{QBWC_USERNAME}.\/FullName/, request.request)
 
     expected = {[nil, ""] => [{:customer_query_rq => {:full_name => QBWC_USERNAME}}]}
     assert_equal expected, QBWC::ActiveRecord::Job::QbwcJob.first[:requests]
@@ -327,11 +329,11 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
     session = QBWC::Session.new('foo', '')
     request1 = session.next_request
-    assert_match /FullName.#{QBWC_USERNAME}.\/FullName/, request1.request
+    assert_match(/FullName.#{QBWC_USERNAME}.\/FullName/, request1.request)
     simulate_response(session)
 
     request2 = session.next_request
-    assert_match /FullName.usr2 name.\/FullName/, request2.request
+    assert_match(/FullName.usr2 name.\/FullName/, request2.request)
     simulate_response(session)
 
     assert_nil session.next_request
