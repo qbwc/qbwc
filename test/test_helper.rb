@@ -47,11 +47,15 @@ module QbwcTestApplication
     require 'generators/qbwc/install/templates/db/migrate/change_request_index'
     require 'generators/qbwc/install/templates/db/migrate/create_qbwc_sessions'
     require 'generators/qbwc/install/templates/db/migrate/index_qbwc_sessions'
+    require 'generators/qbwc/install/templates/db/migrate/session_pending_jobs_text'
+    require 'generators/qbwc/install/templates/db/migrate/session_requests_request_index_columns.rb'
     ActiveRecord::Migration.run(CreateQbwcJobs)
     ActiveRecord::Migration.run(IndexQbwcJobs)
     ActiveRecord::Migration.run(ChangeRequestIndex)
     ActiveRecord::Migration.run(CreateQbwcSessions)
     ActiveRecord::Migration.run(IndexQbwcSessions)
+    ActiveRecord::Migration.run(SessionPendingJobsText)
+    ActiveRecord::Migration.run(SessionRequestsRequestIndexColumns)
     QBWC.configure do |c|
       c.username = QBWC_USERNAME
       c.password = QBWC_PASSWORD
