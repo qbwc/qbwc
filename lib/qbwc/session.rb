@@ -1,7 +1,7 @@
 class QBWC::Session
 
   attr_reader :user, :company, :ticket, :progress
-  attr_accessor :error, :status_code, :status_severity
+  attr_accessor :error, :status_code, :status_severity, :current_request_index # todo not need this
 
   @@session = nil
 
@@ -13,6 +13,7 @@ class QBWC::Session
     @user = user
     @company = company
     @current_job = nil
+    @current_request_index = 0
     @error = nil
     @progress = 0
     @iterator_id = nil
@@ -95,6 +96,11 @@ class QBWC::Session
     end
   end
 
+  def advance_next_request
+    new_index = self.current_request_index + 1
+    self.current_request_index = new_index
+  end
+
   def save
   end
 
@@ -109,13 +115,14 @@ class QBWC::Session
 
   protected
 
-  attr_accessor :current_job, :iterator_id
+  attr_accessor :current_job, :iterator_id #, :current_request_index
   attr_writer :progress
 
   private
 
   def reset(reset_job = false)
     self.current_job = pending_jobs.first
+    self.current_request_index = 0
     self.current_job.reset(self) if reset_job && self.current_job
     return self.current_job
   end

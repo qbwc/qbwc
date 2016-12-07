@@ -13,8 +13,6 @@ class QBWC::Job
     requests = [requests].compact unless Hash === requests || Array === requests
     requests = { default_key => requests } unless Hash === requests || requests.empty?
     @requests = requests
-
-    @request_index = { default_key => 0 }
   end
 
   def worker
@@ -25,15 +23,9 @@ class QBWC::Job
     QBWC.logger.info "Processing response."
     QBWC.logger.info "Job '#{name}' received response: '#{qbxml_response}'." if QBWC.log_requests_and_responses
     request_list = requests(session)
-    completed_request = request_list[request_index(session)] if request_list
-    advance_next_request(session) if advance
+    completed_request = request_list[session.current_request_index] if request_list
+    session.advance_next_request if advance
     worker.handle_response(response, session, self, completed_request, data)
-  end
-
-  def advance_next_request(session)
-    new_index = request_index(session) + 1
-    QBWC.logger.info "Job '#{name}' advancing to request #'#{new_index}'."
-    @request_index[session.key] = new_index
   end
 
   def enable
@@ -85,10 +77,6 @@ class QBWC::Job
     @data = d
   end
 
-  def request_index(session)
-    @request_index[session.key] || 0
-  end
-
   def requests_provided_when_job_added
     @requests_provided_when_job_added
   end
@@ -109,7 +97,7 @@ class QBWC::Job
     end
 
     QBWC.logger.info("Requests available are '#{reqs}'.") if QBWC.log_requests_and_responses
-    ri = request_index session
+    ri = session.current_request_index
     QBWC.logger.info("Request index is '#{ri}'.")
     return nil if ri.nil? || reqs.nil? || ri >= reqs.length
     nr = reqs[ri]
@@ -119,7 +107,6 @@ class QBWC::Job
   alias :next :next_request  # Deprecated method name 'next'
 
   def reset(session)
-    @request_index = {}
     @requests = {} unless self.requests_provided_when_job_added
   end
 

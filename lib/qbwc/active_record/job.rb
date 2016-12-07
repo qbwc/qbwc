@@ -1,9 +1,8 @@
 class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => true, :presence => true
-    serialize :requests, Hash
-    serialize :request_index, Hash
     serialize :data
+    serialize :requests, Hash
 
     def to_qbwc_job
       QBWC::ActiveRecord::Job.new(name, enabled, company, worker_class, requests, data)
@@ -93,33 +92,15 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     super
   end
 
-  def request_index(session)
-    (find_ar_job.pluck(:request_index).first || {})[session.key] || 0
-  end
-
-  def advance_next_request(session)
-    find_ar_job.each do |ar_job|
-      ar_job.with_lock do
-        current_index = ar_job.request_index[session.key] || 0
-        ar_job.request_index[session.key] = current_index + 1
-        ar_job.save
-      end
-    end
-  end
-
   def reset(session)
     find_ar_job.each do |ar_job|
       ar_job.with_lock do
         ar_job.requests ||= {}
-        ar_job.request_index ||= {}
 
         unless self.requests_provided_when_job_added
           ar_job.requests.delete(session.key)
           @requests = ar_job.requests
         end
-
-        ar_job.request_index.delete(session.key)
-        @request_index = ar_job.request_index
 
         ar_job.save
       end
