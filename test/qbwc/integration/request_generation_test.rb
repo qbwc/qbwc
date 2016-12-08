@@ -104,7 +104,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     simulate_response(session2)
     assert_not_nil session2.next_request
     simulate_response(session2)
-    assert_nil session2.next
+    assert_nil session2.next_request
 
     assert_equal 2, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end
@@ -192,7 +192,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
     # Requests from MultipleRequestWorker are suppressed; instead use one request passed when job added
     assert_not_nil session.next_request
     simulate_response(session)
-    assert_nil session.next
+    assert_nil session.next_request
 
     assert_equal 0, $MULTIPLE_REQUESTS_INVOKED_COUNT
   end

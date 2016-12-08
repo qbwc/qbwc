@@ -52,7 +52,7 @@ class QBWC::Job
 
   def next_request(session = QBWC::Session.get)
     # Generate and save the requests to run when starting the job.
-    if @default_requests.empty? && session.requests.nil?
+    if @default_requests.empty? && (session.requests.nil? || session.requests.empty?)
       reqs = worker.requests(self, session, @data)
       reqs = [reqs].flatten.compact
       session.requests = reqs
@@ -62,5 +62,4 @@ class QBWC::Job
     QBWC.logger.info("Next request is '#{next_request}'.") if QBWC.log_requests_and_responses
     QBWC::Request.new(next_request) if next_request
   end
-  alias :next :next_request  # Deprecated method name 'next'
 end

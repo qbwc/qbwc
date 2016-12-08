@@ -25,10 +25,6 @@ class QBWC::Session
     @@session = self
   end
 
-  def key
-    [user, company]
-  end
-
   def response_is_error?
     self.error && self.status_severity == 'Error'
   end
@@ -67,7 +63,6 @@ class QBWC::Session
     complete_with_success if finished?
     request
   end
-  alias :next :next_request  # Deprecated method name 'next'
 
   def current_request
     request = self.next_request
