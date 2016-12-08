@@ -45,13 +45,13 @@ class JobManagementTest < ActionDispatch::IntegrationTest
   test "requests" do
     job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
     session = QBWC::Session.new('foo', '')
-    assert_nil job.requests(session)
+    assert_nil job.next_request(session)
   end
 
   test "requests with default session" do
     job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
-    QBWC::Session.new('foo', '')
-    assert_nil job.requests
+    session = QBWC::Session.new('foo', '')
+    assert_nil session.requests
   end
 
   test "next_request" do

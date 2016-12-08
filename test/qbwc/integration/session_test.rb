@@ -198,30 +198,19 @@ class SessionTest < ActionDispatch::IntegrationTest
     QBWC::ActiveRecord::Job::QbwcJob.stub_any_instance(:save, delayed_save_for_tim) do
       threads = []
       threads << Thread.new {
-        # This would not blow up in mysql (or any other real DBMS),
-        # but since we're using sqlite3 to test, we look for an explosion
-        error = assert_raises(ActiveRecord::StatementInvalid) do
-          job.set_requests(timothy_session, timothy_requests)
-        end
-        assert_match(/SQLite3::BusyException/, error.message)
+        timothy_session.send(:requests=, timothy_requests)
       }
 
       threads << Thread.new {
         sleep(0.25)
-        # This would not blow up in mysql (or any other real DBMS),
-        # but since we're using sqlite3 to test, we look for an explosion
-        error = assert_raises(ActiveRecord::StatementInvalid) do
-          job.set_requests(margaret_session, margaret_requests)
-        end
-        assert_match(/SQLite3::BusyException/, error.message)
+        margaret_session.send(:requests=, margaret_requests)
       }
 
       threads.each { |thread| thread.join }
     end
 
-    # Because both updates failed due to SQLite3's lack of graceful handling of locks, we expect that nothing changed.
-    assert_equal nil, job.requests(margaret_session)
-    assert_equal nil, job.requests(timothy_session)
+    assert_equal timothy_requests, timothy_session.send(:requests)
+    assert_equal margaret_requests, margaret_session.send(:requests)
     # In the "real" world, the DB would allow Margaret to wait for a lock, and then write.
     # We could instead assert that both request hashes had persisted.
   end
@@ -235,7 +224,7 @@ class SessionTest < ActionDispatch::IntegrationTest
       {:customer_query_rq => {:full_name => 'Margaret Customer 1'}},
       {:customer_query_rq => {:full_name => 'Margaret Customer 2'}}
     ]
-    job.set_requests(margaret_session, margaret_requests)
+    margaret_session.send(:requests=, margaret_requests)
 
     margaret_session.next_request
 
@@ -244,9 +233,9 @@ class SessionTest < ActionDispatch::IntegrationTest
       {:customer_query_rq => {:full_name => 'Timothy Customer 1'}},
       {:customer_query_rq => {:full_name => 'Timothy Customer 2'}}
     ]
-    job.set_requests(timothy_session, timothy_requests)
+    timothy_session.send(:requests=, timothy_requests)
 
-    assert_equal timothy_requests, job.requests(timothy_session)
-    assert_equal margaret_requests, job.requests(margaret_session)
+    assert_equal timothy_requests, timothy_session.send(:requests)
+    assert_equal margaret_requests, margaret_session.send(:requests)
   end
 end
