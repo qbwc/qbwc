@@ -184,8 +184,6 @@ class SessionTest < ActionDispatch::IntegrationTest
     timothy_requests = {:customer_query_rq => {:full_name => 'Timothy'}}
     margaret_requests = {:customer_query_rq => {:full_name => 'Margaret'}}
 
-    job = QBWC.jobs.first
-
     delayed_save_for_tim = lambda do
       @@requests_sleep_1_for_timothy_and_0_for_margaret ||= 1
       the_delay = @@requests_sleep_1_for_timothy_and_0_for_margaret
@@ -217,7 +215,6 @@ class SessionTest < ActionDispatch::IntegrationTest
 
   test "resetting a session doesn't reset other people's sessions" do
     QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
-    job = QBWC.jobs.first
 
     margaret_session = QBWC::Session.new("margaret", COMPANY)
     margaret_requests = [

@@ -1,7 +1,7 @@
 class QBWC::Session
 
   attr_reader :user, :company, :ticket, :progress
-  attr_accessor :error, :status_code, :status_severity, :current_request_index, :requests # todo not need this
+  attr_accessor :error, :status_code, :status_severity, :requests
 
   @@session = nil
 
@@ -127,7 +127,7 @@ class QBWC::Session
 
   protected
 
-  attr_accessor :current_job, :iterator_id #, :current_request_index
+  attr_accessor :current_job, :iterator_id, :current_request_index
   attr_writer :progress
 
   private

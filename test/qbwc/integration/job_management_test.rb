@@ -49,9 +49,9 @@ class JobManagementTest < ActionDispatch::IntegrationTest
   end
 
   test "requests with default session" do
-    job = QBWC.add_job(:integration_test, true, '', QBWC::Worker)
+    QBWC.add_job(:integration_test, true, '', QBWC::Worker)
     session = QBWC::Session.new('foo', '')
-    assert_nil session.requests
+    assert_equal [], session.get_current_job_requests(nil)
   end
 
   test "next_request" do

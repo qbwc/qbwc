@@ -1,7 +1,7 @@
 class QBWC::ActiveRecord::Session < QBWC::Session
   class QbwcSession < ActiveRecord::Base
     validates :ticket, :uniqueness => true, :presence => true
-    serialize :requests, Hash
+    serialize :requests, Array
 
     attr_accessible :company, :ticket, :user unless Rails::VERSION::MAJOR >= 4
   end
@@ -47,7 +47,7 @@ class QBWC::ActiveRecord::Session < QBWC::Session
     super
   end
 
-  [:error, :progress, :iterator_id, :current_request_index].each do |method|
+  [:error, :progress, :iterator_id, :current_request_index, :requests].each do |method|
     define_method method do
       @session.send(method)
     end
@@ -55,6 +55,6 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @session.send("#{method}=", value)
     end
   end
-  protected :progress=, :iterator_id=, :iterator_id #, :current_request_index=, :current_request_index TODO MAKE THIS A THING
+  protected :progress=, :iterator_id=, :iterator_id, :current_request_index=, :current_request_index
 
 end
