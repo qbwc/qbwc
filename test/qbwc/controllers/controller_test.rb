@@ -31,13 +31,13 @@ class QBWCControllerTest < ActionController::TestCase
     #_inspect_routes
     process(:qwc)
 
-    assert_match /QBWCXML/,                                                 @response.body
-    assert_match Regexp.new("AppName.*QbwcTestApplication #{Rails.env}.*AppName"),       @response.body
-    assert_match /AppURL.*http:\/\/test.host\/qbwc\/action.*AppURL/,        @response.body
-    assert_match /AppDescription.*Quickbooks integration.*AppDescription/,  @response.body
-    assert_match /AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body
-    assert_match /UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body
-    assert_match /FileID.*{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}.*FileID/,  @response.body
+    assert_match(/QBWCXML/,                                                 @response.body)
+    assert_match(Regexp.new("AppName.*QbwcTestApplication #{Rails.env}.*AppName"),       @response.body)
+    assert_match(/AppURL.*http:\/\/test.host\/qbwc\/action.*AppURL/,        @response.body)
+    assert_match(/AppDescription.*Quickbooks integration.*AppDescription/,  @response.body)
+    assert_match(/AppSupport.*https:\/\/test.host\/.*AppSupport/,           @response.body)
+    assert_match(/UserName.*#{QBWC_USERNAME}.*UserName/,                    @response.body)
+    assert_match(/FileID.*{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}.*FileID/,  @response.body)
   end
 
   test "authenticate with no jobs" do
@@ -101,7 +101,7 @@ class QBWCControllerTest < ActionController::TestCase
     _authenticate_with_queued_job
     _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_PARAMS)
 
-    assert_match /tns:receiveResponseXMLResult.*100..tns:receiveResponseXMLResult/, @response.body
+    assert_match(/tns:receiveResponseXMLResult.*100..tns:receiveResponseXMLResult/, @response.body)
   end
 
   class CheckErrorValuesWorker < QBWC::Worker
@@ -137,7 +137,7 @@ class QBWCControllerTest < ActionController::TestCase
     _simulate_soap_request('receive_response', RECEIVE_RESPONSE_SOAP_ACTION, RECEIVE_RESPONSE_ERROR_PARAMS)
 
     assert $HANDLE_RESPONSE_EXECUTED  # https://github.com/skryl/qbwc/pull/50#discussion_r23764154
-    assert_match /tns:receiveResponseXMLResult.*#{receive_response_xml_result}..tns:receiveResponseXMLResult/, @response.body
+    assert_match(/tns:receiveResponseXMLResult.*#{receive_response_xml_result}..tns:receiveResponseXMLResult/, @response.body)
   end
 
   test "receive_response error stop" do
