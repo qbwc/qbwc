@@ -30,7 +30,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class SingleRequestWorker < QBWC::Worker
     def requests(job, session, data)
-      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
+      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if defined?($SINGLE_REQUESTS_INVOKED_COUNT) && $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       {:customer_query_rq => {:full_name => 'Quincy Bob William Carlos'}}
     end
   end
@@ -48,7 +48,7 @@ class RequestGenerationTest < ActionDispatch::IntegrationTest
 
   class SingleStringRequestWorker < QBWC::Worker
     def requests(job, session, data)
-      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
+      $SINGLE_REQUESTS_INVOKED_COUNT += 1 if defined?($SINGLE_REQUESTS_INVOKED_COUNT) && $SINGLE_REQUESTS_INVOKED_COUNT.is_a?(Integer)
       QBWC_CUSTOMER_QUERY_RQ
     end
   end
