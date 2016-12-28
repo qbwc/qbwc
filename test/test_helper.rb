@@ -212,7 +212,12 @@ def _simulate_soap_request(http_action, soap_action, soap_params)
   @request.env["wash_out.soap_action"]  = soap_action.to_s
   @request.env["wash_out.soap_data"]    = wash_out_soap_data
 
-  post http_action, use_route: :qbwc_action
+  if Rails::VERSION::MAJOR <= 4
+    post http_action, use_route: :qbwc_action
+  else
+    post http_action, params: { use_route: :qbwc_action }
+  end
+
 end
 
 #-------------------------------------------
