@@ -211,7 +211,6 @@ def _simulate_soap_request(http_action, soap_action, soap_params)
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = soap_action.to_s
   @request.env["wash_out.soap_data"]    = wash_out_soap_data
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
 
   post http_action, use_route: :qbwc_action
 end
@@ -221,7 +220,6 @@ def _authenticate
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = AUTHENTICATE_WASH_OUT_SOAP_DATA
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
 
   process(:authenticate)
 end
@@ -241,7 +239,6 @@ def _authenticate_wrong_password
   bad_password_soap_data[:Envelope][:Body][AUTHENTICATE_SOAP_ACTION][:strPassword] = 'something wrong'
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = bad_password_soap_data
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
 
   process(:authenticate)
 end
