@@ -176,6 +176,12 @@ AUTHENTICATE_WASH_OUT_SOAP_DATA = {
   }
 }
 
+SERVER_VERSION_PARAMS = {
+  :@xmlns      => "http://developer.intuit.com/"
+}
+
+SERVER_VERSION_SOAP_ACTION = :serverVersion
+
 SEND_REQUEST_PARAMS = {
   :qbXMLCountry   => "US",
   :qbXMLMajorVers => "13",
@@ -205,8 +211,13 @@ RECEIVE_RESPONSE_SOAP_ACTION = :receiveResponseXML
 #-------------------------------------------
 def _simulate_soap_request(http_action, soap_action, soap_params)
 
-  ticket = QBWC::ActiveRecord::Session::QbwcSession.first.ticket
-  wash_out_soap_data = { :Envelope => { :Body => { soap_action => soap_params.update(:ticket => ticket) }}}
+  session = QBWC::ActiveRecord::Session::QbwcSession.first
+  unless session.blank?
+    ticket = session.ticket
+    soap_params = soap_params.update(:ticket => ticket)
+  end
+
+  wash_out_soap_data = { :Envelope => { :Body => { soap_action => soap_params }}}
 
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = soap_action.to_s

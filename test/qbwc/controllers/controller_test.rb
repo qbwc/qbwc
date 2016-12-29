@@ -40,6 +40,11 @@ class QBWCControllerTest < ActionController::TestCase
     assert_match(/FileID.*{90A44FB5-33D9-4815-AC85-BC87A7E7D1EB}.*FileID/,  @response.body)
   end
 
+  test "server_version" do
+    _simulate_soap_request('server_version', SERVER_VERSION_SOAP_ACTION, SERVER_VERSION_PARAMS)
+    assert_match(/tns:serverVersionResult/, @response.body)
+  end
+
   test "authenticate with no jobs" do
     _authenticate
     assert_equal 0, QBWC.pending_jobs(COMPANY, @session).count
