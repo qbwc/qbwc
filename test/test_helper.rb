@@ -209,6 +209,22 @@ RECEIVE_RESPONSE_ERROR_PARAMS = {
 RECEIVE_RESPONSE_SOAP_ACTION = :receiveResponseXML
 
 #-------------------------------------------
+def _controller_env_is_required?
+  # qbwc requires minimum wash_out 0.10.0
+  # wash_out 0.10.0 uses controller env
+  # wash_out 0.11.0 uses request.env
+  WashOut::VERSION == "0.10.0"
+end
+
+#-------------------------------------------
+def _set_controller_env_if_required
+  if _controller_env_is_required?
+    @controller.set_request!(@request) if Rails::VERSION::MAJOR >= 5
+    @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+  end
+end
+
+#-------------------------------------------
 def _simulate_soap_request(http_action, soap_action, soap_params)
 
   session = QBWC::ActiveRecord::Session::QbwcSession.first
@@ -222,6 +238,7 @@ def _simulate_soap_request(http_action, soap_action, soap_params)
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = soap_action.to_s
   @request.env["wash_out.soap_data"]    = wash_out_soap_data
+  _set_controller_env_if_required
 
   if Rails::VERSION::MAJOR <= 4
     post http_action, use_route: :qbwc_action
@@ -236,6 +253,7 @@ def _authenticate
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = AUTHENTICATE_WASH_OUT_SOAP_DATA
+  _set_controller_env_if_required
 
   process(:authenticate)
 end
@@ -255,6 +273,7 @@ def _authenticate_wrong_password
   bad_password_soap_data[:Envelope][:Body][AUTHENTICATE_SOAP_ACTION][:strPassword] = 'something wrong'
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = bad_password_soap_data
+  _set_controller_env_if_required
 
   process(:authenticate)
 end
