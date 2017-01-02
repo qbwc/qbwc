@@ -89,6 +89,8 @@ QbwcTestApplication::Application.routes.draw do
 end
 
 class QbwcController < ActionController::Base
+  protect_from_forgery with: :exception  # Must precede QWBC::Controller to emulate Rails load order
+
   include Rails.application.routes.url_helpers
   include QBWC::Controller
 end
