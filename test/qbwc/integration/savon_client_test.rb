@@ -35,7 +35,11 @@ class SavonClientTest < ActionDispatch::IntegrationTest
     result = client.call(:server_version, :message => nil)
 
     # Use this assertion when QBWC::Controller.server_version_response returns nil
-    assert_equal({:"@xsi:type"=>"xsd:string"}, result.body[:server_version_response][:server_version_result])
+    if WashOut::VERSION == "0.10.0"
+      assert_equal({:"@xsi:type"=>"xsd:string"}, result.body[:server_version_response][:server_version_result])
+    else
+      assert_nil result.body[:server_version_response][:server_version_result]
+    end
 
     # Use this assertion when QBWC::Controller.server_version_response returns a value
     # assert_equal("SERVER_VERSION_RESPONSE", result.body[:server_version_response][:server_version_result])
