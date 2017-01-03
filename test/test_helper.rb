@@ -9,6 +9,20 @@ require 'active_record'
 require 'action_controller'
 require 'rails'
 
+# Determine location of local wash_out gem
+# https://github.com/rubygems/rubygems/blob/master/lib/rubygems/commands/which_command.rb
+require 'rubygems/commands/which_command'
+which_command = Gem::Commands::WhichCommand.new
+paths = which_command.find_paths('wash_out', $LOAD_PATH)
+wash_out_lib = File.dirname(paths[0])  # Alternate technique: File.dirname(`gem which wash_out`)
+puts "WASH_OUT_LIB #{wash_out_lib}"
+
+# Add wash_out to autoload_paths so that WashOutHelper can be included directly
+# http://api.rubyonrails.org/classes/AbstractController/Helpers/ClassMethods.html#method-i-helper
+# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#require-dependency
+# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#autoload-paths
+ActiveSupport::Dependencies.autoload_paths << "#{wash_out_lib}/../app/helpers"
+
 $:<< File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'qbwc'
 require 'qbwc/controller'
