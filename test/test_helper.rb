@@ -15,7 +15,6 @@ require 'rubygems/commands/which_command'
 which_command = Gem::Commands::WhichCommand.new
 paths = which_command.find_paths('wash_out', $LOAD_PATH)
 wash_out_lib = File.dirname(paths[0])  # Alternate technique: File.dirname(`gem which wash_out`)
-puts "WASH_OUT_LIB #{wash_out_lib}"
 
 # Add wash_out to autoload_paths so that WashOutHelper can be included directly
 # http://api.rubyonrails.org/classes/AbstractController/Helpers/ClassMethods.html#method-i-helper
