@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
-  s.add_development_dependency('activerecord')
+  s.add_development_dependency('activerecord', [">= 4.1.0", "< 5.0.0"])
   s.add_development_dependency('actionpack')
   s.add_development_dependency('rails', [">= 4.1.0"])
   s.add_development_dependency('sqlite3')
