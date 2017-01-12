@@ -118,7 +118,7 @@ class QBWC::Job
   end
   alias :next :next_request  # Deprecated method name 'next'
 
-  def reset
+  def reset(session)
     @request_index = {}
     @requests = {} unless self.requests_provided_when_job_added
   end
