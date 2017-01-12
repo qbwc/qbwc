@@ -89,7 +89,7 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 1, QBWC.pending_jobs(COMPANY, session).count
 
     # Simulate controller send_request
-    request = session.request_to_send
+    session.request_to_send
   end
 
   class ConditionalTestWorker < QBWC::Worker

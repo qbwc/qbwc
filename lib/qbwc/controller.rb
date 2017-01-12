@@ -77,7 +77,7 @@ SB
    <AppURL>#{qbwc_action_url(:only_path => false)}</AppURL>
    <AppDescription>Quickbooks integration</AppDescription>
    <AppSupport>#{QBWC.support_site_url || root_url(:protocol => 'https://')}</AppSupport>
-   <UserName>#{@username || QBWC.username}</UserName>
+   <UserName>#{QBWC.username}</UserName>
    <OwnerID>#{QBWC.owner_id}</OwnerID>
    <FileID>{#{file_id}}</FileID>
    <QBType>QBFS</QBType>
@@ -85,7 +85,7 @@ SB
    #{scheduler_block}
 </QBWCXML>
 QWC
-      send_data qwc, :filename => "#{@filename || Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
+      send_data qwc, :filename => "#{Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
     end
 
     class StringArray < WashOut::Type
@@ -162,7 +162,7 @@ QWC
     end
 
     def app_name
-      "#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}"
+      "#{Rails.application.class.parent_name} #{Rails.env}"
     end
 
     def file_id

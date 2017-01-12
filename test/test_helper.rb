@@ -9,6 +9,19 @@ require 'active_record'
 require 'action_controller'
 require 'rails'
 
+# Determine location of local wash_out gem
+# https://github.com/rubygems/rubygems/blob/master/lib/rubygems/commands/which_command.rb
+require 'rubygems/commands/which_command'
+which_command = Gem::Commands::WhichCommand.new
+paths = which_command.find_paths('wash_out', $LOAD_PATH)
+wash_out_lib = File.dirname(paths[0])  # Alternate technique: File.dirname(`gem which wash_out`)
+
+# Add wash_out to autoload_paths so that WashOutHelper can be included directly
+# http://api.rubyonrails.org/classes/AbstractController/Helpers/ClassMethods.html#method-i-helper
+# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#require-dependency
+# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#autoload-paths
+ActiveSupport::Dependencies.autoload_paths << "#{wash_out_lib}/../app/helpers"
+
 $:<< File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'qbwc'
 require 'qbwc/controller'
@@ -89,6 +102,8 @@ QbwcTestApplication::Application.routes.draw do
 end
 
 class QbwcController < ActionController::Base
+  protect_from_forgery with: :exception  # Must precede QWBC::Controller to emulate Rails load order
+
   include Rails.application.routes.url_helpers
   include QBWC::Controller
 end
@@ -176,6 +191,12 @@ AUTHENTICATE_WASH_OUT_SOAP_DATA = {
   }
 }
 
+SERVER_VERSION_PARAMS = {
+  :@xmlns      => "http://developer.intuit.com/"
+}
+
+SERVER_VERSION_SOAP_ACTION = :serverVersion
+
 SEND_REQUEST_PARAMS = {
   :qbXMLCountry   => "US",
   :qbXMLMajorVers => "13",
@@ -203,17 +224,43 @@ RECEIVE_RESPONSE_ERROR_PARAMS = {
 RECEIVE_RESPONSE_SOAP_ACTION = :receiveResponseXML
 
 #-------------------------------------------
+def _controller_env_is_required?
+  # qbwc requires minimum wash_out 0.10.0
+  # wash_out 0.10.0 uses controller env
+  # wash_out 0.11.0 uses request.env
+  WashOut::VERSION == "0.10.0"
+end
+
+#-------------------------------------------
+def _set_controller_env_if_required
+  if _controller_env_is_required?
+    @controller.set_request!(@request) if Rails::VERSION::MAJOR >= 5
+    @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+  end
+end
+
+#-------------------------------------------
 def _simulate_soap_request(http_action, soap_action, soap_params)
 
-  ticket = QBWC::ActiveRecord::Session::QbwcSession.first.ticket
-  wash_out_soap_data = { :Envelope => { :Body => { soap_action => soap_params.update(:ticket => ticket) }}}
+  session = QBWC::ActiveRecord::Session::QbwcSession.first
+  unless session.blank?
+    ticket = session.ticket
+    soap_params = soap_params.update(:ticket => ticket)
+  end
+
+  wash_out_soap_data = { :Envelope => { :Body => { soap_action => soap_params }}}
 
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = soap_action.to_s
   @request.env["wash_out.soap_data"]    = wash_out_soap_data
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+  _set_controller_env_if_required
 
-  post http_action, use_route: :qbwc_action
+  if Rails::VERSION::MAJOR <= 4
+    post http_action, use_route: :qbwc_action
+  else
+    post http_action, params: { use_route: :qbwc_action }
+  end
+
 end
 
 #-------------------------------------------
@@ -221,7 +268,7 @@ def _authenticate
   # http://twobitlabs.com/2010/09/setting-request-headers-in-rails-functional-tests/
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = AUTHENTICATE_WASH_OUT_SOAP_DATA
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+  _set_controller_env_if_required
 
   process(:authenticate)
 end
@@ -241,7 +288,7 @@ def _authenticate_wrong_password
   bad_password_soap_data[:Envelope][:Body][AUTHENTICATE_SOAP_ACTION][:strPassword] = 'something wrong'
   @request.env["wash_out.soap_action"]  = AUTHENTICATE_SOAP_ACTION.to_s
   @request.env["wash_out.soap_data"]    = bad_password_soap_data
-  @controller.env["wash_out.soap_data"] = @request.env["wash_out.soap_data"]
+  _set_controller_env_if_required
 
   process(:authenticate)
 end
