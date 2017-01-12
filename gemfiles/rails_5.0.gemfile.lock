@@ -3,8 +3,9 @@ PATH
   specs:
     qbwc (1.0.0)
       actionpack (>= 4.1.0)
+      actionview (>= 4.1.0)
       qbxml (>= 0.3.0)
-      wash_out (>= 0.10.0)
+      wash_out (= 0.10.0)
 
 GEM
   remote: https://rubygems.org/
@@ -48,6 +49,9 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.0)
       public_suffix (~> 2.0, >= 2.0.2)
+    akami (1.3.1)
+      gyoku (>= 0.4.0)
+      nokogiri
     appraisal (2.1.0)
       bundler
       rake
@@ -61,7 +65,12 @@ GEM
     erubis (2.7.0)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
+    gyoku (1.3.1)
+      builder (>= 2.1.2)
     hashdiff (0.3.1)
+    httpi (2.4.2)
+      rack
+      socksify
     i18n (0.7.0)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
@@ -124,6 +133,15 @@ GEM
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
     safe_yaml (1.0.4)
+    savon (2.11.1)
+      akami (~> 1.2)
+      builder (>= 2.1.2)
+      gyoku (~> 1.2)
+      httpi (~> 2.3)
+      nokogiri (>= 1.4.0)
+      nori (~> 2.4)
+      wasabi (~> 3.4)
+    socksify (1.7.0)
     sprockets (3.7.0)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -136,7 +154,10 @@ GEM
     thread_safe (0.3.5)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    wash_out (0.11.0)
+    wasabi (3.5.0)
+      httpi (~> 2.0)
+      nokogiri (>= 1.4.2)
+    wash_out (0.10.0)
       nori (>= 2.0.0)
     webmock (2.3.1)
       addressable (>= 2.3.6)
@@ -151,14 +172,17 @@ PLATFORMS
 
 DEPENDENCIES
   actionpack (~> 5.0.0)
+  actionview (~> 5.0.0)
   activerecord
   appraisal
+  httpi
   minitest
   qbwc!
   rails (>= 4.1.0)
   rake
   rb-fsevent
   rspec
+  savon
   sqlite3
   webmock
 

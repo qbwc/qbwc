@@ -25,8 +25,15 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency "qbxml", [">= 0.3.0"]
-  s.add_dependency "wash_out", [">= 0.10.0"]
+  
+  # 0.10.0 until https://github.com/inossidabile/wash_out/pull/221
+  s.add_dependency "wash_out", ["= 0.10.0"]
+  
   s.add_dependency 'actionpack', ['>= 4.1.0']
+  
+  # wash_out requires this but does not list it as a dependency! 
+  # https://github.com/inossidabile/wash_out/issues/219
+  s.add_dependency 'actionview', ['>= 4.1.0']
 
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
