@@ -1,7 +1,7 @@
 class QBWC::Session
 
   attr_reader :user, :company, :ticket, :progress
-  attr_accessor :error, :status_code, :status_severity
+  attr_accessor :error, :status_code, :status_severity, :requests
 
   @@session = nil
 
@@ -12,7 +12,9 @@ class QBWC::Session
   def initialize(user = nil, company = nil, ticket = nil)
     @user = user
     @company = company
-    @current_job = nil
+    @current_job = pending_jobs.first
+    @requests = nil # nil indicates that this session does not have a current job request state
+    @current_request_index = 0
     @error = nil
     @progress = 0
     @iterator_id = nil
@@ -21,11 +23,6 @@ class QBWC::Session
     @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{SecureRandom.uuid}#{Time.now.to_f}")
 
     @@session = self
-    reset(ticket.nil?)
-  end
-
-  def key
-    [user, company]
   end
 
   def response_is_error?
@@ -40,22 +37,32 @@ class QBWC::Session
     self.progress == 100
   end
 
+  def get_current_job_requests(default_requests = nil)
+    self.requests || default_requests || []
+  end
+
+  def get_current_request(default_requests = nil)
+    reqs = get_current_job_requests(default_requests)
+    reqs[self.current_request_index]
+  end
+
   def next_request
     if current_job.nil? || error_and_stop_requested?
       self.progress = 100
       complete_with_success unless response_is_error?
       return nil
     end
+
     until (request = current_job.next_request(self)) do
       pending_jobs.shift
-      reset(true) or break
+      reset or break
     end
+
     jobs_completed = @initial_job_count - pending_jobs.length
     self.progress = ((jobs_completed.to_f  / @initial_job_count.to_f ) * 100).to_i
     complete_with_success if finished?
     request
   end
-  alias :next :next_request  # Deprecated method name 'next'
 
   def current_request
     request = self.next_request
@@ -86,13 +93,19 @@ class QBWC::Session
         parse_response_header(response)
       end
       self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
-      self.next_request # search next request
+
+      self.next_request # respond with the next request we have for QB
 
     rescue => e
       self.error = e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
       QBWC.logger.warn e.backtrace.join("\n")
     end
+  end
+
+  def advance_next_request
+    new_index = self.current_request_index + 1
+    self.current_request_index = new_index
   end
 
   def save
@@ -109,14 +122,15 @@ class QBWC::Session
 
   protected
 
-  attr_accessor :current_job, :iterator_id
+  attr_accessor :current_job, :iterator_id, :current_request_index
   attr_writer :progress
 
   private
 
-  def reset(reset_job = false)
+  def reset
     self.current_job = pending_jobs.first
-    self.current_job.reset(self) if reset_job && self.current_job
+    self.current_request_index = 0
+    self.requests = nil
     return self.current_job
   end
 

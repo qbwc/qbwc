@@ -25,12 +25,12 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency "qbxml", [">= 0.3.0"]
-  s.add_dependency "wash_out", [">= 0.10.0"]
+  s.add_dependency "wash_out", ["= 0.10.0"]
 
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
-  s.add_development_dependency('activerecord')
+  s.add_development_dependency('activerecord', [">= 4.1.0", "< 5.0.0"])
   s.add_development_dependency('actionpack')
   s.add_development_dependency('rails', [">= 4.1.0"])
   s.add_development_dependency('sqlite3')

@@ -1,5 +1,8 @@
 class QBWC::ActiveRecord::Session < QBWC::Session
   class QbwcSession < ActiveRecord::Base
+    validates :ticket, :uniqueness => true, :presence => true
+    serialize :requests, Array
+
     attr_accessible :company, :ticket, :user unless Rails::VERSION::MAJOR >= 4
   end
 
@@ -17,14 +20,19 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @pending_jobs = @session.pending_jobs.split(',').map { |job_name| QBWC.get_job(job_name) }.select { |job| ! job.nil? }
       super(@session.user, @session.company, @session.ticket)
     else
-      super
       @session = QbwcSession.new
+      super
       @session.user = self.user
       @session.company = self.company
       @session.ticket = self.ticket
       self.save
       @session
     end
+  end
+
+  def advance_next_request
+    next_index = @session.current_request_index + 1
+    @session.current_request_index = next_index
   end
 
   def save
@@ -39,7 +47,7 @@ class QBWC::ActiveRecord::Session < QBWC::Session
     super
   end
 
-  [:error, :progress, :iterator_id].each do |method|
+  [:error, :progress, :iterator_id, :current_request_index, :requests].each do |method|
     define_method method do
       @session.send(method)
     end
@@ -47,6 +55,6 @@ class QBWC::ActiveRecord::Session < QBWC::Session
       @session.send("#{method}=", value)
     end
   end
-  protected :progress=, :iterator_id=, :iterator_id
+  protected :progress=, :iterator_id=, :iterator_id, :current_request_index=, :current_request_index
 
 end

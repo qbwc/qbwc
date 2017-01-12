@@ -60,6 +60,9 @@ module QBWC
     end
 
     def qwc
+      @username ||= nil
+      @filename ||= nil
+
       # Optional tag
       scheduler_block = ''
       if !QBWC.minutes_to_run.nil?
@@ -162,6 +165,7 @@ QWC
     end
 
     def app_name
+      @app_name_suffix ||= ''
       "#{Rails.application.class.parent_name} #{Rails.env} #{@app_name_suffix}"
     end
 
