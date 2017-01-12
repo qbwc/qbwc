@@ -4,7 +4,7 @@ PATH
     qbwc (1.0.0)
       actionpack (>= 4.1.0)
       qbxml (>= 0.3.0)
-      wash_out (>= 0.11.0)
+      wash_out (>= 0.10.0)
 
 GEM
   remote: https://rubygems.org/
@@ -158,4 +158,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   1.13.6
+   1.13.7
