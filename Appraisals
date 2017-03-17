@@ -9,6 +9,7 @@ appraise "rails-4.2" do
 end
 
 appraise "rails-5.0" do
-  gem "actionpack", "~> 5.0.0"
-  gem "actionview", "~> 5.0.0"
+  # At least 5.0.1 due to test failures - https://github.com/rails/rails/pull/25950
+  gem "actionpack", "~> 5.0.1"
+  gem "actionview", "~> 5.0.1"
 end
