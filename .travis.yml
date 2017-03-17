@@ -1,7 +1,6 @@
 language: ruby
 
 rvm:
-  - 2.0
   - 2.1
   - 2.2
   - 2.3.3 # https://github.com/travis-ci/travis-ci/issues/5361
@@ -13,10 +12,10 @@ gemfile:
 
 matrix:
   exclude:
-    - rvm: 2.0
-      gemfile: gemfiles/rails_5.0.gemfile
     - rvm: 2.1
       gemfile: gemfiles/rails_5.0.gemfile
 
 before_install:
   - gem update bundler
+
+script: "bundle exec rake test"
