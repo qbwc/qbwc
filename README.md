@@ -72,12 +72,12 @@ To create a job (e.g. from `rails console` or wherever):
 
 ```ruby
 require 'qbwc'
-QBWC.add_job(:list_customers, true, '', CustomerTestWorker)
+QBWC.add_job(:list_customers, true, 'C:\\QuickBooks\\Oceanic.QBW', CustomerTestWorker)
 ```
 
 * The first argument is a unique name for the job. You can use this later to disable or delete the job.
 * The second argument indicates whether the job is initially enabled.
-* The third argument specifies the path to the QuickBooks company file this job affects. An empty string will make the job run against any company file.
+* The third argument specifies the path to the QuickBooks company file this job affects.
 * The fourth argument is your worker class. See the next section for a description of workers.
 
 Your job will be persisted in your database and will remain active and run every time QuickBooks Web Connector runs an update. If you don't want this to happen, you can have have your job disable or delete itself after completion. For example:
