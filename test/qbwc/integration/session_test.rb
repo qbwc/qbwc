@@ -126,5 +126,72 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 100, susan_session.progress
   end
 
+  test "session ticket generated does not collide with others generated in the same second" do
+    QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
+
+    Time.stub :now, Time.at(1466694710) do
+      timothy_session  = QBWC::Session.new("timothy", COMPANY)
+      margaret_session = QBWC::Session.new("margaret", COMPANY)
+
+      assert timothy_session.ticket != margaret_session.ticket
+    end
+  end
+
+  test "two sessions that advance to the next request_index should not clobber each other" do
+    QBWC.add_job(:session_test_1, true, COMPANY, ConditionalTestWorker)
+
+    timothy_session  = QBWC::Session.new("timothy", COMPANY)
+    margaret_session = QBWC::Session.new("margaret", COMPANY)
+
+    job = QBWC.jobs.first
+    job.set_request_index(timothy_session, 0)
+    job.set_request_index(margaret_session, 0)
+
+    delayed_save_for_tim = lambda do
+      @@sleep_1_for_timothy_and_0_for_margaret ||= 1
+      the_delay = @@sleep_1_for_timothy_and_0_for_margaret
+      @@sleep_1_for_timothy_and_0_for_margaret = 0
+      sleep(the_delay)
+
+      self.send("__minitest_any_instance_stub__save")
+    end
+
+    QBWC::ActiveRecord::Job::QbwcJob.stub_any_instance(:save, delayed_save_for_tim) do
+      threads = []
+      threads << Thread.new {
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+        error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_request_index(timothy_session, 1)
+        end
+        assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads << Thread.new {
+        sleep(0.25)
+        # This would not blow up in mysql (or any other real DBMS),
+        # but since we're using sqlite3 to test, we look for an explosion
+        error = assert_raises(ActiveRecord::StatementInvalid) do
+          job.set_request_index(margaret_session, 1)
+        end
+        assert_match /SQLite3::BusyException/, error.message
+      }
+
+      threads.each { |thread| thread.join }
+    end
+
+    # Because both updates failed due to SQLite3's lack of graceful handling of locks, we would expect that nothing changed.
+    # In the "real" world, the DB would force margaret to wait for a lock
+    assert_equal 0, job.request_index(margaret_session)
+    assert_equal 0, job.request_index(timothy_session)
+  end
+
+  # get a job object for a job
+  # update the request index for two dummy sessions (A and B) to be 0
+  # (in a thread) call set_request_index(A, 1)
+  # sleep for .25
+  # (in another thread) call set_request_index(B, 1)
+  # collect
+  # assert that request index is 1 for A, 1 for B
 
 end

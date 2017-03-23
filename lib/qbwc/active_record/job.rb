@@ -93,8 +93,10 @@ class QBWC::ActiveRecord::Job < QBWC::Job
 
   def set_request_index(session, index)
     find_ar_job.each do |jb|
-      jb.request_index[session.key] = index
-      jb.save
+      jb.with_lock do
+        jb.request_index[session.key] = index
+        jb.save
+      end
     end
   end
 

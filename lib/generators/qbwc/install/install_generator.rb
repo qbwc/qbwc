@@ -28,6 +28,7 @@ module QBWC
         migration_template 'db/migrate/create_qbwc_jobs.rb',     'db/migrate/create_qbwc_jobs.rb'
         migration_template 'db/migrate/create_qbwc_sessions.rb', 'db/migrate/create_qbwc_sessions.rb'
         migration_template 'db/migrate/index_qbwc_jobs.rb',      'db/migrate/index_qbwc_jobs.rb'
+        migration_template 'db/migrate/index_qbwc_sessions.rb',  'db/migrate/index_qbwc_sessions.rb'
         migration_template 'db/migrate/change_request_index.rb', 'db/migrate/change_request_index.rb'
         migration_template 'db/migrate/session_pending_jobs_text.rb', 'db/migrate/session_pending_jobs_text.rb'
       end
