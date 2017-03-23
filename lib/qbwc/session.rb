@@ -18,7 +18,7 @@ class QBWC::Session
     @iterator_id = nil
     @initial_job_count = pending_jobs.length
 
-    @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
+    @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{SecureRandom.uuid}#{Time.now.to_f}")
 
     @@session = self
     reset(ticket.nil?)
