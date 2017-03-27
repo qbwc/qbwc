@@ -52,4 +52,8 @@ QBWC.configure do |c|
   # Some log lines contain sensitive information
   # (default false on production, true otherwise)
   # c.log_requests_and_responses = false
+
+  # If a Ruby exception occurs during the session, its message is returned and displayed in the Web Connector window.
+  # Set this to a custom string to replace the exception's message with.
+  # c.error_message = nil
 end
