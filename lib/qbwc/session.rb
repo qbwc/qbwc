@@ -40,6 +40,17 @@ class QBWC::Session
     self.progress == 100
   end
 
+  def received_initial_request(hcp_response, company_file_name, country, major_vers, minor_vers)
+    if QBWC.received_initial_request
+      parse_response_xml(hcp_response) do |response|
+        QBWC.received_initial_request.call(self, response, company_file_name, country, major_vers, minor_vers)
+      end
+
+      # force an early abort if the above failed
+      self.status_severity = 'Error' if self.error
+    end
+  end
+
   def next_request
     if current_job.nil? || error_and_stop_requested?
       self.progress = 100
@@ -78,20 +89,11 @@ class QBWC::Session
   end
 
   def response=(qbxml_response)
-    begin
-      QBWC.logger.info 'Parsing response.'
-      unless qbxml_response.nil?
-        response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
-        response = response[response.keys.first]
-        parse_response_header(response)
-      end
+    parse_response_xml(qbxml_response) do |response|
+      response = response[response.keys.first]
+      parse_response_header(response) if response
       self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
       self.next_request # search next request
-
-    rescue => e
-      self.error = QBWC.error_message || e.message
-      QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
-      QBWC.logger.warn e.backtrace.join("\n")
     end
   end
 
@@ -153,5 +155,19 @@ class QBWC::Session
 
     self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0 && @status_severity != 'Error'
 
+  end
+
+  def parse_response_xml(qbxml_response, &block)
+    begin
+      QBWC.logger.info 'Parsing response.'
+      unless qbxml_response.nil?
+        response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
+      end
+      yield response
+    rescue => e
+      self.error = QBWC.error_message || e.message
+      QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
+      QBWC.logger.warn e.backtrace.join("\n")
+    end
   end
 end

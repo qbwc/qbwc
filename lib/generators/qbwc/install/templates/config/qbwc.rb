@@ -56,4 +56,10 @@ QBWC.configure do |c|
   # If a Ruby exception occurs during the session, its message is returned and displayed in the Web Connector window.
   # Set this to a custom string to replace the exception's message with.
   # c.error_message = nil
+
+  # At the beginning of a session QuickBooks sends initial data including the response of a Host, Company, and Preferences query request, the active company file path, and QuickBooks country and version.
+  # This proc allows the user of the library to take advantage of that data
+  # c.received_initial_request = Proc.new { |session, hcp_response, company_file_name, country, major_vers, minor_vers|
+  #   Rails.logger.info("Company file for user #{session.user}" is: #{company_file_name}")
+  # }
 end
