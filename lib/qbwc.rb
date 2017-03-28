@@ -74,6 +74,10 @@ module QBWC
   mattr_accessor :error_message
   @@error_message = nil
 
+  # Perform actions on the initial data sent by QB on each session start
+  mattr_accessor :received_initial_request
+  @@received_initial_request = nil
+
   class << self
 
     def storage_module
