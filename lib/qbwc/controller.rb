@@ -157,9 +157,17 @@ QWC
     end
 
     def connection_error
-      @session.destroy
-      logger.warn "#{params[:hresult]}: #{params[:message]}"
-      render :soap => {'tns:connectionErrorResult' => 'done'}
+      QBWC.logger.warn "#{params[:hresult]}: #{params[:message]}"
+      if QBWC.on_connection_error
+        begin
+          result = QBWC.on_connection_error.call(params[:hresult], params[:message])
+        rescue => e
+          QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
+          QBWC.logger.warn e.backtrace.join("\n")
+        end
+      end
+      @session.destroy unless result
+      render :soap => {'tns:connectionErrorResult' => result || 'done'}
     end
 
     def get_last_error
