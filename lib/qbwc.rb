@@ -78,6 +78,10 @@ module QBWC
   mattr_accessor :received_initial_request
   @@received_initial_request = nil
 
+  # Respond to connection errors with a proc
+  mattr_accessor :on_connection_error
+  @@on_connection_error = nil
+
   class << self
 
     def storage_module

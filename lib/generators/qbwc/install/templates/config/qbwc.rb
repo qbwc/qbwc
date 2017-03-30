@@ -62,4 +62,12 @@ QBWC.configure do |c|
   # c.received_initial_request = Proc.new { |session, hcp_response, company_file_name, country, major_vers, minor_vers|
   #   Rails.logger.info("Company file for user #{session.user}" is: #{company_file_name}")
   # }
+
+  # Respond to connection errors
+  # Return a new company file path to try or nil to let the session fail
+  # Exceptions in user code are caught and treated as a nil response
+  # c.on_connection_error = Proc.new { |hresult, message|
+  #   # try again with any company file
+  #   '' if hresult == '0x80040408'
+  # }
 end
