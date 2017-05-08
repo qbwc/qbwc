@@ -27,6 +27,11 @@ QBWC.configure do |c|
 
   # QBXML version to use. Check the "Implementation" column in the QuickBooks Onscreen Reference to see which fields are supported in which versions. Newer versions of QuickBooks are backwards compatible with older QBXML versions.
   c.min_version = "7.0"
+
+  # Version supported for serializing, as opposed to the version supported for parsing (min_version)
+  # your application writes QBXML conformant to this version or higher, but accepts QBXML conformant up to the min version above
+  # a serialization_version of nil or equal to the min_version is identical to the previous behavior
+  c.serialization_version = "7.0"
   
   # Quickbooks type (either :qb or :qbpos).
   c.api = :qb
