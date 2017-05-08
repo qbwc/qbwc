@@ -30,6 +30,10 @@ module QBWC
   mattr_accessor :min_version
   @@min_version = "3.0"
 
+  # QBXML version to use for serializing (equal to min_version if nil). Check the "Implementation" column in the QuickBooks Onscreen Reference to see which fields are supported in which versions. Newer versions of QuickBooks are backwards compatible with older QBXML versions.
+  mattr_accessor :serialization_version
+  @@serialization_version = nil
+
   # Quickbooks type (either :qb or :qbpos).
   mattr_reader :api
   @@api = :qb
@@ -134,6 +138,10 @@ module QBWC
 
     def parser
       @@parser ||= Qbxml.new(api, min_version)
+    end
+
+    def write_parser
+      @@write_parser ||= Qbxml.new(api, serialization_version || min_version)
     end
 
     # Allow configuration overrides
