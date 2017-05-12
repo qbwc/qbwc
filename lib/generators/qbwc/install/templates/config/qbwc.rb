@@ -27,6 +27,11 @@ QBWC.configure do |c|
 
   # QBXML version to use. Check the "Implementation" column in the QuickBooks Onscreen Reference to see which fields are supported in which versions. Newer versions of QuickBooks are backwards compatible with older QBXML versions.
   c.min_version = "7.0"
+
+  # Version supported for serializing, as opposed to the version supported for parsing (min_version)
+  # your application writes QBXML conformant to this version or higher, but accepts QBXML conformant up to the min version above
+  # a serialization_version of nil or equal to the min_version is identical to the previous behavior
+  c.serialization_version = "7.0"
   
   # Quickbooks type (either :qb or :qbpos).
   c.api = :qb
@@ -52,4 +57,22 @@ QBWC.configure do |c|
   # Some log lines contain sensitive information
   # (default false on production, true otherwise)
   # c.log_requests_and_responses = false
+
+  # If a Ruby exception occurs during the session, its message is returned and displayed in the Web Connector window.
+  # Set this to a custom string to replace the exception's message with.
+  # c.error_message = nil
+
+  # At the beginning of a session QuickBooks sends initial data including the response of a Host, Company, and Preferences query request, the active company file path, and QuickBooks country and version.
+  # This proc allows the user of the library to take advantage of that data
+  # c.received_initial_request = Proc.new { |session, hcp_response, company_file_name, country, major_vers, minor_vers|
+  #   Rails.logger.info("Company file for user #{session.user}" is: #{company_file_name}")
+  # }
+
+  # Respond to connection errors
+  # Return a new company file path to try or nil to let the session fail
+  # Exceptions in user code are caught and treated as a nil response
+  # c.on_connection_error = Proc.new { |session, hresult, message|
+  #   # try again with any company file
+  #   '' if hresult == '0x80040408'
+  # }
 end

@@ -18,7 +18,7 @@ class QBWC::Session
     @iterator_id = nil
     @initial_job_count = pending_jobs.length
 
-    @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{Time.now.to_i}")
+    @ticket = ticket || Digest::SHA1.hexdigest("#{Rails.application.config.secret_token}#{SecureRandom.uuid}")
 
     @@session = self
     reset(ticket.nil?)
@@ -38,6 +38,17 @@ class QBWC::Session
 
   def finished?
     self.progress == 100
+  end
+
+  def received_initial_request(hcp_response, company_file_name, country, major_vers, minor_vers)
+    if QBWC.received_initial_request
+      parse_response_xml(hcp_response) do |response|
+        QBWC.received_initial_request.call(self, response, company_file_name, country, major_vers, minor_vers)
+      end
+
+      # force an early abort if the above failed
+      self.status_severity = 'Error' if self.error
+    end
   end
 
   def next_request
@@ -78,20 +89,11 @@ class QBWC::Session
   end
 
   def response=(qbxml_response)
-    begin
-      QBWC.logger.info 'Parsing response.'
-      unless qbxml_response.nil?
-        response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
-        response = response[response.keys.first]
-        parse_response_header(response)
-      end
+    parse_response_xml(qbxml_response) do |response|
+      response = response[response.keys.first]
+      parse_response_header(response) if response
       self.current_job.process_response(qbxml_response, response, self, iterator_id.blank?) unless self.current_job.nil?
       self.next_request # search next request
-
-    rescue => e
-      self.error = e.message
-      QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
-      QBWC.logger.warn e.backtrace.join("\n")
     end
   end
 
@@ -107,6 +109,10 @@ class QBWC::Session
     @@session = nil
   end
 
+  def pending_jobs
+    @pending_jobs ||= QBWC.pending_jobs(@company, self)
+  end
+
   protected
 
   attr_accessor :current_job, :iterator_id
@@ -118,10 +124,6 @@ class QBWC::Session
     self.current_job = pending_jobs.first
     self.current_job.reset if reset_job && self.current_job
     return self.current_job
-  end
-
-  def pending_jobs
-    @pending_jobs ||= QBWC.pending_jobs(@company, self)
   end
 
   def complete_with_success
@@ -153,5 +155,19 @@ class QBWC::Session
 
     self.iterator_id = iterator_id if iterator_remaining_count.to_i > 0 && @status_severity != 'Error'
 
+  end
+
+  def parse_response_xml(qbxml_response, &block)
+    begin
+      QBWC.logger.info 'Parsing response.'
+      unless qbxml_response.nil?
+        response = QBWC.parser.from_qbxml(qbxml_response)["qbxml"]["qbxml_msgs_rs"].except("xml_attributes")
+      end
+      yield response
+    rescue => e
+      self.error = QBWC.error_message || e.message
+      QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
+      QBWC.logger.warn e.backtrace.join("\n")
+    end
   end
 end

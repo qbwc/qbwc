@@ -33,7 +33,7 @@ module QBWC
                     :response_tag => "#{wash_out_xml_namespace}authenticateResponse"
 
         soap_action 'sendRequestXML', :to => :send_request,
-                    :args   => {:ticket => :string, :strHCPResponse => :string, :strCompanyFilename => :string, :qbXMLCountry => :string, :qbXMLMajorVers => :string, :qbXMLMinorVers => :string},
+                    :args   => {:ticket => :string, :strHCPResponse => :string, :strCompanyFileName => :string, :qbXMLCountry => :string, :qbXMLMajorVers => :string, :qbXMLMinorVers => :string},
                     :return => {'tns:sendRequestXMLResult' => :string},
                     :response_tag => "#{wash_out_xml_namespace}sendRequestXMLResponse"
 
@@ -119,7 +119,7 @@ QWC
         ticket = QBWC.storage_module::Session.new(username, company_file_path).ticket
         session = get_session(ticket)
 
-        if !QBWC.pending_jobs(company_file_path, session).present?
+        if !session.pending_jobs.any?
           QBWC.logger.info "Authentication of user '#{username}' succeeded, but no jobs pending for '#{company_file_path}'."
           company_file_path = AUTHENTICATE_NO_WORK
         else
@@ -131,6 +131,11 @@ QWC
     end
 
     def send_request
+      if params[:strHCPResponse].present?
+        @session.received_initial_request(
+          *params.values_at(*%i(strHCPResponse strCompanyFileName qbXMLCountry qbXMLMajorVers qbXMLMinorVers))
+        )
+      end
       request = @session.request_to_send
       render :soap => {'tns:sendRequestXMLResult' => request}
     end
@@ -152,9 +157,17 @@ QWC
     end
 
     def connection_error
-      @session.destroy
-      logger.warn "#{params[:hresult]}: #{params[:message]}"
-      render :soap => {'tns:connectionErrorResult' => 'done'}
+      QBWC.logger.warn "#{params[:hresult]}: #{params[:message]}"
+      if QBWC.on_connection_error
+        begin
+          result = QBWC.on_connection_error.call(@session, params[:hresult], params[:message])
+        rescue => e
+          QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
+          QBWC.logger.warn e.backtrace.join("\n")
+        end
+      end
+      @session.destroy unless result
+      render :soap => {'tns:connectionErrorResult' => result || 'done'}
     end
 
     def get_last_error
