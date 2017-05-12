@@ -109,6 +109,10 @@ class QBWC::Session
     @@session = nil
   end
 
+  def pending_jobs
+    @pending_jobs ||= QBWC.pending_jobs(@company, self)
+  end
+
   protected
 
   attr_accessor :current_job, :iterator_id
@@ -120,10 +124,6 @@ class QBWC::Session
     self.current_job = pending_jobs.first
     self.current_job.reset if reset_job && self.current_job
     return self.current_job
-  end
-
-  def pending_jobs
-    @pending_jobs ||= QBWC.pending_jobs(@company, self)
   end
 
   def complete_with_success
