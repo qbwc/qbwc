@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency "qbxml", [">= 0.3.0"]
   
   # 0.10.0 until https://github.com/inossidabile/wash_out/pull/221
-  s.add_dependency "wash_out", ["= 0.10.0"]
+  s.add_dependency "wash_out", [">= 0.10.0"]
   
   s.add_dependency 'actionpack', ['>= 4.1.0']
   
