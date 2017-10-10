@@ -3,7 +3,7 @@
 source "https://rubygems.org"
 
 gem "wash_out", git: "https://github.com/inossidabile/wash_out"
-gem "actionpack", "~> 5.0.1"
-gem "actionview", "~> 5.0.1"
+gem "actionpack", "~> 5.1.1"
+gem "actionview", "~> 5.1.1"
 
 gemspec path: "../"
