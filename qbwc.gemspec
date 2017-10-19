@@ -22,24 +22,19 @@ Gem::Specification.new do |s|
     "README.md"
   ]
 
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.2.2'
 
   s.add_dependency "qbxml", [">= 0.3.0"]
   
-  # 0.10.0 until https://github.com/inossidabile/wash_out/pull/221
-  s.add_dependency "wash_out", ["= 0.10.0"]
+  s.add_dependency "wash_out", ['>=0.12.0']
   
-  s.add_dependency 'actionpack', ['>= 4.1.0']
+  s.add_dependency 'actionpack', ['>= 5.0.1']
   
-  # wash_out requires this but does not list it as a dependency! 
-  # https://github.com/inossidabile/wash_out/issues/219
-  s.add_dependency 'actionview', ['>= 4.1.0']
-
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
   s.add_development_dependency('activerecord')
-  s.add_development_dependency('rails', [">= 4.1.0"])
+  s.add_development_dependency('rails', [">= 5.0.1"])
   s.add_development_dependency('sqlite3')
   s.add_development_dependency('minitest')
   s.add_development_dependency('rake')

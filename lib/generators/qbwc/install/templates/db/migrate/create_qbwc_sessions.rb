@@ -1,4 +1,4 @@
-class CreateQbwcSessions < ActiveRecord::Migration
+class CreateQbwcSessions < ActiveRecord::Migration[5.0]
   def change
     create_table :qbwc_sessions, :force => true do |t|
       t.string :ticket

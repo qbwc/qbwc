@@ -3,3 +3,4 @@ Gemfile.lock
 pkg
 .ruby-gemset
 .ruby-version
+gemfiles/*.lock
