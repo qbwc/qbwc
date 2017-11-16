@@ -25,12 +25,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.2.2'
 
   s.add_dependency "qbxml", [">= 0.3.0"]
-  
   s.add_dependency "wash_out", ['>=0.12.0']
-  
   s.add_dependency 'actionpack', ['>= 5.0.1']
-  
-  s.add_development_dependency('rb-fsevent')
+
   s.add_development_dependency('webmock')
   s.add_development_dependency('rspec')
   s.add_development_dependency('activerecord')
