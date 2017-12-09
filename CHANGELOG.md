@@ -1,6 +1,20 @@
 
 # Change Log
 
+## [1.1.0](https://github.com/qbwc/qbwc/releases/tag/v1.1.0) (2016-03-02)
+[Full Changelog](https://github.com/qbwc/qbwc/compare/1.0.0...1.1.0)
+
+**Fixed bugs:**
+
+- Support Rails 5. [\#100](https://github.com/qbwc/qbwc/pull/100) ([rchekaluk](https://github.com/rchekaluk)) [\#117](https://github.com/qbwc/qbwc/pull/117) ([lostapathy](https://github.com/lostapathy))
+- Clarify documentation regarding top-level tag in response hash. [\#91](https://github.com/qbwc/qbwc/pull/91)  ([steintr](https://github.com/steintr))
+- Fix Rails 5 deprecations. [\#97](https://github.com/qbwc/qbwc/pull/97) ([nicholejeannine](https://github.com/nicholejeannine))
+
+**New features:**
+
+- Log qbxml_response closer to the top of \#process_response. [\#90](https://github.com/qbwc/qbwc/pull/90) ([steintr](https://github.com/steintr))
+
+
 ## [1.0.0](https://github.com/qbwc/qbwc/releases/tag/v1.0.0) (2016-03-02)
 [Full Changelog](https://github.com/qbwc/qbwc/compare/0.1.0...1.0.0)
 
