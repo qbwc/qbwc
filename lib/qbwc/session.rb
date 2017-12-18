@@ -89,7 +89,7 @@ class QBWC::Session
       self.next_request # search next request
 
     rescue => e
-      self.error = e.message
+      self.error = QBWC.error_message || e.message
       QBWC.logger.warn "An error occured in QBWC::Session: #{e.message}"
       QBWC.logger.warn e.backtrace.join("\n")
     end

@@ -70,6 +70,10 @@ module QBWC
   mattr_accessor :log_requests_and_responses
   @@log_requests_and_responses = Rails.env == 'production' ? false : true
 
+  # Return a custom error message to the web connector instead of the exception's
+  mattr_accessor :error_message
+  @@error_message = nil
+
   class << self
 
     def storage_module
