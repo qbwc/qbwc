@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency "qbxml", [">= 0.3.0"]
-  s.add_dependency "wash_out", ["= 0.10.0"]
+  s.add_dependency "wash_out", ["= 0.12.0"]
 
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('webmock')
