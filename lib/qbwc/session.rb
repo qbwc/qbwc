@@ -61,8 +61,8 @@ class QBWC::Session
     request = self.next_request
     if request && self.iterator_id.present?
       request = request.to_hash
-      request.delete('xml_attributes')
-      request.values.first['xml_attributes'] = {'iterator' => 'Continue', 'iteratorID' => self.iterator_id}
+      request.values.first["xml_attributes"].delete_if{|k,v| k != "requestID"}
+      request.values.first['xml_attributes'].merge!({'iterator' => 'Continue', 'iteratorID' => self.iterator_id})
       request = QBWC::Request.new(request)
     end 
     request
