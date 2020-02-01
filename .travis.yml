@@ -1,9 +1,9 @@
 language: ruby
 
 rvm:
-  - 2.2
-  - 2.3.5 # https://github.com/travis-ci/travis-ci/issues/5361
-  - 2.4.2
+  - 2.4.9
+  - 2.5.7
+  - 2.6.5
 gemfile:
   - gemfiles/rails_5.1.gemfile
   - gemfiles/rails_5.0.gemfile
