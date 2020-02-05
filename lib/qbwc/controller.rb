@@ -85,7 +85,7 @@ SB
    #{scheduler_block}
 </QBWCXML>
 QWC
-      send_data qwc, :filename => "#{Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
+      send_data qwc, :filename => "#{Rails.application.class.try(:module_parent_name) || Rails.application.class.parent_name}.qwc", :content_type => 'application/x-qwc'
     end
 
     class StringArray < WashOut::Type
@@ -162,7 +162,7 @@ QWC
     end
 
     def app_name
-      "#{Rails.application.class.parent_name} #{Rails.env}"
+      "#{Rails.application.class.try(:module_parent_name) || Rails.application.class.parent_name} #{Rails.env}"
     end
 
     def file_id

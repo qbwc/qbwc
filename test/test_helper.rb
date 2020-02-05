@@ -3,6 +3,7 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'minitest/autorun'
+require 'byebug'
 
 require 'active_support'
 require 'active_record'
@@ -51,6 +52,10 @@ module QbwcTestApplication
     Rails.application.configure do
       config.secret_key_base = "stub"
       config.eager_load = false
+      if config.respond_to?(:hosts)
+        config.hosts << 'www.example.com'
+        config.hosts << ''
+      end
     end
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
