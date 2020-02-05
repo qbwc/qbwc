@@ -6,3 +6,4 @@ pkg
 gemfiles/*.lock
 .idea
 .rakeTasks
+.byebug_history

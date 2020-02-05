@@ -20,7 +20,7 @@ class SavonClientTest < ActionDispatch::IntegrationTest
 
   # http://blog.johnsonch.com/2013/04/18/rails-3-soap-and-testing-oh-my/
   test "qbwc/action serverVersion" do
-    host     = 'application'
+    host     = 'www.example.com'
     url_base = "http://#{host}"
     url_path = '/qbwc/action'
 

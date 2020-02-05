@@ -26,12 +26,10 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 2, QBWC.pending_jobs(COMPANY, session).count
 
     # Simulate controller 1st send_request and receive_response
-    request = session.current_request
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
     assert_equal 50, session.progress
 
     # Simulate controller 2nd send_request and receive_response
-    request = session.current_request
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
     assert_equal 100, session.progress
   end
@@ -48,12 +46,10 @@ class SessionTest < ActionDispatch::IntegrationTest
     assert_equal 2, QBWC.pending_jobs(COMPANY, session).count
 
     # Simulate controller 1st send_request and receive_response
-    request = session.current_request
     session.response = QBWC_CUSTOMER_ADD_RESPONSE_LONG
     assert_equal 50, session.progress
 
     # Simulate controller 2nd send_request and receive_response
-    request = session.current_request
     session.response = QBWC_CUSTOMER_QUERY_RESPONSE_INFO
     assert_equal 100, session.progress
   end
