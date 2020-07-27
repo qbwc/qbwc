@@ -1,6 +1,6 @@
 class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
-    validates :name, :uniqueness => true, :presence => true
+    validates :name, :uniqueness => { :case_sensitive => true }, :presence => true
     serialize :requests, Hash
     serialize :request_index, Hash
     serialize :data
