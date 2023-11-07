@@ -1,6 +1,6 @@
 class QBWC::ActiveRecord::Session < QBWC::Session
   class QbwcSession < ActiveRecord::Base
-    validates :ticket, :uniqueness => true, :presence => true
+    validates :ticket, :uniqueness => { :case_sensitive => true }, :presence => true
     serialize :requests, Array
 
     attr_accessible :company, :ticket, :user unless Rails::VERSION::MAJOR >= 4
