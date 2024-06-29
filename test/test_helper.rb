@@ -53,8 +53,7 @@ module QbwcTestApplication
       config.secret_key_base = "stub"
       config.eager_load = false
       if config.respond_to?(:hosts)
-        config.hosts << 'www.example.com'
-        config.hosts << ''
+        config.hosts.clear
       end
     end
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
