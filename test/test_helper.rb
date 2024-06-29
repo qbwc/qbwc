@@ -17,11 +17,16 @@ which_command = Gem::Commands::WhichCommand.new
 paths = which_command.find_paths('wash_out', $LOAD_PATH)
 wash_out_lib = File.dirname(paths[0])  # Alternate technique: File.dirname(`gem which wash_out`)
 
-# Add wash_out to autoload_paths so that WashOutHelper can be included directly
-# http://api.rubyonrails.org/classes/AbstractController/Helpers/ClassMethods.html#method-i-helper
-# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#require-dependency
-# http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#autoload-paths
-ActiveSupport::Dependencies.autoload_paths << "#{wash_out_lib}/../app/helpers"
+if Rails.version < '7'
+  # Add wash_out to autoload_paths so that WashOutHelper can be included directly
+  # http://api.rubyonrails.org/classes/AbstractController/Helpers/ClassMethods.html#method-i-helper
+  # http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#require-dependency
+  # http://guides.rubyonrails.org/autoloading_and_reloading_constants.html#autoload-paths
+  ActiveSupport::Dependencies.autoload_paths << "#{wash_out_lib}/../app/helpers"
+else
+  # That doesn't work in Rails 7, but this does.
+  require "#{wash_out_lib}/../app/helpers/wash_out_helper.rb"
+end
 
 $:<< File.expand_path(File.dirname(__FILE__) + '/../lib')
 require 'qbwc'
