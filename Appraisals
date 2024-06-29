@@ -8,6 +8,7 @@ appraise "rails-5.2" do
   gem "actionview", "~> 5.2.0"
 end
 
+# Ruby 3.0+ is functional from this point on
 appraise "rails-6.0" do
   gem "actionpack", "~> 6.0.0"
   gem "actionview", "~> 6.0.0"
@@ -21,4 +22,10 @@ end
 appraise "rails-7.0" do
   gem "actionpack", "~> 7.0.0"
   gem "actionview", "~> 7.0.0"
+end
+
+# Ruby 3.0+ is required from this point on
+appraise "rails-7.1" do
+  gem "actionpack", "~> 7.1.0"
+  gem "actionview", "~> 7.1.0"
 end
