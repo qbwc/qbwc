@@ -1,8 +1,15 @@
 class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => { :case_sensitive => true }, :presence => true
-    serialize :requests, Hash
-    serialize :request_index, Hash
+
+    if Rails.version >= '6.1'
+      serialize :requests, type: Hash
+      serialize :request_index, type: Hash
+    else
+      serialize :requests, Hash
+      serialize :request_index, Hash
+    end
+
     serialize :data
 
     def to_qbwc_job
