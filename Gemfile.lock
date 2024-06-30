@@ -66,13 +66,15 @@ GEM
       zeitwerk (~> 2.2, >= 2.2.2)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    akami (1.3.1)
+    akami (1.3.3)
+      base64
       gyoku (>= 0.4.0)
       nokogiri
     appraisal (2.5.0)
       bundler
       rake
       thor (>= 0.14.0)
+    base64 (0.2.0)
     bigdecimal (3.1.8)
     builder (3.3.0)
     byebug (11.1.3)
@@ -84,14 +86,21 @@ GEM
     date (3.3.4)
     diff-lcs (1.5.1)
     erubi (1.13.0)
+    faraday (2.9.2)
+      faraday-net_http (>= 2.0, < 3.2)
+    faraday-net_http (3.1.0)
+      net-http
     globalid (1.1.0)
       activesupport (>= 5.0)
     gyoku (1.4.0)
       builder (>= 2.1.2)
       rexml (~> 3.0)
     hashdiff (1.1.0)
-    httpi (3.0.1)
-      rack
+    httpi (4.0.2)
+      base64
+      mutex_m
+      nkf
+      rack (>= 2.0, < 3.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     loofah (2.22.0)
@@ -106,7 +115,10 @@ GEM
     method_source (1.1.0)
     mini_mime (1.1.5)
     minitest (5.24.0)
-    net-imap (0.3.7)
+    mutex_m (0.2.0)
+    net-http (0.4.1)
+      uri
+    net-imap (0.4.14)
       date
       net-protocol
     net-pop (0.1.2)
@@ -116,10 +128,12 @@ GEM
     net-smtp (0.5.0)
       net-protocol
     nio4r (2.7.3)
-    nokogiri (1.13.10-x86_64-linux)
+    nkf (0.2.0)
+    nokogiri (1.16.6-x86_64-linux)
       racc (~> 1.4)
-    nori (2.6.0)
-    public_suffix (5.1.1)
+    nori (2.7.0)
+      bigdecimal
+    public_suffix (6.0.0)
     qbxml (0.4.0)
       activesupport (>= 4.1.0)
       builder (~> 3.0)
@@ -171,15 +185,15 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.1)
-    savon (2.13.0)
+    savon (2.15.0)
       akami (~> 1.2)
       builder (>= 2.1.2)
       gyoku (~> 1.2)
-      httpi (>= 2.4.5)
+      httpi (>= 2.4.5, < 5)
       mail (~> 2.5)
       nokogiri (>= 1.8.1)
       nori (~> 2.4)
-      wasabi (~> 3.4)
+      wasabi (>= 3.7, < 6)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -194,10 +208,11 @@ GEM
     timeout (0.4.1)
     tzinfo (1.2.11)
       thread_safe (~> 0.1)
-    wasabi (3.8.0)
+    uri (0.13.0)
+    wasabi (5.0.2)
       addressable
-      httpi (~> 3.0)
-      nokogiri (>= 1.4.2)
+      faraday (~> 2.8)
+      nokogiri (>= 1.13.9)
     wash_out (0.12.0)
       nori (>= 2.0.0)
     webmock (3.23.1)
