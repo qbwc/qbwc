@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version:
+          - 2.7
+          - '3.0'
+        rails-version:
+          - 5.1
+          - 5.2
+          - '6.0'
+          - 6.1
+          - '7.0'
+          - 7.1
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails${{ matrix.rails-version }}.gemfile
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "${{ matrix.ruby-version }}"
+          bundler-cache: true
+      - run: bundle exec rake
