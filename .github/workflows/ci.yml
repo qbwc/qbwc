@@ -21,7 +21,7 @@ jobs:
           - '7.0'
           - 7.1
     env:
-      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails${{ matrix.rails-version }}.gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails-version }}.gemfile
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
