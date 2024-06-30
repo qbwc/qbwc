@@ -1,7 +1,5 @@
 QBWC lets your Rails application talk to QuickBooks Desktop.
 
-[![Build Status](https://travis-ci.org/qbwc/qbwc.svg?branch=master)](https://travis-ci.org/qbwc/qbwc)
-
 ## Installation
 
 `gem install qbwc`
