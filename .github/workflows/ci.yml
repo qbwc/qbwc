@@ -19,6 +19,13 @@ jobs:
           - 6.1
           - '7.0'
           - 7.1
+        exclude:
+          - ruby-version: 2.7
+            rails-version: 7.1
+          - ruby-version: 3.0
+            rails-version: 5.1
+          - ruby-version: 3.0
+            rails-version: 5.2
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails-version }}.gemfile
     steps:
