@@ -36,6 +36,10 @@ jobs:
             rails-version: 5.1
           - ruby-version: 3.2
             rails-version: 5.2
+          - ruby-version: 3.2
+            rails-version: 6.0
+          - ruby-version: 3.2
+            rails-version: 6.1
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails-version }}.gemfile
     steps:
