@@ -39,6 +39,7 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   end
 
   def self.find_ar_job_with_name(name)
+    QBWC.logger.info "Job name '#{name}'."
     QbwcJob.where(:name => name)
   end
 
