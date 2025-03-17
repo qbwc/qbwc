@@ -61,7 +61,7 @@ module QbwcTestApplication
         config.hosts.clear
       end
     end
-    ActiveRecord::Base.yaml_column_permitted_classes += [Symbol]
+    ActiveRecord::Base.yaml_column_permitted_classes += [Symbol] if ActiveRecord::Base.respond_to?(:yaml_column_permitted_classes)
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/index_qbwc_jobs'
