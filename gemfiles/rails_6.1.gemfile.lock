@@ -96,7 +96,7 @@ GEM
     hashdiff (1.1.0)
     httpi (3.0.1)
       rack
-    i18n (1.14.5)
+    i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     loofah (2.22.0)
       crass (~> 1.0.2)
@@ -109,8 +109,7 @@ GEM
     marcel (1.0.4)
     method_source (1.1.0)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.8)
-    minitest (5.24.0)
+    minitest (5.25.5)
     net-imap (0.3.7)
       date
       net-protocol
@@ -121,16 +120,15 @@ GEM
     net-smtp (0.5.0)
       net-protocol
     nio4r (2.7.3)
-    nokogiri (1.13.10)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.18.4-x86_64-linux-gnu)
       racc (~> 1.4)
     nori (2.6.0)
     public_suffix (5.1.1)
-    qbxml (0.4.0)
-      activesupport (>= 4.1.0)
+    qbxml (0.5.0)
+      activesupport (>= 5.0.0)
       builder (~> 3.0)
       nokogiri (~> 1.5)
-    racc (1.8.0)
+    racc (1.8.1)
     rack (2.2.9)
     rack-test (2.1.0)
       rack (>= 1.3)
@@ -212,7 +210,7 @@ GEM
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    zeitwerk (2.6.16)
+    zeitwerk (2.7.2)
 
 PLATFORMS
   x86_64-linux
