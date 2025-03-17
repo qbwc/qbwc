@@ -60,6 +60,7 @@ module QbwcTestApplication
       if config.respond_to?(:hosts)
         config.hosts.clear
       end
+      config.active_record.yaml_column_permitted_classes = [Symbol]
     end
     ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
     require '../qbwc/lib/generators/qbwc/install/templates/db/migrate/create_qbwc_jobs'
