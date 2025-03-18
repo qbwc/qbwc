@@ -33,4 +33,6 @@ end
 appraise "rails-7.1" do
   gem "actionpack", "~> 7.1.0"
   gem "actionview", "~> 7.1.0"
+  # For Ruby 3.0 and 3.1 compat - https://github.com/rubygems/rubygems/issues/6611
+  gem "psych", "< 5"
 end
