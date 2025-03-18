@@ -170,7 +170,8 @@ GEM
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
-    psych (4.0.6)
+    psych (5.2.3)
+      date
       stringio
     public_suffix (6.0.1)
     qbxml (0.5.0)
@@ -279,7 +280,6 @@ DEPENDENCIES
   byebug
   httpi
   minitest
-  psych (< 5)
   qbwc!
   rails (>= 5.0.1, < 7.2)
   rake
