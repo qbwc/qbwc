@@ -8,6 +8,7 @@ class QBWCControllerTest < ActionController::TestCase
 
   def setup
     @routes = Rails.application.routes  # https://github.com/blowmage/minitest-rails/issues/133#issuecomment-36401436
+    ActiveRecord::Base.yaml_column_permitted_classes += [Symbol] if ActiveRecord::Base.respond_to?(:yaml_column_permitted_classes)
     @controller = QbwcController.new    # http://stackoverflow.com/a/7743176
     @session = QBWC::Session.new('foo', '')
 
