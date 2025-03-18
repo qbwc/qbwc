@@ -58,5 +58,6 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "${{ matrix.ruby-version }}"
+          rubygems: 3.0.0
           bundler-cache: true
       - run: bundle exec rake
