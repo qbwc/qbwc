@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    qbwc (1.1.0)
+    qbwc (1.2.0)
       actionpack (>= 5.0.1)
       qbxml (>= 0.3.0)
       wash_out (>= 0.12.0)
