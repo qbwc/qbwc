@@ -1,7 +1,20 @@
 
 # Change Log
 
-## [1.1.0](https://github.com/qbwc/qbwc/releases/tag/v1.1.0) (2016-03-02)
+## [1.2.0](https://github.com/qbwc/qbwc/releases/tag/v1.2.0) (2025-03-19)
+[Full Changelog](https://github.com/qbwc/qbwc/compare/1.1.0...1.2.0)
+
+**Fixed bugs:**
+
+- Support Ruby 2.7 through 3.3.
+- Support Rails 5.1 through 7.1.
+- Prevent collisions in session tickets by using a random UUID instead of a timestamp. #126
+
+**New features:**
+
+- Save `requestID` in session. #132
+
+## [1.1.0](https://github.com/qbwc/qbwc/releases/tag/v1.1.0) (2017-12-08)
 [Full Changelog](https://github.com/qbwc/qbwc/compare/1.0.0...1.1.0)
 
 **Fixed bugs:**
