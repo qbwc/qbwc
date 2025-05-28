@@ -1,5 +1,5 @@
 PATH
-  remote: .
+  remote: ..
   specs:
     qbwc (1.2.0)
       actionpack (>= 5.0.1)
@@ -96,39 +96,41 @@ GEM
     builder (3.3.0)
     byebug (11.1.3)
     concurrent-ruby (1.3.5)
-    connection_pool (2.5.3)
+    connection_pool (2.5.0)
     crack (1.0.0)
       bigdecimal
       rexml
     crass (1.0.6)
     date (3.4.1)
-    drb (2.2.3)
-    erb (5.0.1)
+    drb (2.2.1)
     erubi (1.13.1)
-    faraday (2.9.2)
-      faraday-net_http (>= 2.0, < 3.2)
-    faraday-net_http (3.1.0)
-      net-http
+    faraday (2.12.2)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.0)
+      net-http (>= 0.5.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     gyoku (1.4.0)
       builder (>= 2.1.2)
       rexml (~> 3.0)
-    hashdiff (1.1.0)
-    httpi (4.0.2)
+    hashdiff (1.1.2)
+    httpi (4.0.4)
       base64
       mutex_m
       nkf
-      rack (>= 2.0, < 3.1)
+      rack (>= 2.0, < 4)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
-    irb (1.15.2)
+    irb (1.15.1)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    logger (1.7.0)
-    loofah (2.24.1)
+    json (2.10.2)
+    logger (1.6.6)
+    loofah (2.24.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     mail (2.8.1)
@@ -140,9 +142,9 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.5)
     mutex_m (0.3.0)
-    net-http (0.4.1)
+    net-http (0.6.0)
       uri
-    net-imap (0.5.8)
+    net-imap (0.5.2)
       date
       net-protocol
     net-pop (0.1.2)
@@ -155,22 +157,22 @@ GEM
     nkf (0.2.0)
     nokogiri (1.18.8-x86_64-linux-gnu)
       racc (~> 1.4)
-    nori (2.7.0)
+    nori (2.7.1)
       bigdecimal
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
-    psych (5.2.6)
+    psych (5.2.3)
       date
       stringio
-    public_suffix (6.0.0)
+    public_suffix (6.0.1)
     qbxml (0.5.0)
       activesupport (>= 5.0.0)
       builder (~> 3.0)
       nokogiri (~> 1.5)
     racc (1.8.1)
-    rack (3.0.18)
-    rack-session (2.1.1)
+    rack (3.1.12)
+    rack-session (2.1.0)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
     rack-test (2.2.0)
@@ -191,7 +193,7 @@ GEM
       activesupport (= 7.2.2.1)
       bundler (>= 1.15.0)
       railties (= 7.2.2.1)
-    rails-dom-testing (2.3.0)
+    rails-dom-testing (2.2.0)
       activesupport (>= 5.0.0)
       minitest
       nokogiri (>= 1.6)
@@ -207,52 +209,51 @@ GEM
       thor (~> 1.0, >= 1.2.2)
       zeitwerk (~> 2.6)
     rake (13.2.1)
-    rdoc (6.14.0)
-      erb
+    rdoc (6.12.0)
       psych (>= 4.0.0)
-    reline (0.6.1)
+    reline (0.6.0)
       io-console (~> 0.5)
-    rexml (3.3.1)
-      strscan
-    savon (2.15.0)
+    rexml (3.4.1)
+    savon (2.15.1)
       akami (~> 1.2)
       builder (>= 2.1.2)
       gyoku (~> 1.2)
-      httpi (>= 2.4.5, < 5)
+      httpi (>= 4, < 5)
       mail (~> 2.5)
       nokogiri (>= 1.8.1)
       nori (~> 2.4)
       wasabi (>= 3.7, < 6)
     securerandom (0.4.1)
-    sqlite3 (1.4.2)
-    stringio (3.1.7)
-    strscan (3.1.0)
+    sqlite3 (2.6.0-x86_64-linux-gnu)
+    stringio (3.1.5)
     thor (1.3.2)
     timeout (0.4.3)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (0.13.0)
+    uri (1.0.3)
     useragent (0.16.11)
-    wasabi (5.0.2)
+    wasabi (5.1.0)
       addressable
-      faraday (~> 2.8)
+      faraday (>= 1.9, < 3)
       nokogiri (>= 1.13.9)
     wash_out (0.12.0)
       nori (>= 2.0.0)
-    webmock (3.23.1)
+    webmock (3.25.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
-    websocket-driver (0.8.0)
+    websocket-driver (0.7.7)
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    zeitwerk (2.7.3)
+    zeitwerk (2.7.1)
 
 PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  actionpack (~> 7.2.0)
+  actionview (~> 7.2.0)
   activerecord
   appraisal
   byebug
