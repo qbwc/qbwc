@@ -108,7 +108,6 @@ GEM
       rexml
     crass (1.0.6)
     date (3.4.1)
-    diff-lcs (1.6.0)
     drb (2.2.1)
     erubi (1.13.1)
     faraday (2.12.2)
@@ -222,19 +221,6 @@ GEM
     reline (0.6.0)
       io-console (~> 0.5)
     rexml (3.4.1)
-    rspec (3.13.0)
-      rspec-core (~> 3.13.0)
-      rspec-expectations (~> 3.13.0)
-      rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.3)
-      rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.3)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.2)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-support (3.13.2)
     savon (2.15.1)
       akami (~> 1.2)
       builder (>= 2.1.2)
@@ -283,7 +269,6 @@ DEPENDENCIES
   qbwc!
   rails (>= 5.0.1, < 7.2)
   rake
-  rspec
   savon
   sqlite3
   webmock
