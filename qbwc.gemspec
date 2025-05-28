@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency('webmock')
   s.add_development_dependency('activerecord')
-  s.add_development_dependency('rails', [">= 5.0.1", '< 7.2'])
+  s.add_development_dependency('rails', [">= 5.0.1", '< 8.0'])
   s.add_development_dependency('sqlite3')
   s.add_development_dependency('minitest')
   s.add_development_dependency('rake')
