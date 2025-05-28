@@ -70,6 +70,9 @@ module QBWC
   mattr_accessor :log_requests_and_responses
   @@log_requests_and_responses = Rails.env == 'production' ? false : true
 
+  mattr_accessor :default_column_serializer
+  @@default_column_serializer = nil
+
   class << self
 
     def storage_module
@@ -133,6 +136,8 @@ module QBWC
       storage_module::Job.clear_jobs
     end
 
+    def default_column_serializer
+      @@default_column_serializer || Rails.application.config.try(:active_record)&.default_column_serializer || YAML
+    end
   end
-  
 end
