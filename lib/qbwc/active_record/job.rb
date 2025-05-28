@@ -2,7 +2,10 @@ class QBWC::ActiveRecord::Job < QBWC::Job
   class QbwcJob < ActiveRecord::Base
     validates :name, :uniqueness => { :case_sensitive => true }, :presence => true
 
-    if Rails.version >= '6.1'
+    if Rails.version >= '7.1'
+      serialize :requests, type: Hash, coder: QBWC.default_column_serializer
+      serialize :request_index, type: Hash, coder: QBWC.default_column_serializer
+    elsif Rails.version >= '6.1'
       serialize :requests, type: Hash
       serialize :request_index, type: Hash
     else
