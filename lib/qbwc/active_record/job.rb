@@ -5,15 +5,16 @@ class QBWC::ActiveRecord::Job < QBWC::Job
     if Rails.version >= '7.1'
       serialize :requests, type: Hash, coder: QBWC.default_column_serializer
       serialize :request_index, type: Hash, coder: QBWC.default_column_serializer
+      serialize :data, coder: QBWC.default_column_serializer
     elsif Rails.version >= '6.1'
       serialize :requests, type: Hash
       serialize :request_index, type: Hash
+      serialize :data
     else
       serialize :requests, Hash
       serialize :request_index, Hash
+      serialize :data
     end
-
-    serialize :data
 
     def to_qbwc_job
       QBWC::ActiveRecord::Job.new(name, enabled, company, worker_class, requests, data)
