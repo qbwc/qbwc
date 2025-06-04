@@ -216,7 +216,7 @@ DEPENDENCIES
   httpi
   minitest
   qbwc!
-  rails (>= 5.0.1, < 8.0)
+  rails (>= 5.0.1, < 8.1)
   rake
   savon
   sqlite3
