@@ -6,6 +6,7 @@
 **Fixed bugs:**
 
 - Fix an error when `Rails.application.config.active_record.default_column_serializer` is `nil`, as is default starting in Rails 7.1. Add the config `QBWC.default_column_serializer` to set the default `coder` on ActiveRecord `serialize` declarations in `QBWC::ActiveRecord::Job`. If not set, default to the value from `Rails.application.config.active_record.default_column_serializer`. If that's not set, default to `YAML` to preserve backwards compatibility.
+- Support Ruby 3.4.
 - Support Rails 7.2.
 
 ## [1.2.0](https://github.com/qbwc/qbwc/releases/tag/v1.2.0) (2025-03-19)
