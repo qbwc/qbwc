@@ -140,7 +140,9 @@ GEM
       net-smtp
     marcel (1.0.4)
     mini_mime (1.1.5)
-    minitest (5.25.5)
+    minitest (6.0.2)
+      drb (~> 2.0)
+      prism (~> 1.5)
     mutex_m (0.3.0)
     net-http (0.6.0)
       uri
@@ -162,6 +164,7 @@ GEM
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
+    prism (1.9.0)
     psych (5.2.3)
       date
       stringio
