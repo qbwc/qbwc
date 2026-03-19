@@ -159,7 +159,7 @@ GEM
       net-protocol
     nio4r (2.7.5)
     nkf (0.2.0)
-    nokogiri (1.18.10-x86_64-linux-gnu)
+    nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
     nori (2.7.1)
       bigdecimal
@@ -231,7 +231,7 @@ GEM
       nori (~> 2.4)
       wasabi (>= 3.7, < 6)
     securerandom (0.4.1)
-    sqlite3 (2.8.0-x86_64-linux-gnu)
+    sqlite3 (2.9.2-x86_64-linux-gnu)
     stringio (3.1.7)
     thor (1.4.0)
     timeout (0.4.4)
