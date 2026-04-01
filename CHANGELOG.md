@@ -1,6 +1,14 @@
 
 # Change Log
 
+## [2.0.0](https://github.com/qbwc/qbwc/releases/tag/v2.0.0) (2026-03-31)
+[Full Changelog](https://github.com/qbwc/qbwc/compare/1.3.0...2.0.0)
+
+- Add support for Ruby 4.0.
+- Drop support for Ruby prior to 3.2.
+- Drop support for Rails prior to 7.1.
+
+
 ## [1.3.0](https://github.com/qbwc/qbwc/releases/tag/v1.3.0) (2025-03-19)
 [Full Changelog](https://github.com/qbwc/qbwc/compare/1.2.0...1.3.0)
 
